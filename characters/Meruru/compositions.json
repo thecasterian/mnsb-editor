@@ -1,0 +1,86 @@
+{
+  "Angry1": [
+    "Cheeks01_Normal",
+    "Eyes01_Angry_Open01",
+    "Mouth01_Angry_Closed01"
+  ],
+  "Angry2": [
+    "Cheeks02_Normal",
+    "Eyes02_Angry_Open01",
+    "Mouth02_Angry_Closed01"
+  ],
+  "Cry1": [
+    "Cheeks01_Normal",
+    "Eyes01_Cry_Closed01",
+    "Mouth01_Normal_Open01"
+  ],
+  "Cry2": [
+    "Cheeks02_Normal",
+    "Eyes02_Cry_Closed01",
+    "Mouth02_Normal_Open01"
+  ],
+  "Fearful1": [
+    "Cheeks01_Normal",
+    "Eyes01_Fearful_Open01",
+    "Mouth01_Fearful_Open01",
+    "Pale01_01"
+  ],
+  "Fearful2": [
+    "Cheeks02_Normal",
+    "Eyes02_Fearful_Open01",
+    "Mouth02_Fearful_Open01",
+    "Pale02_01"
+  ],
+  "Flushed1": [
+    "Cheeks01_Flushed",
+    "Eyes01_Flushed_Closed01",
+    "Mouth01_Flushed_Closed01"
+  ],
+  "Flushed2": [
+    "Cheeks02_Flushed",
+    "Eyes02_Flushed_Closed01",
+    "Mouth02_Flushed_Closed01"
+  ],
+  "Normal1": [
+    "Cheeks01_Normal",
+    "Eyes01_Normal_Open01",
+    "Mouth01_Normal_Open01"
+  ],
+  "Normal2": [
+    "Cheeks02_Normal",
+    "Eyes02_Normal_Open01",
+    "Mouth02_Normal_Open01"
+  ],
+  "Pensive1": [
+    "Cheeks01_Normal",
+    "Eyes01_Pensive_Open01",
+    "Mouth01_Normal_Open01"
+  ],
+  "Pensive2": [
+    "Cheeks02_Normal",
+    "Eyes02_Pensive_Open01",
+    "Mouth02_Normal_Open01"
+  ],
+  "Smile1": [
+    "Cheeks01_Normal",
+    "Eyes01_Normal_Open03",
+    "Mouth01_Smile_Closed01"
+  ],
+  "Smile2": [
+    "Cheeks02_Normal",
+    "Eyes02_Normal_Open03",
+    "Mouth02_Smile_Closed01"
+  ],
+  "Surprised1": [
+    "Cheeks01_Normal",
+    "Eyes01_Surprised_Open01",
+    "Mouth01_Surprised_Open01",
+    "Sweat01_01"
+  ],
+  "Surprised2": [
+    "Cheeks02_Normal",
+    "Eyes02_Surprised_Open01",
+    "Mouth02_Surprised_Open01",
+    "Sweat02_01"
+  ]
+}

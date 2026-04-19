@@ -1,0 +1,446 @@
+{
+  "canvas_size": [
+    1999,
+    3999
+  ],
+  "scale": 1.3329,
+  "layers": [
+    {
+      "name": "ClippingMask_Root_Overlay01",
+      "group": "Angle01",
+      "order": 84,
+      "empty": true
+    },
+    {
+      "name": "ClippingMask_Root_Overlay02",
+      "group": "Angle01",
+      "order": 83,
+      "empty": true
+    },
+    {
+      "name": "ClippingMask_Root_Softlight",
+      "group": "Angle01",
+      "order": 82,
+      "empty": true
+    },
+    {
+      "name": "Arms01",
+      "group": "Angle01/Arms",
+      "order": 80,
+      "empty": false
+    },
+    {
+      "name": "ArmL01",
+      "group": "Angle01/ArmL",
+      "order": 78,
+      "empty": false
+    },
+    {
+      "name": "ArmL02",
+      "group": "Angle01/ArmL",
+      "order": 77,
+      "empty": false
+    },
+    {
+      "name": "ArmL03",
+      "group": "Angle01/ArmL",
+      "order": 76,
+      "empty": false
+    },
+    {
+      "name": "ArmL04",
+      "group": "Angle01/ArmL",
+      "order": 75,
+      "empty": false
+    },
+    {
+      "name": "ArmL05",
+      "group": "Angle01/ArmL",
+      "order": 74,
+      "empty": false
+    },
+    {
+      "name": "ArmL06",
+      "group": "Angle01/ArmL",
+      "order": 73,
+      "empty": false
+    },
+    {
+      "name": "ArmL07",
+      "group": "Angle01/ArmL",
+      "order": 72,
+      "empty": false
+    },
+    {
+      "name": "ArmL08",
+      "group": "Angle01/ArmL",
+      "order": 71,
+      "empty": false
+    },
+    {
+      "name": "ArmR01",
+      "group": "Angle01/ArmR",
+      "order": 69,
+      "empty": false
+    },
+    {
+      "name": "ArmR02",
+      "group": "Angle01/ArmR",
+      "order": 68,
+      "empty": false
+    },
+    {
+      "name": "ArmR03",
+      "group": "Angle01/ArmR",
+      "order": 67,
+      "empty": false
+    },
+    {
+      "name": "ArmR04",
+      "group": "Angle01/ArmR",
+      "order": 66,
+      "empty": false
+    },
+    {
+      "name": "ArmR05",
+      "group": "Angle01/ArmR",
+      "order": 65,
+      "empty": false
+    },
+    {
+      "name": "ArmR06",
+      "group": "Angle01/ArmR",
+      "order": 64,
+      "empty": false
+    },
+    {
+      "name": "ArmR07",
+      "group": "Angle01/ArmR",
+      "order": 63,
+      "empty": false
+    },
+    {
+      "name": "ArmR08",
+      "group": "Angle01/ArmR",
+      "order": 62,
+      "empty": false
+    },
+    {
+      "name": "ArmR09",
+      "group": "Angle01/ArmR",
+      "order": 61,
+      "empty": false
+    },
+    {
+      "name": "ArmR10",
+      "group": "Angle01/ArmR",
+      "order": 60,
+      "empty": false
+    },
+    {
+      "name": "ArmR11",
+      "group": "Angle01/ArmR",
+      "order": 59,
+      "empty": false
+    },
+    {
+      "name": "ClippingMask_Facial_Normal01",
+      "group": "Angle01/ClippingMask",
+      "order": 58,
+      "empty": false
+    },
+    {
+      "name": "ClippingMask_Facial_Multiply",
+      "group": "Angle01/ClippingMask",
+      "order": 57,
+      "empty": false
+    },
+    {
+      "name": "ClippingMask_Facial_Normal02",
+      "group": "Angle01/ClippingMask",
+      "order": 56,
+      "empty": false
+    },
+    {
+      "name": "Pale01",
+      "group": "Angle01/Facial/Pale",
+      "order": 53,
+      "empty": false
+    },
+    {
+      "name": "Pale02",
+      "group": "Angle01/Facial/Pale",
+      "order": 52,
+      "empty": false
+    },
+    {
+      "name": "Sweat01",
+      "group": "Angle01/Facial/Sweat",
+      "order": 50,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Open01",
+      "group": "Angle01/Facial/Eyes",
+      "order": 48,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Open02",
+      "group": "Angle01/Facial/Eyes",
+      "order": 47,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Open03",
+      "group": "Angle01/Facial/Eyes",
+      "order": 46,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Closed01",
+      "group": "Angle01/Facial/Eyes",
+      "order": 45,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Closed02",
+      "group": "Angle01/Facial/Eyes",
+      "order": 44,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Normal_Closed03",
+      "group": "Angle01/Facial/Eyes",
+      "order": 43,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Smile_Open",
+      "group": "Angle01/Facial/Eyes",
+      "order": 42,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Smile_Middle",
+      "group": "Angle01/Facial/Eyes",
+      "order": 41,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Smile_Closed",
+      "group": "Angle01/Facial/Eyes",
+      "order": 40,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Angry_Open01",
+      "group": "Angle01/Facial/Eyes",
+      "order": 39,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Angry_Open02",
+      "group": "Angle01/Facial/Eyes",
+      "order": 38,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Pensive_Open",
+      "group": "Angle01/Facial/Eyes",
+      "order": 37,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Pensive_Closed",
+      "group": "Angle01/Facial/Eyes",
+      "order": 36,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Cry_Open",
+      "group": "Angle01/Facial/Eyes",
+      "order": 35,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Surprised_Open01",
+      "group": "Angle01/Facial/Eyes",
+      "order": 34,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Surprised_Open02",
+      "group": "Angle01/Facial/Eyes",
+      "order": 33,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Fearful_Open",
+      "group": "Angle01/Facial/Eyes",
+      "order": 32,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Downcast_Open",
+      "group": "Angle01/Facial/Eyes",
+      "order": 31,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Uncomfortable_Open01",
+      "group": "Angle01/Facial/Eyes",
+      "order": 30,
+      "empty": false
+    },
+    {
+      "name": "Eyes_Uncomfortable_Open02",
+      "group": "Angle01/Facial/Eyes",
+      "order": 29,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Normal_Closed",
+      "group": "Angle01/Facial/Mouth",
+      "order": 27,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Smile_Open01",
+      "group": "Angle01/Facial/Mouth",
+      "order": 26,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Smile_Open02",
+      "group": "Angle01/Facial/Mouth",
+      "order": 25,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Smile_Middle",
+      "group": "Angle01/Facial/Mouth",
+      "order": 24,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Smile_Closed",
+      "group": "Angle01/Facial/Mouth",
+      "order": 23,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Angry_Open",
+      "group": "Angle01/Facial/Mouth",
+      "order": 22,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Angry_Closed",
+      "group": "Angle01/Facial/Mouth",
+      "order": 21,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Pensive_Closed",
+      "group": "Angle01/Facial/Mouth",
+      "order": 20,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Cry_Closed01",
+      "group": "Angle01/Facial/Mouth",
+      "order": 19,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Cry_Closed02",
+      "group": "Angle01/Facial/Mouth",
+      "order": 18,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Surprised_Open",
+      "group": "Angle01/Facial/Mouth",
+      "order": 17,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Fearful_Open",
+      "group": "Angle01/Facial/Mouth",
+      "order": 16,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Neutral_Closed",
+      "group": "Angle01/Facial/Mouth",
+      "order": 15,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Yell_Open01",
+      "group": "Angle01/Facial/Mouth",
+      "order": 14,
+      "empty": false
+    },
+    {
+      "name": "Mouth_Yell_Open02",
+      "group": "Angle01/Facial/Mouth",
+      "order": 13,
+      "empty": false
+    },
+    {
+      "name": "Cheeks_Normal",
+      "group": "Angle01/Facial/Cheeks",
+      "order": 11,
+      "empty": false
+    },
+    {
+      "name": "Cheeks_Flushed",
+      "group": "Angle01/Facial/Cheeks",
+      "order": 10,
+      "empty": false
+    },
+    {
+      "name": "Shadow_Arms01",
+      "group": "Angle01/Shadow_Arms",
+      "order": 8,
+      "empty": false,
+      "requires": "Arms01"
+    },
+    {
+      "name": "Shadow_ArmL03",
+      "group": "Angle01/Shadow_ArmL",
+      "order": 6,
+      "empty": false,
+      "requires": "ArmL03"
+    },
+    {
+      "name": "Shadow_ArmL04",
+      "group": "Angle01/Shadow_ArmL",
+      "order": 5,
+      "empty": false,
+      "requires": "ArmL04"
+    },
+    {
+      "name": "Shadow_ArmL05",
+      "group": "Angle01/Shadow_ArmL",
+      "order": 4,
+      "empty": false,
+      "requires": "ArmL05"
+    },
+    {
+      "name": "Shadow_ArmR05",
+      "group": "Angle01/Shadow_ArmR",
+      "order": 2,
+      "empty": false,
+      "requires": "ArmR05"
+    },
+    {
+      "name": "Body",
+      "group": "Angle01",
+      "order": 1,
+      "empty": false
+    }
+  ]
+}

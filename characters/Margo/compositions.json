@@ -1,0 +1,42 @@
+{
+  "Angry1": [
+    "Cheeks_Normal",
+    "Eyes_Angry_Open",
+    "Mouth_Angry_Closed"
+  ],
+  "Cry1": [
+    "Cheeks_Normal",
+    "Eyes_Cry_Open",
+    "Mouth_Cry_Closed"
+  ],
+  "Fearful1": [
+    "Eyes_Fearful_Open",
+    "Mouth_Pensive_Closed",
+    "Pale01"
+  ],
+  "Flushed1": [
+    "Cheeks_Flushed",
+    "Eyes_Pensive_Middle",
+    "Mouth_Smile_Middle"
+  ],
+  "Normal1": [
+    "Cheeks_Normal",
+    "Eyes_Normal_Open",
+    "Mouth_Normal_Closed"
+  ],
+  "Pensive1": [
+    "Cheeks_Normal",
+    "Eyes_Pensive_Open",
+    "Mouth_Pensive_Open"
+  ],
+  "Smile1": [
+    "Cheeks_Normal",
+    "Eyes_Smile_Open",
+    "Mouth_Smile_Open"
+  ],
+  "Surprised1": [
+    "Cheeks_Normal",
+    "Eyes_Surprised_Open",
+    "Mouth_Surprised_Open"
+  ]
+}

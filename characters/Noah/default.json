@@ -1,0 +1,11 @@
+{
+  "enabled": [
+    "ArmL01",
+    "ArmR01",
+    "Body",
+    "Cheeks_Normal",
+    "Effect_Front_ArmL01",
+    "Eyes_Normal_Open01",
+    "Mouth_Normal_Closed"
+  ]
+}

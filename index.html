@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Editor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #121214;
+    --bg-panel: #1c1c21;
+    --bg-card: #26262d;
+    --accent: #ff6b4a;
+    --accent-soft: #ff6b4a22;
+    --text: #e8e6e3;
+    --text-muted: #8a8a8e;
+    --active: #a78bfa;
+    --active-bg: #a78bfa33;
+    --border: #333338;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Left Panel */
+  .panel {
+    width: 460px;
+    min-width: 460px;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .panel h1 {
+    font-size: 24px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Character selector */
+  .char-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Preset buttons */
+  .section-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .preset-btn {
+    padding: 8px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { background: #333338; color: var(--text); }
+  .preset-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 12px var(--accent-soft);
+    transform: translateY(-1px);
+  }
+
+  /* Layer groups */
+  .group {
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .group-header {
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .group-header:hover { color: var(--text); }
+  .group-header .arrow {
+    transition: transform 0.2s;
+    font-size: 12px;
+  }
+  .group.collapsed .arrow { transform: rotate(-90deg); }
+
+  .group-options {
+    padding: 6px 14px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+  }
+  .group.collapsed .group-options {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .group-status {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--active);
+    margin-left: 8px;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .offset-controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px 14px 4px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .offset-controls label {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .offset-controls input[type="range"] {
+    width: 100px;
+    accent-color: var(--active);
+  }
+  .offset-controls input[type="number"] {
+    width: 56px;
+    padding: 2px 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 12px;
+    text-align: right;
+  }
+  .offset-controls .unit {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .offset-controls button {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .offset-controls button:hover { color: var(--text); }
+
+  .layer-btn {
+    padding: 6px 14px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .layer-btn:hover:not(:disabled) { border-color: #555; color: var(--text); }
+  .layer-btn.active {
+    background: var(--active-bg);
+    border-color: var(--active);
+    color: #fff;
+  }
+  .layer-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .none-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px dashed #444;
+    border-radius: 5px;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .none-btn:hover { border-color: #777; color: var(--text-muted); }
+  .none-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  /* Action buttons */
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 12px;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .reset-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+  .reset-btn:hover { background: #333338; color: var(--text); }
+  .export-btn { background: var(--accent); color: #fff; transition: all 0.2s; }
+  .export-btn:hover { background: #ff8266; }
+  .export-btn.exported {
+    background: #27ae60;
+    pointer-events: none;
+  }
+
+  /* Scrollbar */
+  .panel::-webkit-scrollbar { width: 12px; }
+  .panel::-webkit-scrollbar-track { background: transparent; }
+  .panel::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  .panel::-webkit-scrollbar-thumb:hover { background: #555; }
+
+  /* Right Preview */
+  .preview {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(ellipse at 50% 60%, #1e1e24 0%, #0a0a0c 70%);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .preview-container {
+    position: relative;
+    width: 500px;
+    aspect-ratio: 1 / 2;
+    transform-origin: center center;
+    transition: transform 0.15s ease;
+    cursor: grab;
+  }
+  .preview-container.dragging { cursor: grabbing; transition: none; }
+
+  .preview-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+  }
+
+  .zoom-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-panel);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+  .zoom-btn:hover { opacity: 1; background: var(--bg-card); }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Character Editor</h1>
+
+  <select class="char-select" id="charSelect"></select>
+
+  <div id="headSelectorSection" style="display:none">
+    <div class="section-label">Head</div>
+    <div class="presets" id="headSelector"></div>
+  </div>
+
+  <div>
+    <div class="section-label">Expression</div>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <div id="groups"></div>
+
+  <div class="actions">
+    <button class="action-btn reset-btn" id="resetBtn">Reset</button>
+    <button class="action-btn reset-btn" id="saveOffsetsBtn">Save Offsets</button>
+    <button class="action-btn export-btn" id="exportBtn">Export PNG</button>
+  </div>
+</div>
+
+<div class="preview" id="previewArea">
+  <div class="preview-container" id="previewContainer"></div>
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoomIn">+</button>
+    <button class="zoom-btn" id="zoomOut">&minus;</button>
+    <button class="zoom-btn" id="zoomReset" style="font-size:14px">1:1</button>
+  </div>
+</div>
+
+<script>
+const CHARACTERS = [
+  "Alisa","AnAn","Coco","Ema","Hanna","Hiro",
+  "Leia","Margo","Meruru","Miria","Nanoka","Noah","Sherry"
+];
+
+let currentChar = null;
+let layersInfo = [];       // from layers.json
+let compositions = {};     // from composition.txt
+let defaultEnabled = [];   // from default.json
+let headBases = [];        // e.g. ['Head01', 'Head02'] if multi-head
+let activeHead = null;     // currently active head base name
+let activeState = {};      // { layerName: true/false }
+let layerOffsets = {};     // { layerName: { x: number, y: number } }
+let cacheBust = Date.now();
+
+// --- Data Loading ---
+
+async function loadCharacter(name) {
+  currentChar = name;
+
+  cacheBust = Date.now();
+  const [layersJson, compsJson, defaultJson, offsetsJson] = await Promise.all([
+    fetch(`characters/${name}/layers.json?v=${cacheBust}`).then(r => r.json()),
+    fetch(`characters/${name}/compositions.json?v=${cacheBust}`).then(r => r.json()),
+    fetch(`characters/${name}/default.json?v=${cacheBust}`).then(r => r.json()),
+    fetch(`characters/${name}/offsets.json?v=${cacheBust}`).then(r => r.ok ? r.json() : {}),
+  ]);
+
+  layersInfo = layersJson.layers.filter(l => !l.empty);
+  // Store canvas size for offset scaling
+  const canvasSize = layersJson.canvas_size || [2500, 5000];
+  layersInfo.forEach(l => { l._canvasW = canvasSize[0]; l._canvasH = canvasSize[1]; });
+  compositions = compsJson;
+  defaultEnabled = defaultJson.enabled || [];
+  layerOffsets = offsetsJson || {};
+
+  // Detect head bases (Head01, Head02, etc.)
+  const headSet = new Set();
+  for (const l of layersInfo) {
+    const match = l.group.match(/Head(\d+)/);
+    if (match) headSet.add('Head' + match[1]);
+  }
+  headBases = [...headSet].sort();
+  if (headBases.length > 1) {
+    // Pick active head from default enabled (whichever HeadBase is on)
+    const enabledHead = defaultEnabled.find(n => n.startsWith('HeadBase'));
+    activeHead = enabledHead ? 'Head' + enabledHead.replace('HeadBase', '') : headBases[0];
+  } else {
+    activeHead = null;
+  }
+
+  // Reset zoom/pan on character switch
+  zoomLevel = 1; panX = 0; panY = 0;
+  const pc = document.getElementById('previewContainer');
+  if (pc) pc.style.transform = '';
+
+  resetToDefault();
+  buildHeadSelector();
+  buildUI();
+  renderPreview();
+}
+
+// --- State Management ---
+
+function resetToDefault() {
+  activeState = {};
+  for (const l of layersInfo) activeState[l.name] = defaultEnabled.includes(l.name);
+}
+
+function enforceDeps() {
+  // If a required layer is off, turn off all layers that depend on it
+  for (const l of layersInfo) {
+    if (l.requires && activeState[l.name] && !activeState[l.requires]) {
+      activeState[l.name] = false;
+    }
+  }
+}
+
+
+function applyPreset(presetName) {
+  const enabled = compositions[presetName];
+  if (!enabled) return;
+
+  // Turn off all facial layers, then enable the preset's list
+  const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
+  const isFacial = name => facialKeywords.some(k => name.includes(k));
+
+  // Only clear facial layers belonging to the active head (or all if single head)
+  for (const l of layersInfo) {
+    if (isFacial(l.name)) {
+      if (!activeHead || l.group.includes(activeHead)) {
+        activeState[l.name] = false;
+      }
+    }
+  }
+
+  // Enable the preset layers
+  for (const name of enabled) {
+    if (activeState.hasOwnProperty(name)) {
+      activeState[name] = true;
+    }
+  }
+}
+
+// --- UI Building ---
+
+function buildHeadSelector() {
+  const section = document.getElementById('headSelectorSection');
+  const container = document.getElementById('headSelector');
+  container.innerHTML = '';
+
+  if (headBases.length <= 1) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  for (const head of headBases) {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (head === activeHead ? ' active' : '');
+    btn.textContent = head;
+    btn.onclick = () => {
+      // Turn off all layers of the old head
+      for (const l of layersInfo) {
+        if (l.group.includes(activeHead)) activeState[l.name] = false;
+      }
+      activeHead = head;
+      // Enable head base layer
+      const base = layersInfo.find(l => l.name === 'HeadBase' + head.replace('Head', ''));
+      if (base) activeState[base.name] = true;
+      // Enable always-on layers for the new head (HeadBase, HairB, etc.)
+      // FacialLineDrawing and HairClippingMask are handled by default.json
+      // Apply Normal expression for the new head
+      const headNum = head.replace('Head', '').replace(/^0+/, '');
+      const normalPreset = 'Normal' + headNum;
+      if (compositions[normalPreset]) {
+        applyPreset(normalPreset);
+      }
+      // Update head buttons
+      for (const b of container.querySelectorAll('.preset-btn')) {
+        b.classList.toggle('active', b.textContent === head);
+      }
+      buildUI();
+      renderPreview();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function isGroupForActiveHead(groupPath) {
+  if (!activeHead) return true; // single head, show all
+  // If group contains a Head## marker, only show if it matches activeHead
+  const match = groupPath.match(/Head(\d+)/);
+  if (!match) return true; // not head-specific, always show
+  return 'Head' + match[1] === activeHead;
+}
+
+function buildUI() {
+  buildPresets();
+  buildGroups();
+}
+
+function buildPresets() {
+  const container = document.getElementById('presets');
+  container.innerHTML = '';
+
+  // Find expression presets (compositions that set Eyes + Mouth)
+  const expressionNames = ['Normal','Smile','Angry','Pensive','Cry','Flushed','Surprised','Fearful','Wink','Sparkle','Determined'];
+  // For multi-head: filter to presets matching the active head number
+  const headNum = activeHead ? activeHead.replace('Head', '').replace(/^0+/, '') : null;
+  const presets = Object.keys(compositions).filter(k => {
+    if (!expressionNames.some(e => k.startsWith(e))) return false;
+    if (!headNum) return true; // single head, show all
+    // Match presets ending with the head number (Normal1 for Head01, Normal2 for Head02)
+    // Also include presets without a number suffix or aliased (Smile, Angry, etc.)
+    const trailingNum = k.match(/(\d+)$/);
+    if (!trailingNum) return true; // no number, show always (alias like "Smile")
+    return trailingNum[1] === headNum;
+  });
+
+  // Deduplicate: prefer short names
+  const seen = new Set();
+  const uniquePresets = [];
+  for (const p of presets) {
+    const base = p.replace(/\d+$/, '');
+    if (!seen.has(base)) {
+      seen.add(base);
+      uniquePresets.push(p);
+    }
+  }
+
+  for (const name of uniquePresets) {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.dataset.preset = name;
+    btn.textContent = name.replace(/\d+$/, '');
+    btn.onclick = () => {
+      applyPreset(name);
+      enforceDeps();
+      updateUI();
+      renderPreview();
+    };
+    container.appendChild(btn);
+  }
+}
+
+function buildGroups() {
+  const container = document.getElementById('groups');
+  container.innerHTML = '';
+
+  // Group layers by their group path
+  const groups = new Map();
+  for (const l of layersInfo) {
+    if (!groups.has(l.group)) groups.set(l.group, []);
+    groups.get(l.group).push(l);
+  }
+
+  // Simplify group names for display
+  function displayName(group) {
+    const parts = group.split('/');
+    return parts[parts.length - 1];
+  }
+
+  // Sort groups: facial first, arms second, everything else last
+  const facialKeys = ['Eyes', 'Mouth', 'Cheeks'];
+  const effectKeys = ['Pale', 'Sweat', 'Mask'];
+  const armKeys = ['ArmL', 'ArmR', 'Arms'];
+  function groupOrder(path) {
+    const leaf = path.split('/').pop();
+    if (facialKeys.some(k => leaf.includes(k))) return 0;
+    if (effectKeys.some(k => leaf.includes(k))) return 1;
+
+    // Arm groups: sorted by category then limb (L → R → combined)
+    if (leaf.includes('Arm')) {
+      const limb = leaf.includes('ArmL') ? 0 : leaf.includes('ArmR') ? 1 : 2;
+      if (leaf === 'ArmL' || leaf === 'ArmR' || leaf === 'Arms') return 20 + limb;
+      if (leaf.startsWith('Option_Arm')) return 30 + limb;
+      if (leaf.startsWith('Effect_Front_Arm')) return 40 + limb;
+      if (leaf.startsWith('Effect_Middle_Arm')) return 50 + limb;
+      if (leaf.startsWith('Effect_Back_Arm')) return 60 + limb;
+      if (leaf.startsWith('Shadow_Arm')) return 70 + limb;
+      return 80 + limb;
+    }
+    return 100;
+  }
+  const sortedGroups = [...groups.entries()].sort((a, b) => groupOrder(a[0]) - groupOrder(b[0]));
+
+  for (const [groupPath, layers] of sortedGroups) {
+    // Skip groups whose layers are all always-on (Body, HeadBase, HairB)
+    if (layers.every(l => l.name === 'Body' || l.name.startsWith('HeadBase') || l.name.startsWith('HairB'))) continue;
+    // Skip groups belonging to inactive head
+    if (!isGroupForActiveHead(groupPath)) continue;
+
+    const div = document.createElement('div');
+    div.className = 'group';
+
+    const header = document.createElement('div');
+    header.className = 'group-header';
+    header.innerHTML = `<span>${displayName(groupPath)}<span class="group-status" data-status-group="${groupPath}"></span></span><span class="arrow">&#9660;</span>`;
+    header.onclick = () => div.classList.toggle('collapsed');
+    div.appendChild(header);
+
+    const opts = document.createElement('div');
+    opts.className = 'group-options';
+
+    // "None" button
+    const noneBtn = document.createElement('button');
+    noneBtn.className = 'none-btn';
+    noneBtn.textContent = 'None';
+    noneBtn.dataset.group = groupPath;
+    noneBtn.onclick = () => {
+      for (const l of layers) activeState[l.name] = false;
+      enforceDeps();
+      updateUI();
+      renderPreview();
+    };
+    opts.appendChild(noneBtn);
+
+    for (const l of layers) {
+      const btn = document.createElement('button');
+      btn.className = 'layer-btn';
+      btn.textContent = l.name.replace(/^(ArmL|ArmR|Eyes_|Mouth_|Cheeks_|Sweat|Pale)/, '').replace(/^_/, '') || l.name;
+      btn.dataset.layer = l.name;
+      btn.dataset.group = groupPath;
+      btn.onclick = () => {
+        const leaf = groupPath.split('/').pop();
+        const multiSelect = (leaf === 'Facial' || leaf === 'ClippingMask');
+
+        if (multiSelect) {
+          // Toggle behavior: flip this layer on/off
+          activeState[l.name] = !activeState[l.name];
+        } else {
+          // Radio behavior: turn off all in group, turn on this one
+          for (const other of layers) activeState[other.name] = false;
+          activeState[l.name] = true;
+        }
+
+        // Arms mutual exclusion: Arms vs ArmL/ArmR
+        if (leaf === 'Arms') {
+          // Selecting Arms → clear ArmL and ArmR
+          for (const ol of layersInfo) {
+            const oleaf = ol.group.split('/').pop();
+            if (oleaf === 'ArmL' || oleaf === 'ArmR') activeState[ol.name] = false;
+          }
+        } else if (leaf === 'ArmL' || leaf === 'ArmR') {
+          // If Arms was active, clear it and set the other arm to 01
+          const armsActive = layersInfo.some(ol => ol.group.split('/').pop() === 'Arms' && activeState[ol.name]);
+          if (armsActive) {
+            for (const ol of layersInfo) {
+              if (ol.group.split('/').pop() === 'Arms') activeState[ol.name] = false;
+            }
+            // Set the other arm to 01
+            const otherArm = leaf === 'ArmL' ? 'ArmR' : 'ArmL';
+            const arm01 = layersInfo.find(ol => ol.group.split('/').pop() === otherArm && ol.name === otherArm + '01');
+            if (arm01) activeState[arm01.name] = true;
+          }
+        }
+
+        updateUI();
+        renderPreview();
+      };
+      opts.appendChild(btn);
+    }
+
+    // Offset sliders for the active layer in this group
+    const offsetDiv = document.createElement('div');
+    offsetDiv.className = 'offset-controls';
+    offsetDiv.dataset.group = groupPath;
+    offsetDiv.style.display = 'none';
+
+    function buildOffsetSliders() {
+      offsetDiv.innerHTML = '';
+      const activeLayer = layers.find(l => activeState[l.name]);
+      if (!activeLayer) { offsetDiv.style.display = 'none'; return; }
+      offsetDiv.style.display = '';
+      const name = activeLayer.name;
+      if (!layerOffsets[name]) layerOffsets[name] = { x: 0, y: 0 };
+      const off = layerOffsets[name];
+
+      for (const axis of ['x', 'y']) {
+        const label = document.createElement('label');
+        label.textContent = axis.toUpperCase();
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = -200;
+        slider.max = 200;
+        slider.value = off[axis];
+        const numInput = document.createElement('input');
+        numInput.type = 'number';
+        numInput.value = off[axis];
+        const unit = document.createElement('span');
+        unit.className = 'unit';
+        unit.textContent = 'px';
+        slider.oninput = () => {
+          off[axis] = parseInt(slider.value);
+          numInput.value = off[axis];
+          renderPreview();
+        };
+        numInput.oninput = () => {
+          off[axis] = parseInt(numInput.value) || 0;
+          slider.value = Math.max(-200, Math.min(200, off[axis]));
+          renderPreview();
+        };
+        label.appendChild(slider);
+        label.appendChild(numInput);
+        label.appendChild(unit);
+        offsetDiv.appendChild(label);
+      }
+
+      const resetBtn = document.createElement('button');
+      resetBtn.textContent = 'Reset';
+      resetBtn.onclick = () => {
+        off.x = 0; off.y = 0;
+        buildOffsetSliders();
+        renderPreview();
+      };
+      offsetDiv.appendChild(resetBtn);
+    }
+
+    // Rebuild sliders when group selection changes
+    const origOnclicks = [];
+    opts.querySelectorAll('button').forEach(btn => {
+      const orig = btn.onclick;
+      btn.onclick = (...args) => { orig(...args); buildOffsetSliders(); };
+    });
+
+    div.appendChild(opts);
+    div.appendChild(offsetDiv);
+    container.appendChild(div);
+    buildOffsetSliders();
+  }
+}
+
+function updateUI() {
+  // Update preset buttons — compare current facial state against each preset's enabled list
+  for (const btn of document.querySelectorAll('#presets .preset-btn')) {
+    const enabled = compositions[btn.dataset.preset];
+    if (!enabled) { btn.classList.remove('active'); continue; }
+    const matches = enabled.every(name => activeState[name]) &&
+      enabled.length > 0;
+    btn.classList.toggle('active', matches);
+  }
+  // Update layer buttons
+  for (const btn of document.querySelectorAll('.layer-btn')) {
+    const layer = layersInfo.find(l => l.name === btn.dataset.layer);
+    const reqMet = !layer || !layer.requires || !!activeState[layer.requires];
+    btn.disabled = !reqMet;
+    btn.classList.toggle('active', !!activeState[btn.dataset.layer]);
+  }
+  // Update none buttons
+  for (const btn of document.querySelectorAll('.none-btn')) {
+    const group = btn.dataset.group;
+    const anyActive = layersInfo.some(l => l.group === group && activeState[l.name]);
+    btn.classList.toggle('active', !anyActive);
+  }
+  // Update group status labels
+  for (const span of document.querySelectorAll('.group-status')) {
+    const group = span.dataset.statusGroup;
+    const active = layersInfo.find(l => l.group === group && activeState[l.name]);
+    span.textContent = active ? ` — ${active.name}` : '';
+  }
+}
+
+// --- Rendering ---
+
+function renderPreview() {
+  const container = document.getElementById('previewContainer');
+  container.innerHTML = '';
+
+  const activeLayers = layersInfo
+    .filter(l => activeState[l.name])
+    .sort((a, b) => a.order - b.order);
+
+  // Compute scale: native canvas pixels → preview CSS pixels
+  const canvasW = layersInfo.length > 0 ? (layersInfo[0]._canvasW || 2500) : 2500;
+  const previewW = container.clientWidth || 500;
+  const displayScale = previewW / canvasW;
+
+  for (const l of activeLayers) {
+    const img = document.createElement('img');
+    img.src = `characters/${currentChar}/${l.name}.png?v=${cacheBust}`;
+    img.style.zIndex = l.order;
+    const off = layerOffsets[l.name];
+    if (off && (off.x || off.y)) {
+      img.style.transform = `translate(${off.x * displayScale}px, ${off.y * displayScale}px)`;
+    }
+    img.loading = 'eager';
+    img.onerror = () => img.remove();
+    container.appendChild(img);
+  }
+
+  updateUI();
+}
+
+// --- Export ---
+
+document.getElementById('exportBtn').onclick = async () => {
+  const activeLayers = layersInfo
+    .filter(l => activeState[l.name])
+    .sort((a, b) => a.order - b.order);
+
+  if (activeLayers.length === 0) return;
+
+  // Load all images
+  const images = await Promise.all(activeLayers.map(l => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = `characters/${currentChar}/${l.name}.png`;
+    });
+  }));
+
+  // Find max dimensions
+  let maxW = 0, maxH = 0;
+  for (const img of images) {
+    if (!img) continue;
+    maxW = Math.max(maxW, img.naturalWidth);
+    maxH = Math.max(maxH, img.naturalHeight);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = maxW;
+  canvas.height = maxH;
+  const ctx = canvas.getContext('2d');
+
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    if (!img) continue;
+    const off = layerOffsets[activeLayers[i].name];
+    const ox = off ? off.x : 0;
+    const oy = off ? off.y : 0;
+    ctx.drawImage(img, ox, oy, maxW, maxH);
+  }
+
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = `${currentChar}_${Date.now()}.png`;
+  a.click();
+
+  // Feedback
+  const btn = document.getElementById('exportBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Exported!';
+  btn.classList.add('exported');
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.classList.remove('exported');
+  }, 1200);
+};
+
+// --- Reset ---
+
+document.getElementById('resetBtn').onclick = () => {
+  resetToDefault();
+  enforceDeps();
+  updateUI();
+  renderPreview();
+};
+
+// --- Save Offsets ---
+
+document.getElementById('saveOffsetsBtn').onclick = () => {
+  // Filter out zero offsets
+  const nonZero = {};
+  for (const [name, off] of Object.entries(layerOffsets)) {
+    if (off.x || off.y) nonZero[name] = off;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(nonZero, null, 2)], { type: 'application/json' }));
+  a.download = `${currentChar}_offsets.json`;
+  a.click();
+
+  const btn = document.getElementById('saveOffsetsBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Saved!';
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+};
+
+// --- Init ---
+
+const charSelect = document.getElementById('charSelect');
+for (const c of CHARACTERS) {
+  const opt = document.createElement('option');
+  opt.value = c;
+  opt.textContent = c;
+  charSelect.appendChild(opt);
+}
+charSelect.value = 'Sherry';
+charSelect.onchange = () => loadCharacter(charSelect.value);
+
+loadCharacter('Sherry');
+
+// --- Zoom & Pan ---
+
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+let isDragging = false, dragStartX, dragStartY, panStartX, panStartY;
+const container = document.getElementById('previewContainer');
+const previewArea = document.getElementById('previewArea');
+
+function applyTransform() {
+  container.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+}
+
+function zoom(delta, centerX, centerY) {
+  const oldZoom = zoomLevel;
+  zoomLevel = Math.min(8, Math.max(0.25, zoomLevel * (1 + delta)));
+  // Adjust pan to zoom toward cursor/center
+  const ratio = zoomLevel / oldZoom;
+  panX = centerX - ratio * (centerX - panX);
+  panY = centerY - ratio * (centerY - panY);
+  applyTransform();
+}
+
+// Scroll wheel zoom
+previewArea.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = previewArea.getBoundingClientRect();
+  const cx = e.clientX - rect.left - rect.width / 2;
+  const cy = e.clientY - rect.top - rect.height / 2;
+  zoom(e.deltaY > 0 ? -0.15 : 0.15, cx, cy);
+}, { passive: false });
+
+// Button zoom
+document.getElementById('zoomIn').onclick = () => { zoom(0.3, 0, 0); };
+document.getElementById('zoomOut').onclick = () => { zoom(-0.3, 0, 0); };
+document.getElementById('zoomReset').onclick = () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); };
+
+// Pan with mouse drag
+previewArea.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  panStartX = panX;
+  panStartY = panY;
+  container.classList.add('dragging');
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  panX = panStartX + (e.clientX - dragStartX);
+  panY = panStartY + (e.clientY - dragStartY);
+  applyTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  container.classList.remove('dragging');
+});
+</script>
+</body>
+</html>
