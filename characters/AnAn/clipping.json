@@ -1,0 +1,22 @@
+{
+  "ClippingMask_Facial_Normal01": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial_Multiply": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial_Normal02": {
+    "target": "eyes",
+    "blend": "destination-out"
+  },
+  "Pale01": {
+    "target": "canvas",
+    "blend": "multiply"
+  },
+  "Pale02": {
+    "target": "canvas",
+    "blend": "multiply"
+  }
+}

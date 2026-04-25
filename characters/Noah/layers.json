@@ -1,9 +1,9 @@
 {
   "canvas_size": [
-    2566,
-    5131
+    2551,
+    5102
   ],
-  "scale": 1.7104,
+  "scale": 1.7006,
   "layers": [
     {
       "name": "ClippingMask_Effect_Root_01",
@@ -147,13 +147,13 @@
       "name": "ClippingMask_Facial_01",
       "group": "Angle01",
       "order": 40,
-      "empty": true
+      "empty": false
     },
     {
       "name": "ClippingMask_Facial_02",
       "group": "Angle01",
       "order": 39,
-      "empty": true
+      "empty": false
     },
     {
       "name": "Pale01",
@@ -171,7 +171,7 @@
       "name": "ClippingMask_Eyes",
       "group": "Angle01/Facial",
       "order": 33,
-      "empty": true
+      "empty": false
     },
     {
       "name": "Eyes_Normal_Open01",
@@ -347,49 +347,5 @@
       "order": 1,
       "empty": false
     }
-  ],
-  "compositions": {
-    "ArmL1": "Angle01/ArmL>ArmL01,Angle01/Effect_Front_ArmL>Effect_Front_ArmL01",
-    "ArmL2": "Angle01/ArmL>ArmL02,Angle01/Effect_Front_ArmL-",
-    "ArmL3": "Angle01/ArmL>ArmL03,Angle01/Effect_Front_ArmL-",
-    "ArmL4": "Angle01/ArmL>ArmL04,Angle01/Effect_Front_ArmL-",
-    "ArmL5": "Angle01/ArmL>ArmL05,Angle01/Effect_Front_ArmL-",
-    "ArmR1": "Angle01/ArmR>ArmR01,Angle01/Effect_Front_ArmR-",
-    "ArmR2": "Angle01/ArmR>ArmR02,Angle01/Effect_Front_ArmR>Effect_Front_ArmR02",
-    "ArmR3": "Angle01/ArmR>ArmR03,Angle01/Effect_Front_ArmR-",
-    "ArmR4": "Angle01/ArmR>ArmR04,Angle01/Effect_Front_ArmR>Effect_Front_ArmR04",
-    "ArmR5": "Angle01/ArmR>ArmR05,Angle01/Effect_Front_ArmR>Effect_Front_ArmR05",
-    "ArmR6": "Angle01/ArmR>ArmR06,Angle01/Effect_Front_ArmR-",
-    "Pale-1": "Angle01/Facial/Pale>Pale01",
-    "Pale-Off": "Angle01/Facial/Pale-",
-    "Sweat-1": "Angle01/Facial/Sweat>Sweat01",
-    "Sweat-Off": "Angle01/Facial/Sweat-",
-    "Cheeks-Normal": "Angle01/Facial/Cheeks>Cheeks_Normal",
-    "Cheeks-Flushed": "Angle01/Facial/Cheeks>Cheeks_Flushed",
-    "Cheeks-Off": "Angle01/Facial/Cheeks-",
-    "Normal1": "Pale-Off,Sweat-Off,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Normal_Open01,Angle01/Facial/Mouth>Mouth_Normal_Closed",
-    "Smile1": "Pale-Off,Sweat-Off,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Smile_Closed01,Angle01/Facial/Mouth>Mouth_Smile_Open01",
-    "Angry1": "Pale-Off,Sweat-Off,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Uncomfortable_Open,Angle01/Facial/Mouth>Mouth_Angry_Closed",
-    "Pensive1": "Pale-Off,Sweat-Off,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Pensive_Open,Angle01/Facial/Mouth>Mouth_Pensive_Open",
-    "Cry1": "Pale-Off,Sweat-Off,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Cry_Open,Angle01/Facial/Mouth>Mouth_Cry_Closed",
-    "Flushed1": "Pale-Off,Sweat-Off,Cheeks-Flushed,Angle01/Facial/Eyes>Eyes_Smile_Closed02,Angle01/Facial/Mouth>Mouth_Flushed_Open",
-    "Surprised1": "Pale-Off,Sweat-1,Cheeks-Normal,Angle01/Facial/Eyes>Eyes_Surprised_Open01,Angle01/Facial/Mouth>Mouth_Confused_Open",
-    "Fearful1": "Pale-1,Sweat-Off,Cheeks-Off,Angle01/Facial/Eyes>Eyes_Fearful_Open,Angle01/Facial/Mouth>Mouth_Uncomfortable_Open",
-    "Default": "Normal1",
-    "Smile": "Smile1",
-    "Angry": "Angry1",
-    "Pensive": "Pensive1",
-    "Cry": "Cry1",
-    "Flushed": "Flushed1",
-    "Surprised": "Surprised1",
-    "Fearful": "Fearful1"
-  },
-  "default_composition": {
-    "presets": [
-      "ArmL1",
-      "ArmR1",
-      "Default"
-    ],
-    "layers": "Angle01+ClippingMask_Effect_Root_01,Angle01+ClippingMask_Effect_Root_02,Angle01+ClippingMask_Effect_Root_03,Angle01+ClippingMask_Effect_Root_04,Angle01/Effect_Front_ArmL+Effect_Front_ArmL01,Angle01/Effect_Front_ArmL-Effect_Front_ArmL04,Angle01/Effect_Front_ArmL-Effect_Front_ArmL05,Angle01/Effect_Front_ArmR-Effect_Front_ArmR02,Angle01/Effect_Front_ArmR-Effect_Front_ArmR04,Angle01/Effect_Front_ArmR-Effect_Front_ArmR05,Angle01/ArmL+ArmL01,Angle01/ArmL-ArmL02,Angle01/ArmL-ArmL03,Angle01/ArmL-ArmL04,Angle01/ArmL-ArmL05,Angle01/ArmL-ArmL06,Angle01/ArmR+ArmR01,Angle01/ArmR-ArmR02,Angle01/ArmR-ArmR03,Angle01/ArmR-ArmR04,Angle01/ArmR-ArmR05,Angle01/ArmR-ArmR06,Angle01+ClippingMask_Facial_01,Angle01+ClippingMask_Facial_02,Angle01/Facial/Pale-Pale01,Angle01/Facial/Sweat-Sweat01,Angle01/Facial+ClippingMask_Eyes,Angle01/Facial/Eyes+Eyes_Normal_Open01,Angle01/Facial/Eyes-Eyes_Normal_Open02,Angle01/Facial/Eyes-Eyes_Smile_Open,Angle01/Facial/Eyes-Eyes_Smile_Closed01,Angle01/Facial/Eyes-Eyes_Smile_Closed02,Angle01/Facial/Eyes-Eyes_Angry_Open,Angle01/Facial/Eyes-Eyes_Pensive_Open,Angle01/Facial/Eyes-Eyes_Pensive_Open_1,Angle01/Facial/Eyes-Eyes_Cry_Open,Angle01/Facial/Eyes-Eyes_Surprised_Open01,Angle01/Facial/Eyes-Eyes_Surprised_Open02,Angle01/Facial/Eyes-Eyes_Fearful_Open,Angle01/Facial/Eyes-Eyes_Uncomfortable_Open,Angle01/Facial/Mouth+Mouth_Normal_Closed,Angle01/Facial/Mouth-Mouth_Smile_Open01,Angle01/Facial/Mouth-Mouth_Smile_Open02,Angle01/Facial/Mouth-Mouth_Smile_Closed,Angle01/Facial/Mouth-Mouth_Angry_Open,Angle01/Facial/Mouth-Mouth_Angry_Closed,Angle01/Facial/Mouth-Mouth_Pensive_Open,Angle01/Facial/Mouth-Mouth_Cry_Closed,Angle01/Facial/Mouth-Mouth_Surprised_Open01,Angle01/Facial/Mouth-Mouth_Surprised_Open02,Angle01/Facial/Mouth-Mouth_Flushed_Open,Angle01/Facial/Mouth-Mouth_Confused_Open,Angle01/Facial/Mouth-Mouth_Uncomfortable_Open,Angle01/Facial/Cheeks+Cheeks_Normal,Angle01/Facial/Cheeks-Cheeks_Flushed,Angle01+Body,"
-  }
+  ]
 }

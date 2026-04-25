@@ -1,0 +1,24 @@
+{
+  "ClippingMask_Eyes_Normal": {
+    "target": "eyes",
+    "blend": "multiply",
+    "strength": 0.95,
+    "lightness": 0.15
+  },
+  "Hair_Normal": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "Hair_Multiply": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "Pale01": {
+    "target": "canvas",
+    "blend": "multiply"
+  },
+  "Pale02": {
+    "target": "canvas",
+    "blend": "multiply"
+  }
+}

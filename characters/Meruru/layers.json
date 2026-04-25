@@ -1,9 +1,9 @@
 {
   "canvas_size": [
-    2004,
-    4007
+    2000,
+    4000
   ],
-  "scale": 1.3358,
+  "scale": 1.3335,
   "layers": [
     {
       "name": "ClippingMask_Angle01_01",
@@ -283,7 +283,7 @@
     },
     {
       "name": "ClippingMask_Facial01_01",
-      "group": "Angle01/Head/Head01/ClippingMask",
+      "group": "Angle01/Head/Head01",
       "order": 86,
       "empty": false
     },
@@ -301,7 +301,7 @@
     },
     {
       "name": "ClippingMask_Eyes01_01",
-      "group": "Angle01/Head/Head01/ClippingMask",
+      "group": "Angle01/Head/Head01",
       "order": 81,
       "empty": false
     },
@@ -505,7 +505,7 @@
     },
     {
       "name": "ClippingMask_Facial02_01",
-      "group": "Angle01/Head/Head02/ClippingMask",
+      "group": "Angle01/Head/Head02",
       "order": 43,
       "empty": false
     },
@@ -523,7 +523,7 @@
     },
     {
       "name": "ClippingMask_Eyes02_01",
-      "group": "Angle01/Head/Head02/ClippingMask",
+      "group": "Angle01/Head/Head02",
       "order": 38,
       "empty": false
     },

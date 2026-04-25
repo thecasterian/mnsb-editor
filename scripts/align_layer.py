@@ -103,18 +103,27 @@ def fine_tune(content_alpha_mask, ref_canvas_mask, base_x, base_y, canvas_w, can
     return best_dx, best_dy, best_m
 
 
-def align_layer(ref_path, hires_path, output_path, canvas_size=None, mask_threshold=0):
+def align_layer(ref_path, hires_path, output_path, canvas_size=None, mask_threshold=0, scale_override=None):
     ref_img = np.array(Image.open(ref_path))
     hires_img = np.array(Image.open(hires_path))
 
-    # Step 1: Compute scale
-    scale = compute_scale(ref_img, hires_img)
-    if scale is None:
+    # Step 1: Compute scale from this sprite's own bbox (always; used for sanity check)
+    computed_scale = compute_scale(ref_img, hires_img)
+    if computed_scale is None:
         # Retry with mask_threshold (for low-alpha sprites like blush)
-        scale = compute_scale(ref_img, hires_img, threshold=mask_threshold)
-    if scale is None:
-        print("ERROR: empty content in reference or hi-res image", file=sys.stderr)
-        return False
+        computed_scale = compute_scale(ref_img, hires_img, threshold=mask_threshold)
+
+    if scale_override is not None:
+        scale = scale_override
+        if computed_scale is not None:
+            diff = abs(computed_scale - scale_override) / scale_override
+            if diff > 0.10:
+                print(f"  WARNING: computed scale {computed_scale:.4f} differs from --scale {scale_override:.4f} by {diff * 100:.1f}% — sprite bbox may be unreliable (small/antialiased)")
+    else:
+        if computed_scale is None:
+            print("ERROR: empty content in reference or hi-res image", file=sys.stderr)
+            return False
+        scale = computed_scale
 
     ref_canvas_h, ref_canvas_w = ref_img.shape[:2]
 
@@ -203,6 +212,7 @@ def main():
     parser.add_argument("output", help="Output PNG (hi-res placed on correct canvas)")
     parser.add_argument("--canvas", help="Canvas size WxH (default: auto from scale)", default=None)
     parser.add_argument("--threshold", help="Alpha threshold for mask comparison (default: 0)", type=int, default=0)
+    parser.add_argument("--scale", help="Override computed scale with a known global scale (useful for tiny sprites where bbox-derived scale is unreliable)", type=float, default=None)
     args = parser.parse_args()
 
     canvas_size = None
@@ -211,7 +221,7 @@ def main():
         canvas_size = (int(w), int(h))
 
     print(f"Aligning {args.hires} -> {args.output}")
-    align_layer(args.reference, args.hires, args.output, canvas_size, args.threshold)
+    align_layer(args.reference, args.hires, args.output, canvas_size, args.threshold, args.scale)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+{
+  "FacialLineDrawing01": {
+    "target": "eyes",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial01_01": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial01_02": {
+    "target": "eyes",
+    "blend": "multiply",
+    "strength": 0.7,
+    "lightness": 0.12
+  },
+  "Pale01_01": {
+    "target": "canvas",
+    "blend": "multiply"
+  },
+  "Pale01_02": {
+    "target": "canvas",
+    "blend": "multiply"
+  }
+}

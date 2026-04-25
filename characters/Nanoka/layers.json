@@ -1,9 +1,9 @@
 {
   "canvas_size": [
-    2006,
-    4012
+    2000,
+    4000
   ],
-  "scale": 1.3375,
+  "scale": 1.3332,
   "layers": [
     {
       "name": "ClippingMask_Angle01_01",
@@ -159,13 +159,13 @@
       "name": "ClippingMask_Facial01_01",
       "group": "Angle01/Head/Head01",
       "order": 55,
-      "empty": true
+      "empty": false
     },
     {
       "name": "ClippingMask_Facial01_02",
       "group": "Angle01/Head/Head01",
       "order": 54,
-      "empty": true
+      "empty": false
     },
     {
       "name": "Pale01_01",

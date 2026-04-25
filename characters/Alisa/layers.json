@@ -159,13 +159,13 @@
     },
     {
       "name": "ClippingMask_Facial_01",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 65,
       "empty": false
     },
     {
       "name": "ClippingMask_Facial_02",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 64,
       "empty": false
     },
@@ -195,7 +195,7 @@
     },
     {
       "name": "ClippingMask_Eyes",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01/Facial",
       "order": 55,
       "empty": false
     },

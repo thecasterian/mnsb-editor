@@ -1,0 +1,34 @@
+{
+  "ClippingMask_Effect_Root_01": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Effect_Root_02": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Effect_Root_03": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Effect_Root_04": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial_01": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Facial_02": {
+    "target": "facial",
+    "blend": "source-over"
+  },
+  "ClippingMask_Eyes": {
+    "target": "eyes",
+    "blend": "source-over"
+  },
+  "Pale01": {
+    "target": "canvas",
+    "blend": "multiply"
+  }
+}

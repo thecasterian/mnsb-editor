@@ -156,25 +156,25 @@
     },
     {
       "name": "ClippingMask_Facial_Normal01",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 52,
       "empty": false
     },
     {
       "name": "ClippingMask_Facial_Normal02",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 51,
       "empty": true
     },
     {
       "name": "ClippingMask_Facial_Multiply",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 50,
       "empty": false
     },
     {
       "name": "ClippingMask_Facial_Normal03",
-      "group": "Angle01/ClippingMask",
+      "group": "Angle01",
       "order": 49,
       "empty": false
     },

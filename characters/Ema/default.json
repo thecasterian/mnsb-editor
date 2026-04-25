@@ -1,12 +1,26 @@
 {
-  "enabled": [
-    "ArmL01",
-    "ArmR01",
-    "Body",
-    "Cheeks01_Normal",
-    "Eyes01_Normal_Open01",
-    "FacialLineDrawing01",
-    "HeadBase01",
-    "Mouth01_Normal_Closed"
-  ]
+  "Head01": {
+    "enabled": [
+      "ArmL01",
+      "ArmR01",
+      "Body",
+      "Cheeks01_Normal",
+      "Eyes01_Normal_Open01",
+      "FacialLineDrawing01",
+      "HeadBase01",
+      "Mouth01_Normal_Closed"
+    ]
+  },
+  "Head02": {
+    "enabled": [
+      "ArmL01",
+      "ArmR01",
+      "Body",
+      "Cheeks02_Normal",
+      "Eyes02_Normal_Lifeless",
+      "FacialLineDrawing02",
+      "HeadBase02",
+      "Mouth02_Determined_Closed"
+    ]
+  }
 }

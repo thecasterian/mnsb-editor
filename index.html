@@ -124,7 +124,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    max-height: 500px;
+    max-height: 9999px;
     overflow: hidden;
     transition: max-height 0.25s ease, padding 0.25s ease;
   }
@@ -265,6 +265,7 @@
     overflow: hidden;
     position: relative;
   }
+  .preview.bg-white { background: #ffffff; }
 
   .preview-container {
     position: relative;
@@ -276,7 +277,8 @@
   }
   .preview-container.dragging { cursor: grabbing; transition: none; }
 
-  .preview-container img {
+  .preview-container img,
+  .preview-container canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -342,6 +344,7 @@
 <div class="preview" id="previewArea">
   <div class="preview-container" id="previewContainer"></div>
   <div class="zoom-controls">
+    <button class="zoom-btn" id="bgToggle" style="font-size:14px" title="Toggle preview background">BG</button>
     <button class="zoom-btn" id="zoomIn">+</button>
     <button class="zoom-btn" id="zoomOut">&minus;</button>
     <button class="zoom-btn" id="zoomReset" style="font-size:14px">1:1</button>
@@ -357,11 +360,13 @@ const CHARACTERS = [
 let currentChar = null;
 let layersInfo = [];       // from layers.json
 let compositions = {};     // from composition.txt
-let defaultEnabled = [];   // from default.json
+let defaultEnabled = [];   // resolved default list for current active head
+let defaultJsonRaw = {};   // raw default.json (may be flat or per-head)
 let headBases = [];        // e.g. ['Head01', 'Head02'] if multi-head
 let activeHead = null;     // currently active head base name
 let activeState = {};      // { layerName: true/false }
 let layerOffsets = {};     // { layerName: { x: number, y: number } }
+let clippingData = {};     // from clipping.json: { layerName: { target, blend } }
 let cacheBust = Date.now();
 
 // --- Data Loading ---
@@ -370,11 +375,13 @@ async function loadCharacter(name) {
   currentChar = name;
 
   cacheBust = Date.now();
-  const [layersJson, compsJson, defaultJson, offsetsJson] = await Promise.all([
+  invalidateImageCache();
+  const [layersJson, compsJson, defaultJson, offsetsJson, clippingJson] = await Promise.all([
     fetch(`characters/${name}/layers.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/compositions.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/default.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/offsets.json?v=${cacheBust}`).then(r => r.ok ? r.json() : {}),
+    fetch(`characters/${name}/clipping.json?v=${cacheBust}`).then(r => r.ok ? r.json() : {}),
   ]);
 
   layersInfo = layersJson.layers.filter(l => !l.empty);
@@ -382,8 +389,9 @@ async function loadCharacter(name) {
   const canvasSize = layersJson.canvas_size || [2500, 5000];
   layersInfo.forEach(l => { l._canvasW = canvasSize[0]; l._canvasH = canvasSize[1]; });
   compositions = compsJson;
-  defaultEnabled = defaultJson.enabled || [];
+  defaultJsonRaw = defaultJson || {};
   layerOffsets = offsetsJson || {};
+  clippingData = clippingJson || {};
 
   // Detect head bases (Head01, Head02, etc.)
   const headSet = new Set();
@@ -393,12 +401,18 @@ async function loadCharacter(name) {
   }
   headBases = [...headSet].sort();
   if (headBases.length > 1) {
-    // Pick active head from default enabled (whichever HeadBase is on)
-    const enabledHead = defaultEnabled.find(n => n.startsWith('HeadBase'));
-    activeHead = enabledHead ? 'Head' + enabledHead.replace('HeadBase', '') : headBases[0];
+    // Per-head shape: pick first head that has a block; else legacy fallback via HeadBase entry
+    const perHead = headBases.find(h => defaultJsonRaw[h]);
+    if (perHead) {
+      activeHead = perHead;
+    } else {
+      const legacy = (defaultJsonRaw.enabled || []).find(n => n.startsWith('HeadBase'));
+      activeHead = legacy ? 'Head' + legacy.replace('HeadBase', '') : headBases[0];
+    }
   } else {
     activeHead = null;
   }
+  defaultEnabled = computeDefaultEnabled();
 
   // Reset zoom/pan on character switch
   zoomLevel = 1; panX = 0; panY = 0;
@@ -411,11 +425,87 @@ async function loadCharacter(name) {
   renderPreview();
 }
 
+// --- Clipping Mask ---
+
+function getClipInfo(name) {
+  const info = clippingData[name];
+  if (!info) return null;
+  return { target: info.target, blendMode: info.blend || 'source-over', head: info.head || null };
+}
+
+function isClipMaskLayer(l) {
+  return getClipInfo(l.name) !== null;
+}
+
+function isToggleableClipMask(l) {
+  const info = getClipInfo(l.name);
+  if (info === null) return false;
+  // Canvas-target masks (Pale) are user-toggleable expression effects.
+  if (info.target === 'canvas') return true;
+  return info.blendMode === 'source-over';
+}
+
+function isAlwaysOnClipMask(l) {
+  return isClipMaskLayer(l) && !isToggleableClipMask(l);
+}
+
+function getDisplayGroup(l) {
+  if (!isToggleableClipMask(l)) return l.group;
+  const info = getClipInfo(l.name);
+  // Canvas-multiply Pale masks get their own UI sections per Pale bucket,
+  // taken from the layer's source group leaf so siblings under one group stay
+  // together (e.g. AnAn's Pale01/Pale02 share group ".../Facial/Pale"), while
+  // per-head buckets (Ema's ".../Head01/Facial01/Pale01") stay separated.
+  if (info && info.target === 'canvas') {
+    const segments = l.group.split('/');
+    const paleSegment = [...segments].reverse().find(s => /^Pale/.test(s)) || 'Pale';
+    const headMatch = l.group.match(/Head\d+/);
+    return headMatch
+      ? `__PaleMask__/${headMatch[0]}/${paleSegment}`
+      : `__PaleMask__/${paleSegment}`;
+  }
+  if (headBases.length <= 1) return '__ClippingMasks__';
+  const headMatch = l.group.match(/Head\d+/);
+  return headMatch ? `__ClippingMasks__/${headMatch[0]}` : '__ClippingMasks__';
+}
+
+function isInClipTarget(layer, target) {
+  if (isClipMaskLayer(layer)) return false;
+  const group = layer.group;
+  const segments = group.split('/');
+  if (target === 'facial') {
+    if (segments.some(s => /^Facial\d*$/.test(s))) return true;
+    // Flat-hierarchy characters (e.g. Meruru) skip the Facial## group and
+    // park facial features directly under Head##; recognize them by leaf.
+    const underHead = segments.some(s => /^Head\d*$/.test(s));
+    return underHead && segments.some(s => /^(Mouth|Cheeks|Pale|Sweat)\d*$/.test(s));
+  }
+  if (target === 'eyes') return segments.some(s => /^Eyes\d*$/.test(s));
+  return false;
+}
+
 // --- State Management ---
+
+function computeDefaultEnabled() {
+  // New per-head shape: { Head01: { enabled: [...] }, Head02: { enabled: [...] } }
+  if (activeHead && defaultJsonRaw[activeHead]) {
+    return defaultJsonRaw[activeHead].enabled || [];
+  }
+  // Legacy flat shape: { enabled: [...] }
+  return defaultJsonRaw.enabled || [];
+}
 
 function resetToDefault() {
   activeState = {};
-  for (const l of layersInfo) activeState[l.name] = defaultEnabled.includes(l.name);
+  for (const l of layersInfo) {
+    if (isAlwaysOnClipMask(l)) {
+      activeState[l.name] = true; // non-source-over masks always on
+    } else if (isToggleableClipMask(l)) {
+      activeState[l.name] = defaultEnabled.includes(l.name); // off unless listed
+    } else {
+      activeState[l.name] = defaultEnabled.includes(l.name);
+    }
+  }
 }
 
 function enforceDeps() {
@@ -436,8 +526,12 @@ function applyPreset(presetName) {
   const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
   const isFacial = name => facialKeywords.some(k => name.includes(k));
 
-  // Only clear facial layers belonging to the active head (or all if single head)
+  // Only clear facial layers belonging to the active head (or all if single head).
+  // Pool-target clip masks (source-over / destination-out / pool-multiply) stay
+  // preset-independent; canvas-target masks (Pale) are toggled by presets.
   for (const l of layersInfo) {
+    const info = getClipInfo(l.name);
+    if (info && info.target !== 'canvas') continue;
     if (isFacial(l.name)) {
       if (!activeHead || l.group.includes(activeHead)) {
         activeState[l.name] = false;
@@ -471,16 +565,29 @@ function buildHeadSelector() {
     btn.className = 'preset-btn' + (head === activeHead ? ' active' : '');
     btn.textContent = head;
     btn.onclick = () => {
-      // Turn off all layers of the old head
+      const oldHead = activeHead;
+      const belongsToHead = (l, h) => {
+        if (l.group.includes(h)) return true;
+        const m = l.name.match(/Head(\d+)/);
+        return !!(m && 'Head' + m[1] === h);
+      };
+      // Turn off all layers of the old head (matched by group OR by Head## suffix in name).
+      // Always-on clip masks are head-scoped at render time, not state time — leave them on.
       for (const l of layersInfo) {
-        if (l.group.includes(activeHead)) activeState[l.name] = false;
+        if (belongsToHead(l, oldHead) && !isAlwaysOnClipMask(l)) activeState[l.name] = false;
       }
       activeHead = head;
-      // Enable head base layer
+      defaultEnabled = computeDefaultEnabled();
+      // Enable head-scoped layers from the new head's default
+      // (HeadBase, FacialLineDrawing, OptionB_Head*, HairB*, etc.)
+      for (const l of layersInfo) {
+        if (belongsToHead(l, head) && defaultEnabled.includes(l.name)) {
+          activeState[l.name] = true;
+        }
+      }
+      // Fallback: ensure HeadBase is on even if missing from default
       const base = layersInfo.find(l => l.name === 'HeadBase' + head.replace('Head', ''));
       if (base) activeState[base.name] = true;
-      // Enable always-on layers for the new head (HeadBase, HairB, etc.)
-      // FacialLineDrawing and HairClippingMask are handled by default.json
       // Apply Normal expression for the new head
       const headNum = head.replace('Head', '').replace(/^0+/, '');
       const normalPreset = 'Normal' + headNum;
@@ -503,6 +610,15 @@ function isGroupForActiveHead(groupPath) {
   // If group contains a Head## marker, only show if it matches activeHead
   const match = groupPath.match(/Head(\d+)/);
   if (!match) return true; // not head-specific, always show
+  return 'Head' + match[1] === activeHead;
+}
+
+function isLayerForActiveHead(name) {
+  if (!activeHead) return true;
+  // For shared groups (e.g. OptionB) where head-specific layers live side by side,
+  // filter by Head## marker in the layer name itself.
+  const match = name.match(/Head(\d+)/);
+  if (!match) return true;
   return 'Head' + match[1] === activeHead;
 }
 
@@ -559,15 +675,19 @@ function buildGroups() {
   const container = document.getElementById('groups');
   container.innerHTML = '';
 
-  // Group layers by their group path
+  // Group layers by their group path. Toggleable clip masks are rerouted into a
+  // synthetic "__ClippingMasks__" group so they appear in a dedicated UI section.
+  // Preserve any Head## segment so per-head filtering still works.
   const groups = new Map();
   for (const l of layersInfo) {
-    if (!groups.has(l.group)) groups.set(l.group, []);
-    groups.get(l.group).push(l);
+    const key = getDisplayGroup(l);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(l);
   }
 
   // Simplify group names for display
   function displayName(group) {
+    if (group.startsWith('__ClippingMasks__')) return 'Clipping Masks';
     const parts = group.split('/');
     return parts[parts.length - 1];
   }
@@ -577,6 +697,8 @@ function buildGroups() {
   const effectKeys = ['Pale', 'Sweat', 'Mask'];
   const armKeys = ['ArmL', 'ArmR', 'Arms'];
   function groupOrder(path) {
+    if (path.startsWith('__PaleMask__')) return 1;
+    if (path.startsWith('__ClippingMasks__')) return 200;
     const leaf = path.split('/').pop();
     if (facialKeys.some(k => leaf.includes(k))) return 0;
     if (effectKeys.some(k => leaf.includes(k))) return 1;
@@ -597,8 +719,8 @@ function buildGroups() {
   const sortedGroups = [...groups.entries()].sort((a, b) => groupOrder(a[0]) - groupOrder(b[0]));
 
   for (const [groupPath, layers] of sortedGroups) {
-    // Skip groups whose layers are all always-on (Body, HeadBase, HairB)
-    if (layers.every(l => l.name === 'Body' || l.name.startsWith('HeadBase') || l.name.startsWith('HairB'))) continue;
+    // Skip groups whose layers are all always-on (Body, HeadBase, HairB, non-source-over masks)
+    if (layers.every(l => l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase') || l.name.startsWith('HairB') || isAlwaysOnClipMask(l))) continue;
     // Skip groups belonging to inactive head
     if (!isGroupForActiveHead(groupPath)) continue;
 
@@ -620,7 +742,11 @@ function buildGroups() {
     noneBtn.textContent = 'None';
     noneBtn.dataset.group = groupPath;
     noneBtn.onclick = () => {
-      for (const l of layers) activeState[l.name] = false;
+      for (const l of layers) {
+        if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on
+        if (!isLayerForActiveHead(l.name)) continue; // don't touch layers belonging to inactive head
+        activeState[l.name] = false;
+      }
       enforceDeps();
       updateUI();
       renderPreview();
@@ -628,22 +754,39 @@ function buildGroups() {
     opts.appendChild(noneBtn);
 
     for (const l of layers) {
+      if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on, not user-selectable
+      if (!isLayerForActiveHead(l.name)) continue; // hide layers that belong to a different head
       const btn = document.createElement('button');
       btn.className = 'layer-btn';
-      btn.textContent = l.name.replace(/^(ArmL|ArmR|Eyes_|Mouth_|Cheeks_|Sweat|Pale)/, '').replace(/^_/, '') || l.name;
+      btn.textContent = l.name
+        .replace(/^ClippingMask_/, '')
+        .replace(/^(Eyes|Mouth|Cheeks|Sweat|Pale)\d+_/, '')
+        .replace(/^(ArmL|ArmR|Eyes_|Mouth_|Cheeks_|Sweat|Pale)/, '')
+        .replace(/^_/, '') || l.name;
       btn.dataset.layer = l.name;
       btn.dataset.group = groupPath;
       btn.onclick = () => {
         const leaf = groupPath.split('/').pop();
-        const multiSelect = (leaf === 'Facial' || leaf === 'ClippingMask');
+        const multiSelect = (leaf === 'Facial' || leaf === 'ClippingMask' || leaf === 'Angle01'
+          || /^Head\d+$/.test(leaf)
+          || groupPath.startsWith('__ClippingMasks__'));
 
         if (multiSelect) {
           // Toggle behavior: flip this layer on/off
           activeState[l.name] = !activeState[l.name];
         } else {
-          // Radio behavior: turn off all in group, turn on this one
-          for (const other of layers) activeState[other.name] = false;
-          activeState[l.name] = true;
+          // Radio behavior: turn off all in group, turn on this one —
+          // but additively preserve the clicked layer's `requires` chain.
+          const keepOn = new Set([l.name]);
+          let cur = l;
+          while (cur && cur.requires) {
+            keepOn.add(cur.requires);
+            cur = layersInfo.find(x => x.name === cur.requires);
+          }
+          for (const other of layers) {
+            if (!keepOn.has(other.name)) activeState[other.name] = false;
+          }
+          for (const n of keepOn) activeState[n] = true;
         }
 
         // Arms mutual exclusion: Arms vs ArmL/ArmR
@@ -761,20 +904,224 @@ function updateUI() {
   // Update none buttons
   for (const btn of document.querySelectorAll('.none-btn')) {
     const group = btn.dataset.group;
-    const anyActive = layersInfo.some(l => l.group === group && activeState[l.name]);
+    const anyActive = layersInfo.some(l =>
+      getDisplayGroup(l) === group && !isAlwaysOnClipMask(l) && activeState[l.name]);
     btn.classList.toggle('active', !anyActive);
   }
   // Update group status labels
   for (const span of document.querySelectorAll('.group-status')) {
     const group = span.dataset.statusGroup;
-    const active = layersInfo.find(l => l.group === group && activeState[l.name]);
+    const active = layersInfo.find(l =>
+      getDisplayGroup(l) === group && !isAlwaysOnClipMask(l) && activeState[l.name]);
     span.textContent = active ? ` — ${active.name}` : '';
   }
 }
 
 // --- Rendering ---
 
-function renderPreview() {
+// Image cache to avoid reloading on every render
+const imageCache = {};
+
+function loadLayerImage(charName, layerName) {
+  const key = `${charName}/${layerName}`;
+  if (imageCache[key]) return imageCache[key];
+  const promise = new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = `characters/${charName}/${layerName}.png?v=${cacheBust}`;
+  });
+  imageCache[key] = promise;
+  return promise;
+}
+
+function invalidateImageCache() {
+  for (const key in imageCache) delete imageCache[key];
+}
+
+async function compositeToCanvas(layers, canvasW, canvasH) {
+  // Load all images in parallel
+  const entries = await Promise.all(layers.map(async l => ({
+    layer: l,
+    img: await loadLayerImage(currentChar, l.name),
+    clip: getClipInfo(l.name),
+  })));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext('2d');
+
+  const normalLayers = entries.filter(e => !e.clip && e.img);
+  const allMasks = entries.filter(e =>
+    e.clip && e.img && (!e.clip.head || activeHead === null || e.clip.head === activeHead));
+  // Canvas-target masks (Pale) operate on the main composite at their own
+  // z-order — they tint everything beneath them in layer order, mirroring
+  // PSD multiply semantics. Pool-target masks stay scoped to their pool.
+  const canvasMasks = allMasks.filter(m => m.clip.target === 'canvas');
+  const poolMasksAll = allMasks.filter(m => m.clip.target !== 'canvas');
+
+  // Per-target pools. Each normal layer is assigned to at most one target — the
+  // most specific match (e.g. a layer in Facial/Eyes goes to 'eyes', not 'facial').
+  // Each mask is applied only to its declared target pool.
+  const TARGET_PRIORITY = ['eyes', 'facial'];
+  const targetsUsed = new Set(poolMasksAll.map(m => m.clip.target));
+
+  function assignTarget(layer) {
+    for (const t of TARGET_PRIORITY) {
+      if (targetsUsed.has(t) && isInClipTarget(layer, t)) return t;
+    }
+    return null;
+  }
+
+  const pools = new Map();
+  for (const t of targetsUsed) pools.set(t, { layers: [], masks: [] });
+  const maskedLayerNames = new Set();
+  for (const e of normalLayers) {
+    const t = assignTarget(e.layer);
+    if (t) {
+      pools.get(t).layers.push(e);
+      maskedLayerNames.add(e.layer.name);
+    }
+  }
+  for (const m of poolMasksAll) {
+    if (pools.has(m.clip.target)) pools.get(m.clip.target).masks.push(m);
+  }
+
+  // Per-pixel multiply on an arbitrary 2D context. Same arithmetic as the
+  // pool-multiply path: Cmul = Cb · (αs·Cs + (1-αs)); αout = αb. Outside the
+  // mask (αs=0) the pixel is untouched. `lightness` lerps the result toward
+  // white where the mask is active.
+  function applyMultiplyMask(targetCtx, mask, w, h) {
+    const off = layerOffsets[mask.layer.name];
+    const ox = off ? off.x : 0;
+    const oy = off ? off.y : 0;
+    const strength = clippingData[mask.layer.name]?.strength ?? 1;
+    const lightness = clippingData[mask.layer.name]?.lightness ?? 0;
+    const lInv = 1 - lightness;
+    const lW = lightness * 255;
+    const maskTmp = document.createElement('canvas');
+    maskTmp.width = w;
+    maskTmp.height = h;
+    const mtCtx = maskTmp.getContext('2d');
+    mtCtx.drawImage(mask.img, ox, oy, w, h);
+    const pd = targetCtx.getImageData(0, 0, w, h);
+    const md = mtCtx.getImageData(0, 0, w, h);
+    const p = pd.data, mm = md.data;
+    for (let i = 0; i < p.length; i += 4) {
+      if (p[i + 3] === 0) continue;
+      const as = (mm[i + 3] / 255) * strength;
+      if (as === 0) continue;
+      const k = 1 - as;
+      p[i]     = p[i]     * (as * mm[i]     / 255 + k) * lInv + lW;
+      p[i + 1] = p[i + 1] * (as * mm[i + 1] / 255 + k) * lInv + lW;
+      p[i + 2] = p[i + 2] * (as * mm[i + 2] / 255 + k) * lInv + lW;
+    }
+    targetCtx.putImageData(pd, 0, 0);
+  }
+
+  // Built-in compositing for source-over / destination-out (exact, AA-safe).
+  // Any new blend added here (e.g. 'screen') would need the per-pixel treatment
+  // above, otherwise W3C's (1-αb)·Cs term will leak mask color into AA edges.
+  function applyBuiltinMask(targetCtx, mask, w, h) {
+    const off = layerOffsets[mask.layer.name];
+    const ox = off ? off.x : 0;
+    const oy = off ? off.y : 0;
+    const strength = clippingData[mask.layer.name]?.strength
+      ?? (mask.clip.blendMode === 'destination-out' ? 0.5 : 1);
+    targetCtx.globalCompositeOperation = mask.clip.blendMode;
+    targetCtx.globalAlpha = strength;
+    targetCtx.drawImage(mask.img, ox, oy, w, h);
+    targetCtx.globalAlpha = 1;
+    const opacity = clippingData[mask.layer.name]?.opacity ?? 1;
+    if (opacity < 1) {
+      targetCtx.globalCompositeOperation = 'destination-out';
+      targetCtx.globalAlpha = 1 - opacity;
+      targetCtx.drawImage(mask.img, ox, oy, w, h);
+      targetCtx.globalAlpha = 1;
+    }
+    targetCtx.globalCompositeOperation = 'source-over';
+  }
+
+  function drawLayerImg(targetCtx, entry, w, h) {
+    const off = layerOffsets[entry.layer.name];
+    const ox = off ? off.x : 0;
+    const oy = off ? off.y : 0;
+    targetCtx.globalCompositeOperation = 'source-over';
+    targetCtx.drawImage(entry.img, ox, oy, w, h);
+  }
+
+  // Compose each pool offscreen with z-order interleaving of layers, pool
+  // masks, and any canvas-target masks whose order lies inside the pool's
+  // span. A canvas mask is included in a pool when the pool's last event
+  // happens *after* the mask — otherwise the pool blits before the mask
+  // runs on the main canvas, and the main-canvas pass will tint the
+  // already-blitted pool pixels.
+  const poolBlits = [];
+  for (const [, pool] of pools) {
+    if (pool.layers.length === 0) continue;
+    const offscreen = document.createElement('canvas');
+    offscreen.width = canvasW;
+    offscreen.height = canvasH;
+    const oCtx = offscreen.getContext('2d');
+
+    const poolMaxOrder = Math.max(
+      ...pool.layers.map(x => x.layer.order),
+      ...pool.masks.map(m => m.layer.order),
+    );
+
+    const events = [
+      ...pool.layers.map(e => ({ type: 'layer', order: e.layer.order, entry: e })),
+      ...pool.masks.map(m => ({ type: 'pool-mask', order: m.layer.order, mask: m })),
+      ...canvasMasks
+        .filter(m => m.layer.order < poolMaxOrder)
+        .map(m => ({ type: 'canvas-mask', order: m.layer.order, mask: m })),
+    ].sort((a, b) => a.order - b.order);
+
+    for (const ev of events) {
+      if (ev.type === 'layer') {
+        drawLayerImg(oCtx, ev.entry, canvasW, canvasH);
+      } else if (ev.type === 'canvas-mask') {
+        applyMultiplyMask(oCtx, ev.mask, canvasW, canvasH);
+      } else {
+        // ev.type === 'pool-mask'
+        if (ev.mask.clip.blendMode === 'multiply') {
+          applyMultiplyMask(oCtx, ev.mask, canvasW, canvasH);
+        } else {
+          applyBuiltinMask(oCtx, ev.mask, canvasW, canvasH);
+        }
+      }
+    }
+
+    poolBlits.push({ order: poolMaxOrder, offscreen });
+  }
+
+  // Main-canvas event timeline: non-pool normals, pool blits (each at the
+  // pool's max event order), and canvas-target masks at their own order.
+  const nonPoolNormals = normalLayers.filter(e => !maskedLayerNames.has(e.layer.name));
+  const mainEvents = [
+    ...nonPoolNormals.map(e => ({ type: 'layer', order: e.layer.order, entry: e })),
+    ...poolBlits.map(p => ({ type: 'blit', order: p.order, offscreen: p.offscreen })),
+    ...canvasMasks.map(m => ({ type: 'canvas-mask', order: m.layer.order, mask: m })),
+  ].sort((a, b) => a.order - b.order);
+
+  for (const ev of mainEvents) {
+    if (ev.type === 'layer') {
+      drawLayerImg(ctx, ev.entry, canvasW, canvasH);
+    } else if (ev.type === 'blit') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(ev.offscreen, 0, 0);
+    } else {
+      // ev.type === 'canvas-mask'
+      applyMultiplyMask(ctx, ev.mask, canvasW, canvasH);
+    }
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+  return canvas;
+}
+
+async function renderPreview() {
   const container = document.getElementById('previewContainer');
   container.innerHTML = '';
 
@@ -782,23 +1129,13 @@ function renderPreview() {
     .filter(l => activeState[l.name])
     .sort((a, b) => a.order - b.order);
 
-  // Compute scale: native canvas pixels → preview CSS pixels
   const canvasW = layersInfo.length > 0 ? (layersInfo[0]._canvasW || 2500) : 2500;
-  const previewW = container.clientWidth || 500;
-  const displayScale = previewW / canvasW;
+  const canvasH = layersInfo.length > 0 ? (layersInfo[0]._canvasH || 5000) : 5000;
 
-  for (const l of activeLayers) {
-    const img = document.createElement('img');
-    img.src = `characters/${currentChar}/${l.name}.png?v=${cacheBust}`;
-    img.style.zIndex = l.order;
-    const off = layerOffsets[l.name];
-    if (off && (off.x || off.y)) {
-      img.style.transform = `translate(${off.x * displayScale}px, ${off.y * displayScale}px)`;
-    }
-    img.loading = 'eager';
-    img.onerror = () => img.remove();
-    container.appendChild(img);
-  }
+  const canvas = await compositeToCanvas(activeLayers, canvasW, canvasH);
+  canvas.style.width = '100%';
+  canvas.style.height = 'auto';
+  container.appendChild(canvas);
 
   updateUI();
 }
@@ -812,38 +1149,10 @@ document.getElementById('exportBtn').onclick = async () => {
 
   if (activeLayers.length === 0) return;
 
-  // Load all images
-  const images = await Promise.all(activeLayers.map(l => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = `characters/${currentChar}/${l.name}.png`;
-    });
-  }));
+  const canvasW = layersInfo[0]._canvasW || 2500;
+  const canvasH = layersInfo[0]._canvasH || 5000;
 
-  // Find max dimensions
-  let maxW = 0, maxH = 0;
-  for (const img of images) {
-    if (!img) continue;
-    maxW = Math.max(maxW, img.naturalWidth);
-    maxH = Math.max(maxH, img.naturalHeight);
-  }
-
-  const canvas = document.createElement('canvas');
-  canvas.width = maxW;
-  canvas.height = maxH;
-  const ctx = canvas.getContext('2d');
-
-  for (let i = 0; i < images.length; i++) {
-    const img = images[i];
-    if (!img) continue;
-    const off = layerOffsets[activeLayers[i].name];
-    const ox = off ? off.x : 0;
-    const oy = off ? off.y : 0;
-    ctx.drawImage(img, ox, oy, maxW, maxH);
-  }
+  const canvas = await compositeToCanvas(activeLayers, canvasW, canvasH);
 
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
@@ -938,6 +1247,7 @@ previewArea.addEventListener('wheel', e => {
 document.getElementById('zoomIn').onclick = () => { zoom(0.3, 0, 0); };
 document.getElementById('zoomOut').onclick = () => { zoom(-0.3, 0, 0); };
 document.getElementById('zoomReset').onclick = () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); };
+document.getElementById('bgToggle').onclick = () => { previewArea.classList.toggle('bg-white'); };
 
 // Pan with mouse drag
 previewArea.addEventListener('mousedown', e => {
