@@ -146,49 +146,6 @@
     max-width: 200px;
   }
 
-  .offset-controls {
-    display: flex;
-    gap: 8px;
-    padding: 8px 14px 4px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .offset-controls label {
-    font-size: 12px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .offset-controls input[type="range"] {
-    width: 100px;
-    accent-color: var(--active);
-  }
-  .offset-controls input[type="number"] {
-    width: 56px;
-    padding: 2px 4px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text);
-    font-size: 12px;
-    text-align: right;
-  }
-  .offset-controls .unit {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .offset-controls button {
-    font-size: 11px;
-    padding: 2px 8px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text-muted);
-    cursor: pointer;
-  }
-  .offset-controls button:hover { color: var(--text); }
-
   .layer-btn {
     padding: 6px 14px;
     background: var(--bg-panel);
@@ -336,7 +293,6 @@
 
   <div class="actions">
     <button class="action-btn reset-btn" id="resetBtn">Reset</button>
-    <button class="action-btn reset-btn" id="saveOffsetsBtn">Save Offsets</button>
     <button class="action-btn export-btn" id="exportBtn">Export PNG</button>
   </div>
 </div>
@@ -365,7 +321,6 @@ let defaultJsonRaw = {};   // raw default.json (may be flat or per-head)
 let headBases = [];        // e.g. ['Head01', 'Head02'] if multi-head
 let activeHead = null;     // currently active head base name
 let activeState = {};      // { layerName: true/false }
-let layerOffsets = {};     // { layerName: { x: number, y: number } }
 let clippingData = {};     // from clipping.json: { layerName: { target, blend } }
 let cacheBust = Date.now();
 
@@ -376,21 +331,18 @@ async function loadCharacter(name) {
 
   cacheBust = Date.now();
   invalidateImageCache();
-  const [layersJson, compsJson, defaultJson, offsetsJson, clippingJson] = await Promise.all([
+  const [layersJson, compsJson, defaultJson, clippingJson] = await Promise.all([
     fetch(`characters/${name}/layers.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/compositions.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/default.json?v=${cacheBust}`).then(r => r.json()),
-    fetch(`characters/${name}/offsets.json?v=${cacheBust}`).then(r => r.ok ? r.json() : {}),
     fetch(`characters/${name}/clipping.json?v=${cacheBust}`).then(r => r.ok ? r.json() : {}),
   ]);
 
   layersInfo = layersJson.layers.filter(l => !l.empty);
-  // Store canvas size for offset scaling
   const canvasSize = layersJson.canvas_size || [2500, 5000];
   layersInfo.forEach(l => { l._canvasW = canvasSize[0]; l._canvasH = canvasSize[1]; });
   compositions = compsJson;
   defaultJsonRaw = defaultJson || {};
-  layerOffsets = offsetsJson || {};
   clippingData = clippingJson || {};
 
   // Detect head bases (Head01, Head02, etc.)
@@ -816,72 +768,8 @@ function buildGroups() {
       opts.appendChild(btn);
     }
 
-    // Offset sliders for the active layer in this group
-    const offsetDiv = document.createElement('div');
-    offsetDiv.className = 'offset-controls';
-    offsetDiv.dataset.group = groupPath;
-    offsetDiv.style.display = 'none';
-
-    function buildOffsetSliders() {
-      offsetDiv.innerHTML = '';
-      const activeLayer = layers.find(l => activeState[l.name]);
-      if (!activeLayer) { offsetDiv.style.display = 'none'; return; }
-      offsetDiv.style.display = '';
-      const name = activeLayer.name;
-      if (!layerOffsets[name]) layerOffsets[name] = { x: 0, y: 0 };
-      const off = layerOffsets[name];
-
-      for (const axis of ['x', 'y']) {
-        const label = document.createElement('label');
-        label.textContent = axis.toUpperCase();
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = -200;
-        slider.max = 200;
-        slider.value = off[axis];
-        const numInput = document.createElement('input');
-        numInput.type = 'number';
-        numInput.value = off[axis];
-        const unit = document.createElement('span');
-        unit.className = 'unit';
-        unit.textContent = 'px';
-        slider.oninput = () => {
-          off[axis] = parseInt(slider.value);
-          numInput.value = off[axis];
-          renderPreview();
-        };
-        numInput.oninput = () => {
-          off[axis] = parseInt(numInput.value) || 0;
-          slider.value = Math.max(-200, Math.min(200, off[axis]));
-          renderPreview();
-        };
-        label.appendChild(slider);
-        label.appendChild(numInput);
-        label.appendChild(unit);
-        offsetDiv.appendChild(label);
-      }
-
-      const resetBtn = document.createElement('button');
-      resetBtn.textContent = 'Reset';
-      resetBtn.onclick = () => {
-        off.x = 0; off.y = 0;
-        buildOffsetSliders();
-        renderPreview();
-      };
-      offsetDiv.appendChild(resetBtn);
-    }
-
-    // Rebuild sliders when group selection changes
-    const origOnclicks = [];
-    opts.querySelectorAll('button').forEach(btn => {
-      const orig = btn.onclick;
-      btn.onclick = (...args) => { orig(...args); buildOffsetSliders(); };
-    });
-
     div.appendChild(opts);
-    div.appendChild(offsetDiv);
     container.appendChild(div);
-    buildOffsetSliders();
   }
 }
 
@@ -993,9 +881,6 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
   // mask (αs=0) the pixel is untouched. `lightness` lerps the result toward
   // white where the mask is active.
   function applyMultiplyMask(targetCtx, mask, w, h) {
-    const off = layerOffsets[mask.layer.name];
-    const ox = off ? off.x : 0;
-    const oy = off ? off.y : 0;
     const strength = clippingData[mask.layer.name]?.strength ?? 1;
     const lightness = clippingData[mask.layer.name]?.lightness ?? 0;
     const lInv = 1 - lightness;
@@ -1004,7 +889,7 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     maskTmp.width = w;
     maskTmp.height = h;
     const mtCtx = maskTmp.getContext('2d');
-    mtCtx.drawImage(mask.img, ox, oy, w, h);
+    mtCtx.drawImage(mask.img, 0, 0, w, h);
     const pd = targetCtx.getImageData(0, 0, w, h);
     const md = mtCtx.getImageData(0, 0, w, h);
     const p = pd.data, mm = md.data;
@@ -1024,31 +909,25 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
   // Any new blend added here (e.g. 'screen') would need the per-pixel treatment
   // above, otherwise W3C's (1-αb)·Cs term will leak mask color into AA edges.
   function applyBuiltinMask(targetCtx, mask, w, h) {
-    const off = layerOffsets[mask.layer.name];
-    const ox = off ? off.x : 0;
-    const oy = off ? off.y : 0;
     const strength = clippingData[mask.layer.name]?.strength
       ?? (mask.clip.blendMode === 'destination-out' ? 0.5 : 1);
     targetCtx.globalCompositeOperation = mask.clip.blendMode;
     targetCtx.globalAlpha = strength;
-    targetCtx.drawImage(mask.img, ox, oy, w, h);
+    targetCtx.drawImage(mask.img, 0, 0, w, h);
     targetCtx.globalAlpha = 1;
     const opacity = clippingData[mask.layer.name]?.opacity ?? 1;
     if (opacity < 1) {
       targetCtx.globalCompositeOperation = 'destination-out';
       targetCtx.globalAlpha = 1 - opacity;
-      targetCtx.drawImage(mask.img, ox, oy, w, h);
+      targetCtx.drawImage(mask.img, 0, 0, w, h);
       targetCtx.globalAlpha = 1;
     }
     targetCtx.globalCompositeOperation = 'source-over';
   }
 
   function drawLayerImg(targetCtx, entry, w, h) {
-    const off = layerOffsets[entry.layer.name];
-    const ox = off ? off.x : 0;
-    const oy = off ? off.y : 0;
     targetCtx.globalCompositeOperation = 'source-over';
-    targetCtx.drawImage(entry.img, ox, oy, w, h);
+    targetCtx.drawImage(entry.img, 0, 0, w, h);
   }
 
   // Compose each pool offscreen with z-order interleaving of layers, pool
@@ -1177,25 +1056,6 @@ document.getElementById('resetBtn').onclick = () => {
   enforceDeps();
   updateUI();
   renderPreview();
-};
-
-// --- Save Offsets ---
-
-document.getElementById('saveOffsetsBtn').onclick = () => {
-  // Filter out zero offsets
-  const nonZero = {};
-  for (const [name, off] of Object.entries(layerOffsets)) {
-    if (off.x || off.y) nonZero[name] = off;
-  }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(nonZero, null, 2)], { type: 'application/json' }));
-  a.download = `${currentChar}_offsets.json`;
-  a.click();
-
-  const btn = document.getElementById('saveOffsetsBtn');
-  const orig = btn.textContent;
-  btn.textContent = 'Saved!';
-  setTimeout(() => { btn.textContent = orig; }, 1200);
 };
 
 // --- Init ---
