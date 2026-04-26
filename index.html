@@ -655,23 +655,32 @@ function buildGroups() {
   }
 
   // Sort groups: facial first, arms second, everything else last
-  const facialKeys = ['Eyes', 'Mouth', 'Cheeks'];
-  const effectKeys = ['Pale', 'Sweat', 'Mask'];
-  const armKeys = ['ArmL', 'ArmR', 'Arms'];
+  // Strict total order so the panel layout is identical across every
+  // character. Earlier versions used coarse buckets that left ties; sort
+  // stability then exposed file-iteration order, which differs per
+  // character. Each leaf gets a distinct rank.
   function groupOrder(path) {
-    if (path.startsWith('__PaleMask__')) return 1;
-    if (path.startsWith('__ClippingMasks__')) return 200;
-    const leaf = path.split('/').pop();
-    if (facialKeys.some(k => leaf.includes(k))) return 0;
-    // Real Sweat/Mask leaf groups sort right after __PaleMask__ synthetic
-    // groups (1 < 2) — gives a stable, deterministic Pale → Sweat → Mask order.
-    if (effectKeys.some(k => leaf.includes(k))) return 2;
+    if (path.startsWith('__PaleMask__')) return 3;
+    if (path.startsWith('__ClippingMasks__')) return 30;
 
-    // Arm groups: sorted by category then limb (L → R → combined)
+    const leaf = path.split('/').pop();
+
+    // Facial features
+    if (leaf.includes('Eyes')) return 0;
+    if (leaf.includes('Mouth')) return 1;
+    if (leaf.includes('Cheeks')) return 2;
+    // Pale falls here only if a Pale group is ever a non-synthetic leaf;
+    // currently every Pale layer is a clip mask routed to __PaleMask__.
+    if (leaf.includes('Pale')) return 3;
+    if (leaf.includes('Sweat')) return 4;
+    if (leaf.includes('Mask')) return 5;
+
+    // Arms: category first, then limb (L → R → combined within each category)
     if (leaf.includes('Arm')) {
       const limb = leaf.includes('ArmL') ? 0 : leaf.includes('ArmR') ? 1 : 2;
-      if (leaf === 'ArmL' || leaf === 'ArmR' || leaf === 'Arms') return 20 + limb;
-      if (leaf.startsWith('Option_Arm')) return 30 + limb;
+      if (leaf === 'ArmL' || leaf === 'ArmR' || leaf === 'Arms') return 10 + limb;
+      if (leaf.startsWith('Option_Arm')) return 20 + limb;
+      // Effects come AFTER __ClippingMasks__ (rank 30).
       if (leaf.startsWith('Effect_Front_Arm')) return 40 + limb;
       if (leaf.startsWith('Effect_Middle_Arm')) return 50 + limb;
       if (leaf.startsWith('Effect_Back_Arm')) return 60 + limb;
