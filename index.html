@@ -198,6 +198,106 @@
   .none-btn:hover { border-color: #777; color: var(--text-muted); }
   .none-btn.active { border-color: var(--accent); color: var(--accent); }
 
+  /* Advanced mode */
+  .advanced-toggle {
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .advanced-toggle:hover { color: var(--text); }
+  .advanced-toggle.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .group-advanced {
+    padding: 10px 14px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+    max-height: 9999px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+  }
+  .group.collapsed .group-advanced {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .group-advanced .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .group-advanced .slider-row label {
+    width: 14px;
+    flex-shrink: 0;
+  }
+  .group-advanced input[type="range"] {
+    flex: 1;
+    min-width: 0;
+  }
+  .group-advanced .slider-value {
+    width: 50px;
+    padding: 2px 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 13px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .group-advanced .slider-value:focus {
+    outline: none;
+    border-color: var(--active);
+  }
+  .group-advanced .slider-value::-webkit-inner-spin-button,
+  .group-advanced .slider-value::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .group-advanced .slider-value { -moz-appearance: textfield; }
+  .slider-step {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .slider-step:hover { color: var(--text); border-color: #555; }
+  .slider-reset {
+    margin-top: 4px;
+    padding: 6px 12px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    align-self: flex-start;
+  }
+  .slider-reset:hover { color: var(--text); border-color: #555; }
+
   /* Action buttons */
   .actions {
     display: flex;
@@ -307,6 +407,8 @@
 
   <select class="char-select" id="charSelect"></select>
 
+  <button class="advanced-toggle" id="advancedToggle">Advanced</button>
+
   <div id="headSelectorSection" style="display:none">
     <div class="section-label">Head</div>
     <div class="presets" id="headSelector"></div>
@@ -360,6 +462,20 @@ let activeHead = null;     // currently active head base name
 let activeState = {};      // { layerName: true/false }
 let clippingData = {};     // from clipping.json: { layerName: { target, blend } }
 let cacheBust = Date.now();
+let advancedMode = false;
+let groupOffsets = {};     // { displayGroupPath: { dx, dy } } — facial groups only
+
+function isFacialGroup(groupPath) {
+  if (groupPath.startsWith('__')) return false; // synthetic mask buckets
+  const leaf = groupPath.split('/').pop();
+  return /^(Eyes|Mouth)\d*$/.test(leaf);
+}
+
+function getLayerOffset(layer) {
+  const o = groupOffsets[getDisplayGroup(layer)];
+  if (!o) return { dx: 0, dy: 0, scale: 1, rotate: 0 };
+  return { dx: o.dx || 0, dy: o.dy || 0, scale: o.scale ?? 1, rotate: o.rotate || 0 };
+}
 
 // --- Data Loading ---
 
@@ -368,6 +484,7 @@ async function loadCharacter(name) {
 
   cacheBust = Date.now();
   invalidateImageCache();
+  groupOffsets = {};
   const [layersJson, compsJson, defaultJson, clippingJson] = await Promise.all([
     fetch(`characters/${name}/layers.json?v=${cacheBust}`).then(r => r.json()),
     fetch(`characters/${name}/compositions.json?v=${cacheBust}`).then(r => r.json()),
@@ -959,8 +1076,102 @@ function buildGroups() {
     }
 
     div.appendChild(opts);
+    if (advancedMode && isFacialGroup(groupPath)) {
+      div.appendChild(buildAdvancedSliders(groupPath));
+    }
     container.appendChild(div);
   }
+}
+
+const AXIS_CONFIG = {
+  dx:     { label: 'X', title: 'X offset',         default: 0, min: -1000, max: 1000, sliderMin: -200, sliderMax: 200, step: 1,    decimals: 0 },
+  dy:     { label: 'Y', title: 'Y offset',         default: 0, min: -1000, max: 1000, sliderMin: -200, sliderMax: 200, step: 1,    decimals: 0 },
+  scale:  { label: 'S', title: 'Scale',            default: 1, min: 0.3,   max: 3.0,  sliderMin: 0.5,  sliderMax: 1.5, step: 0.01, decimals: 2 },
+  rotate: { label: 'R', title: 'Rotation (°)',     default: 0, min: -180,  max: 180,  sliderMin: -30,  sliderMax: 30,  step: 1,    decimals: 0 },
+};
+
+function buildAdvancedSliders(groupPath) {
+  const wrap = document.createElement('div');
+  wrap.className = 'group-advanced';
+  if (!groupOffsets[groupPath]) groupOffsets[groupPath] = {};
+  const off = groupOffsets[groupPath];
+  for (const a of Object.keys(AXIS_CONFIG)) {
+    if (off[a] === undefined) off[a] = AXIS_CONFIG[a].default;
+  }
+  const inputs = {};
+  const values = {};
+
+  function set(axis, v) {
+    const cfg = AXIS_CONFIG[axis];
+    if (Number.isNaN(v)) return;
+    v = Math.max(cfg.min, Math.min(cfg.max, v));
+    v = parseFloat((Math.round(v / cfg.step) * cfg.step).toFixed(cfg.decimals));
+    if (off[axis] === v) return;
+    off[axis] = v;
+    inputs[axis].value = v;
+    values[axis].value = v.toFixed(cfg.decimals);
+    renderPreview();
+  }
+
+  for (const axis of Object.keys(AXIS_CONFIG)) {
+    const cfg = AXIS_CONFIG[axis];
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+
+    const label = document.createElement('label');
+    label.textContent = cfg.label;
+    label.title = cfg.title;
+
+    const dec = document.createElement('button');
+    dec.className = 'slider-step';
+    dec.textContent = '−';
+    dec.onclick = () => set(axis, off[axis] - cfg.step);
+
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = String(cfg.sliderMin);
+    input.max = String(cfg.sliderMax);
+    input.step = String(cfg.step);
+    input.value = off[axis];
+    input.addEventListener('input', () => set(axis, parseFloat(input.value)));
+    inputs[axis] = input;
+
+    const inc = document.createElement('button');
+    inc.className = 'slider-step';
+    inc.textContent = '+';
+    inc.onclick = () => set(axis, off[axis] + cfg.step);
+
+    const value = document.createElement('input');
+    value.type = 'number';
+    value.min = String(cfg.min);
+    value.max = String(cfg.max);
+    value.step = String(cfg.step);
+    value.className = 'slider-value';
+    value.value = off[axis].toFixed(cfg.decimals);
+    value.addEventListener('input', () => {
+      const v = parseFloat(value.value);
+      if (!Number.isNaN(v)) set(axis, v);
+    });
+    value.addEventListener('blur', () => { value.value = off[axis].toFixed(cfg.decimals); });
+    values[axis] = value;
+
+    row.appendChild(label);
+    row.appendChild(dec);
+    row.appendChild(input);
+    row.appendChild(inc);
+    row.appendChild(value);
+    wrap.appendChild(row);
+  }
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'slider-reset';
+  resetBtn.textContent = 'Reset';
+  resetBtn.onclick = () => {
+    for (const axis of Object.keys(AXIS_CONFIG)) set(axis, AXIS_CONFIG[axis].default);
+  };
+  wrap.appendChild(resetBtn);
+
+  return wrap;
 }
 
 function updateUI() {
@@ -1016,6 +1227,45 @@ function updateUI() {
 
 // Image cache to avoid reloading on every render
 const imageCache = {};
+// Anchor cache: { "char/layer": {ax, ay} } — content-bbox center used as the
+// pivot when scaling. Computed lazily once per layer the first time scale != 1
+// and cleared alongside imageCache on character switch.
+const anchorCache = {};
+
+function getAnchor(charName, layerName, img, w, h) {
+  const key = `${charName}/${layerName}`;
+  if (anchorCache[key]) return anchorCache[key];
+  const dw = Math.min(400, w);
+  const dh = Math.min(800, h);
+  const tmp = document.createElement('canvas');
+  tmp.width = dw;
+  tmp.height = dh;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(img, 0, 0, dw, dh);
+  const data = tctx.getImageData(0, 0, dw, dh).data;
+  let minX = dw, minY = dh, maxX = -1, maxY = -1;
+  for (let y = 0; y < dh; y++) {
+    for (let x = 0; x < dw; x++) {
+      if (data[(y * dw + x) * 4 + 3]) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  let anchor;
+  if (maxX < 0) {
+    anchor = { ax: w / 2, ay: h / 2 };
+  } else {
+    anchor = {
+      ax: ((minX + maxX + 1) / 2) * (w / dw),
+      ay: ((minY + maxY + 1) / 2) * (h / dh),
+    };
+  }
+  anchorCache[key] = anchor;
+  return anchor;
+}
 
 function loadLayerImage(charName, layerName) {
   const key = `${charName}/${layerName}`;
@@ -1032,6 +1282,7 @@ function loadLayerImage(charName, layerName) {
 
 function invalidateImageCache() {
   for (const key in imageCache) delete imageCache[key];
+  for (const key in anchorCache) delete anchorCache[key];
 }
 
 async function compositeToCanvas(layers, canvasW, canvasH) {
@@ -1166,9 +1417,21 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     targetCtx.globalCompositeOperation = 'source-over';
   }
 
-  function drawLayerImg(targetCtx, entry, w, h) {
+  function drawLayerImg(targetCtx, entry, w, h, applyOffset = false) {
+    const off = applyOffset ? getLayerOffset(entry.layer) : { dx: 0, dy: 0, scale: 1, rotate: 0 };
     targetCtx.globalCompositeOperation = 'source-over';
-    targetCtx.drawImage(entry.img, 0, 0, w, h);
+    if (off.scale === 1 && off.rotate === 0) {
+      targetCtx.drawImage(entry.img, off.dx, off.dy, w, h);
+    } else {
+      const a = getAnchor(currentChar, entry.layer.name, entry.img, w, h);
+      targetCtx.save();
+      targetCtx.translate(off.dx + a.ax, off.dy + a.ay);
+      if (off.rotate) targetCtx.rotate(off.rotate * Math.PI / 180);
+      if (off.scale !== 1) targetCtx.scale(off.scale, off.scale);
+      targetCtx.translate(-a.ax, -a.ay);
+      targetCtx.drawImage(entry.img, 0, 0, w, h);
+      targetCtx.restore();
+    }
   }
 
   // Pre-render each layer that belongs to a transform target, baking its
@@ -1211,10 +1474,22 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
   for (const ev of mainEvents) {
     if (ev.type === 'layer') {
       if (ev.tile) {
+        const off = getLayerOffset(ev.entry.layer);
         ctx.globalCompositeOperation = 'source-over';
-        ctx.drawImage(ev.tile, 0, 0);
+        if (off.scale === 1 && off.rotate === 0) {
+          ctx.drawImage(ev.tile, off.dx, off.dy);
+        } else {
+          const a = getAnchor(currentChar, ev.entry.layer.name, ev.entry.img, canvasW, canvasH);
+          ctx.save();
+          ctx.translate(off.dx + a.ax, off.dy + a.ay);
+          if (off.rotate) ctx.rotate(off.rotate * Math.PI / 180);
+          if (off.scale !== 1) ctx.scale(off.scale, off.scale);
+          ctx.translate(-a.ax, -a.ay);
+          ctx.drawImage(ev.tile, 0, 0);
+          ctx.restore();
+        }
       } else {
-        drawLayerImg(ctx, ev.entry, canvasW, canvasH);
+        drawLayerImg(ctx, ev.entry, canvasW, canvasH, true);
       }
     } else if (ev.type === 'pass-mask') {
       applyBuiltinMask(ctx, ev.mask, canvasW, canvasH);
@@ -1291,9 +1566,18 @@ document.getElementById('exportBtn').onclick = async () => {
 
 document.getElementById('resetBtn').onclick = () => {
   resetToDefault();
+  groupOffsets = {};
   enforceDeps();
+  if (advancedMode) buildGroups();
   updateUI();
   renderPreview();
+};
+
+document.getElementById('advancedToggle').onclick = (e) => {
+  advancedMode = !advancedMode;
+  e.currentTarget.classList.toggle('active', advancedMode);
+  buildGroups();
+  updateUI();
 };
 
 // --- Init ---
