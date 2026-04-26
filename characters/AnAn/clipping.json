@@ -18,5 +18,22 @@
   "Pale02": {
     "target": "canvas",
     "blend": "multiply"
-  }
+  },
+  "Effect_Back_Arms01": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_Arms02": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR02": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR04": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR05": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR06": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR07": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL03": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL05": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL06": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL07": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL08": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL10": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL11":    { "target": "canvas", "blend": "multiply" },
+  "Option_ArmR01_01_Back": { "target": "canvas", "blend": "multiply" },
+  "Option_ArmR01_02_Back": { "target": "canvas", "blend": "multiply" },
+  "Option_ArmR02_Back":    { "target": "canvas", "blend": "multiply" }
 }

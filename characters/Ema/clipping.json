@@ -38,5 +38,8 @@
     "target": "canvas",
     "blend": "multiply",
     "head": "Head02"
-  }
+  },
+  "Shadow_ArmR10": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmR12": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmR13": { "target": "canvas", "blend": "multiply" }
 }

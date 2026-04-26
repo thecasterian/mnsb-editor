@@ -20,5 +20,11 @@
   "Pale02": {
     "target": "canvas",
     "blend": "multiply"
-  }
+  },
+  "Effect_Back_ArmR05": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR10": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR13": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL05": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL08": { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmL10": { "target": "canvas", "blend": "multiply" }
 }

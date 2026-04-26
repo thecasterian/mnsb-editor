@@ -19,5 +19,10 @@
   "Pale02": {
     "target": "canvas",
     "blend": "multiply"
-  }
+  },
+  "Shadow_Arms01": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmL03": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmL04": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmL05": { "target": "canvas", "blend": "multiply" },
+  "Shadow_ArmR05": { "target": "canvas", "blend": "multiply" }
 }

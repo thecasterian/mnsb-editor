@@ -418,17 +418,31 @@ function isAlwaysOnClipMask(l) {
 function getDisplayGroup(l) {
   if (!isToggleableClipMask(l)) return l.group;
   const info = getClipInfo(l.name);
-  // Canvas-multiply Pale masks get their own UI sections per Pale bucket,
-  // taken from the layer's source group leaf so siblings under one group stay
-  // together (e.g. AnAn's Pale01/Pale02 share group ".../Facial/Pale"), while
-  // per-head buckets (Ema's ".../Head01/Facial01/Pale01") stay separated.
+  // Canvas-multiply masks get their own UI buckets keyed by the relevant
+  // source-group segment so siblings stay together while per-head buckets
+  // (e.g. Ema's ".../Head01/...") stay separated. Each mask family routes
+  // to its own bucket: Effect_* → __EffectMask__, Shadow_* → __ShadowMask__,
+  // Pale → __PaleMask__ (default).
   if (info && info.target === 'canvas') {
     const segments = l.group.split('/');
-    const paleSegment = [...segments].reverse().find(s => /^Pale/.test(s)) || 'Pale';
     const headMatch = l.group.match(/Head\d+/);
-    return headMatch
-      ? `__PaleMask__/${headMatch[0]}/${paleSegment}`
-      : `__PaleMask__/${paleSegment}`;
+    const headPrefix = headMatch ? `${headMatch[0]}/` : '';
+    // Option_Arm*_Back layers are shadow effects whose group has no Shadow
+    // segment — detect by name and bucket by the parent Option_Arm segment so
+    // all variants under one Option_Arm group gather into a single section.
+    if (/^Option_Arm.*_Back$/.test(l.name)) {
+      const optSeg = segments.find(s => /^Option_Arm/.test(s));
+      if (optSeg) return `__ShadowMask__/${headPrefix}${optSeg}`;
+    }
+    for (const [bucket, regex] of [
+      ['__EffectMask__', /^Effect/],
+      ['__ShadowMask__', /^Shadow/],
+    ]) {
+      const seg = [...segments].reverse().find(s => regex.test(s));
+      if (seg) return `${bucket}/${headPrefix}${seg}`;
+    }
+    const paleSegment = [...segments].reverse().find(s => /^Pale/.test(s)) || 'Pale';
+    return `__PaleMask__/${headPrefix}${paleSegment}`;
   }
   if (headBases.length <= 1) return '__ClippingMasks__';
   const headMatch = l.group.match(/Head\d+/);
@@ -669,6 +683,18 @@ function buildGroups() {
     if (path.startsWith('__PaleMask__')) return 3;
     if (path.startsWith('__ClippingMasks__')) return 30;
 
+    // __ShadowMask__/Option_Arm* (Option_*_Back shadows) ride alongside their
+    // parent limb (Option_Arm groups at 20+limb*2; shadow at 21+limb*2). E.g.
+    // AnAn: Option_ArmR variants (22) → Option_ArmR shadow (23) → Option_Arms
+    // (24), so Option_Arms doesn't get sandwiched mid-ArmR cluster.
+    if (path.startsWith('__ShadowMask__/')) {
+      const sub = path.split('/').pop();
+      if (sub.startsWith('Option_Arm')) {
+        const limb = sub.includes('ArmL') ? 0 : sub.includes('ArmR') ? 1 : 2;
+        return 21 + limb * 2;
+      }
+    }
+
     const leaf = path.split('/').pop();
 
     // Facial features
@@ -685,7 +711,9 @@ function buildGroups() {
     if (leaf.includes('Arm')) {
       const limb = leaf.includes('ArmL') ? 0 : leaf.includes('ArmR') ? 1 : 2;
       if (leaf === 'ArmL' || leaf === 'ArmR' || leaf === 'Arms') return 10 + limb;
-      if (leaf.startsWith('Option_Arm')) return 20 + limb;
+      // limb*2 leaves room for __ShadowMask__/Option_Arm* shadow buckets to
+      // slot in between limbs (see the synthetic-bucket branch above).
+      if (leaf.startsWith('Option_Arm')) return 20 + limb * 2;
       // Effects come AFTER __ClippingMasks__ (rank 30).
       if (leaf.startsWith('Effect_Front_Arm')) return 40 + limb;
       if (leaf.startsWith('Effect_Middle_Arm')) return 50 + limb;
@@ -979,9 +1007,35 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     targetCtx.putImageData(pd, 0, 0);
   }
 
+  // Per-pixel screen on an arbitrary 2D context. Mirrors applyMultiplyMask's
+  // structure but inverted: Cscreen = 1 - (1-Cb)(1-Cs); weighted by mask alpha
+  // it collapses to Cout = Cb + αs·Cs·(255-Cb)/255; αout = αb. Black mask
+  // (Cs=0) and αs=0 are no-ops, so AA edges of bright "glow" sprites brighten
+  // the destination instead of multiplying it to identity.
+  function applyScreenMask(targetCtx, mask, w, h) {
+    const strength = clippingData[mask.layer.name]?.strength ?? 1;
+    const maskTmp = document.createElement('canvas');
+    maskTmp.width = w;
+    maskTmp.height = h;
+    const mtCtx = maskTmp.getContext('2d');
+    mtCtx.drawImage(mask.img, 0, 0, w, h);
+    const pd = targetCtx.getImageData(0, 0, w, h);
+    const md = mtCtx.getImageData(0, 0, w, h);
+    const p = pd.data, mm = md.data;
+    for (let i = 0; i < p.length; i += 4) {
+      if (p[i + 3] === 0) continue;
+      const as = (mm[i + 3] / 255) * strength;
+      if (as === 0) continue;
+      p[i]     = p[i]     + as * mm[i]     * (255 - p[i])     / 255;
+      p[i + 1] = p[i + 1] + as * mm[i + 1] * (255 - p[i + 1]) / 255;
+      p[i + 2] = p[i + 2] + as * mm[i + 2] * (255 - p[i + 2]) / 255;
+    }
+    targetCtx.putImageData(pd, 0, 0);
+  }
+
   // Built-in compositing for source-over / destination-out (exact, AA-safe).
-  // Any new blend added here (e.g. 'screen') would need the per-pixel treatment
-  // above, otherwise W3C's (1-αb)·Cs term will leak mask color into AA edges.
+  // Any other blend added here would need the per-pixel treatment above,
+  // otherwise W3C's (1-αb)·Cs term will leak mask color into AA edges.
   function applyBuiltinMask(targetCtx, mask, w, h) {
     const strength = clippingData[mask.layer.name]?.strength
       ?? (mask.clip.blendMode === 'destination-out' ? 0.5 : 1);
@@ -1052,8 +1106,12 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     } else if (ev.type === 'pass-mask') {
       applyBuiltinMask(ctx, ev.mask, canvasW, canvasH);
     } else {
-      // canvas-mask: multiply over the main composite
-      applyMultiplyMask(ctx, ev.mask, canvasW, canvasH);
+      // canvas-mask: multiply (darken) or screen (lighten) over the composite
+      if (ev.mask.clip.blendMode === 'screen') {
+        applyScreenMask(ctx, ev.mask, canvasW, canvasH);
+      } else {
+        applyMultiplyMask(ctx, ev.mask, canvasW, canvasH);
+      }
     }
   }
 

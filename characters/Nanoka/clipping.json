@@ -20,5 +20,9 @@
   "Pale01_02": {
     "target": "canvas",
     "blend": "multiply"
-  }
+  },
+  "EffectB_ArmL05": { "target": "canvas", "blend": "multiply" },
+  "EffectB_Arms01": { "target": "canvas", "blend": "multiply" },
+  "EffectB_Arms02": { "target": "canvas", "blend": "multiply" },
+  "EffectB_Arms03": { "target": "canvas", "blend": "multiply" }
 }

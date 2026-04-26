@@ -14,5 +14,17 @@
   "Pale01": {
     "target": "canvas",
     "blend": "multiply"
-  }
+  },
+  "Effect_Back_ArmL05":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR01":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR02":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR03":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR04":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR05":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR06":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR07":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR08":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_ArmR09":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Back_Arms01":   { "target": "canvas", "blend": "multiply" },
+  "Effect_Middle_ArmR07": { "target": "canvas", "blend": "multiply" }
 }
