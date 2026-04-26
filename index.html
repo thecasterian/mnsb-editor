@@ -385,6 +385,7 @@ async function loadCharacter(name) {
   if (pc) pc.style.transform = '';
 
   resetToDefault();
+  enforceDeps();
   buildHeadSelector();
   buildUI();
   renderPreview();
@@ -463,13 +464,9 @@ function computeDefaultEnabled() {
 function resetToDefault() {
   activeState = {};
   for (const l of layersInfo) {
-    if (isAlwaysOnClipMask(l)) {
-      activeState[l.name] = true; // non-source-over masks always on
-    } else if (isToggleableClipMask(l)) {
-      activeState[l.name] = defaultEnabled.includes(l.name); // off unless listed
-    } else {
-      activeState[l.name] = defaultEnabled.includes(l.name);
-    }
+    // Non-toggleable clip masks (destination-out, pool-multiply) are always on;
+    // everything else is on iff listed in the resolved default.
+    activeState[l.name] = isAlwaysOnClipMask(l) || defaultEnabled.includes(l.name);
   }
 }
 
@@ -666,7 +663,9 @@ function buildGroups() {
     if (path.startsWith('__ClippingMasks__')) return 200;
     const leaf = path.split('/').pop();
     if (facialKeys.some(k => leaf.includes(k))) return 0;
-    if (effectKeys.some(k => leaf.includes(k))) return 1;
+    // Real Sweat/Mask leaf groups sort right after __PaleMask__ synthetic
+    // groups (1 < 2) — gives a stable, deterministic Pale → Sweat → Mask order.
+    if (effectKeys.some(k => leaf.includes(k))) return 2;
 
     // Arm groups: sorted by category then limb (L → R → combined)
     if (leaf.includes('Arm')) {
@@ -694,7 +693,17 @@ function buildGroups() {
 
     const header = document.createElement('div');
     header.className = 'group-header';
-    header.innerHTML = `<span>${displayName(groupPath)}<span class="group-status" data-status-group="${groupPath}"></span></span><span class="arrow">&#9660;</span>`;
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = displayName(groupPath);
+    const statusSpan = document.createElement('span');
+    statusSpan.className = 'group-status';
+    statusSpan.dataset.statusGroup = groupPath;
+    titleSpan.appendChild(statusSpan);
+    const arrowSpan = document.createElement('span');
+    arrowSpan.className = 'arrow';
+    arrowSpan.textContent = '▼';
+    header.appendChild(titleSpan);
+    header.appendChild(arrowSpan);
     header.onclick = () => div.classList.toggle('collapsed');
     div.appendChild(header);
 
@@ -787,12 +796,29 @@ function buildGroups() {
 }
 
 function updateUI() {
-  // Update preset buttons — compare current facial state against each preset's enabled list
+  // Update preset buttons — preset is active iff currently-on facial layers
+  // (within applyPreset's scope: same head, controllable) equal the preset
+  // exactly. Looser "every" matching falsely highlights when extras are on.
+  const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
+  const isFacial = name => facialKeywords.some(k => name.includes(k));
+  const isControllable = l => {
+    const info = getClipInfo(l.name);
+    return !info || info.target === 'canvas';
+  };
+  const facialOnNames = new Set(
+    layersInfo
+      .filter(l => isFacial(l.name)
+        && (!activeHead || l.group.includes(activeHead))
+        && isControllable(l)
+        && activeState[l.name])
+      .map(l => l.name)
+  );
   for (const btn of document.querySelectorAll('#presets .preset-btn')) {
     const enabled = compositions[btn.dataset.preset];
-    if (!enabled) { btn.classList.remove('active'); continue; }
-    const matches = enabled.every(name => activeState[name]) &&
-      enabled.length > 0;
+    if (!enabled || enabled.length === 0) { btn.classList.remove('active'); continue; }
+    const enabledSet = new Set(enabled);
+    const matches = enabled.every(n => activeState[n])
+      && [...facialOnNames].every(n => enabledSet.has(n));
     btn.classList.toggle('active', matches);
   }
   // Update layer buttons
@@ -856,37 +882,45 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
   const normalLayers = entries.filter(e => !e.clip && e.img);
   const allMasks = entries.filter(e =>
     e.clip && e.img && (!e.clip.head || activeHead === null || e.clip.head === activeHead));
-  // Canvas-target masks (Pale) operate on the main composite at their own
-  // z-order — they tint everything beneath them in layer order, mirroring
-  // PSD multiply semantics. Pool-target masks stay scoped to their pool.
+
+  // Three mask categories, each with its own placement on the main timeline:
+  //  - canvas-target  : multiply over the entire main canvas at their own z-order.
+  //  - pass-through   : non-canvas source-over masks. Drawn as normal layers at
+  //                     their own z-order; the `target` field is metadata only,
+  //                     no per-layer transformation. (Source-over has no clipping
+  //                     behavior in canvas2D — it just draws normally — so a pool
+  //                     would just hijack the blit z-order without changing pixels.)
+  //  - transform      : non-canvas dest-out / pool-multiply. Applied per-layer:
+  //                     each affected layer is pre-rendered to a tile with the
+  //                     masks baked in, then drawn at the layer's own z-order.
+  //                     This preserves z-order interleaving with non-target
+  //                     layers — the previous pool model collapsed them onto a
+  //                     single blit z-order which broke when pool layers
+  //                     bracketed non-pool layers (e.g. Cheeks below Eyes below
+  //                     Sweat, with all three in the 'facial' target).
   const canvasMasks = allMasks.filter(m => m.clip.target === 'canvas');
-  const poolMasksAll = allMasks.filter(m => m.clip.target !== 'canvas');
+  const passThroughMasks = allMasks.filter(m =>
+    m.clip.target !== 'canvas' && m.clip.blendMode === 'source-over');
+  const transformMasks = allMasks.filter(m =>
+    m.clip.target !== 'canvas' && m.clip.blendMode !== 'source-over');
 
-  // Per-target pools. Each normal layer is assigned to at most one target — the
-  // most specific match (e.g. a layer in Facial/Eyes goes to 'eyes', not 'facial').
-  // Each mask is applied only to its declared target pool.
+  // Group transform masks by target, sorted by z-order ascending so that
+  // applying them in array order matches their natural composition order.
+  const masksByTarget = new Map();
+  for (const m of transformMasks) {
+    if (!masksByTarget.has(m.clip.target)) masksByTarget.set(m.clip.target, []);
+    masksByTarget.get(m.clip.target).push(m);
+  }
+  for (const arr of masksByTarget.values()) {
+    arr.sort((a, b) => a.layer.order - b.layer.order);
+  }
+
   const TARGET_PRIORITY = ['eyes', 'facial'];
-  const targetsUsed = new Set(poolMasksAll.map(m => m.clip.target));
-
   function assignTarget(layer) {
     for (const t of TARGET_PRIORITY) {
-      if (targetsUsed.has(t) && isInClipTarget(layer, t)) return t;
+      if (masksByTarget.has(t) && isInClipTarget(layer, t)) return t;
     }
     return null;
-  }
-
-  const pools = new Map();
-  for (const t of targetsUsed) pools.set(t, { layers: [], masks: [] });
-  const maskedLayerNames = new Set();
-  for (const e of normalLayers) {
-    const t = assignTarget(e.layer);
-    if (t) {
-      pools.get(t).layers.push(e);
-      maskedLayerNames.add(e.layer.name);
-    }
-  }
-  for (const m of poolMasksAll) {
-    if (pools.has(m.clip.target)) pools.get(m.clip.target).masks.push(m);
   }
 
   // Per-pixel multiply on an arbitrary 2D context. Same arithmetic as the
@@ -943,68 +977,55 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     targetCtx.drawImage(entry.img, 0, 0, w, h);
   }
 
-  // Compose each pool offscreen with z-order interleaving of layers, pool
-  // masks, and any canvas-target masks whose order lies inside the pool's
-  // span. A canvas mask is included in a pool when the pool's last event
-  // happens *after* the mask — otherwise the pool blits before the mask
-  // runs on the main canvas, and the main-canvas pass will tint the
-  // already-blitted pool pixels.
-  const poolBlits = [];
-  for (const [, pool] of pools) {
-    if (pool.layers.length === 0) continue;
-    const offscreen = document.createElement('canvas');
-    offscreen.width = canvasW;
-    offscreen.height = canvasH;
-    const oCtx = offscreen.getContext('2d');
-
-    const poolMaxOrder = Math.max(
-      ...pool.layers.map(x => x.layer.order),
-      ...pool.masks.map(m => m.layer.order),
-    );
-
-    const events = [
-      ...pool.layers.map(e => ({ type: 'layer', order: e.layer.order, entry: e })),
-      ...pool.masks.map(m => ({ type: 'pool-mask', order: m.layer.order, mask: m })),
-      ...canvasMasks
-        .filter(m => m.layer.order < poolMaxOrder)
-        .map(m => ({ type: 'canvas-mask', order: m.layer.order, mask: m })),
-    ].sort((a, b) => a.order - b.order);
-
-    for (const ev of events) {
-      if (ev.type === 'layer') {
-        drawLayerImg(oCtx, ev.entry, canvasW, canvasH);
-      } else if (ev.type === 'canvas-mask') {
-        applyMultiplyMask(oCtx, ev.mask, canvasW, canvasH);
+  // Pre-render each layer that belongs to a transform target, baking its
+  // masks into a canvas-sized tile. Layers without a target render directly
+  // via drawLayerImg. Each layer keeps its own z-order on the main timeline,
+  // so non-target layers (e.g. Eyes) can naturally sit between target layers
+  // (e.g. Cheeks under Eyes under Sweat, all in the 'facial' target).
+  function prerenderLayer(entry) {
+    const target = assignTarget(entry.layer);
+    if (!target) return null;
+    const masks = masksByTarget.get(target);
+    const tmp = document.createElement('canvas');
+    tmp.width = canvasW;
+    tmp.height = canvasH;
+    const tCtx = tmp.getContext('2d');
+    drawLayerImg(tCtx, entry, canvasW, canvasH);
+    for (const mask of masks) {
+      if (mask.clip.blendMode === 'multiply') {
+        applyMultiplyMask(tCtx, mask, canvasW, canvasH);
       } else {
-        // ev.type === 'pool-mask'
-        if (ev.mask.clip.blendMode === 'multiply') {
-          applyMultiplyMask(oCtx, ev.mask, canvasW, canvasH);
-        } else {
-          applyBuiltinMask(oCtx, ev.mask, canvasW, canvasH);
-        }
+        applyBuiltinMask(tCtx, mask, canvasW, canvasH);
       }
     }
-
-    poolBlits.push({ order: poolMaxOrder, offscreen });
+    return tmp;
   }
 
-  // Main-canvas event timeline: non-pool normals, pool blits (each at the
-  // pool's max event order), and canvas-target masks at their own order.
-  const nonPoolNormals = normalLayers.filter(e => !maskedLayerNames.has(e.layer.name));
+  const layerEvents = normalLayers.map(e => ({
+    type: 'layer',
+    order: e.layer.order,
+    entry: e,
+    tile: prerenderLayer(e),
+  }));
+
   const mainEvents = [
-    ...nonPoolNormals.map(e => ({ type: 'layer', order: e.layer.order, entry: e })),
-    ...poolBlits.map(p => ({ type: 'blit', order: p.order, offscreen: p.offscreen })),
+    ...layerEvents,
+    ...passThroughMasks.map(m => ({ type: 'pass-mask', order: m.layer.order, mask: m })),
     ...canvasMasks.map(m => ({ type: 'canvas-mask', order: m.layer.order, mask: m })),
   ].sort((a, b) => a.order - b.order);
 
   for (const ev of mainEvents) {
     if (ev.type === 'layer') {
-      drawLayerImg(ctx, ev.entry, canvasW, canvasH);
-    } else if (ev.type === 'blit') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.drawImage(ev.offscreen, 0, 0);
+      if (ev.tile) {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(ev.tile, 0, 0);
+      } else {
+        drawLayerImg(ctx, ev.entry, canvasW, canvasH);
+      }
+    } else if (ev.type === 'pass-mask') {
+      applyBuiltinMask(ctx, ev.mask, canvasW, canvasH);
     } else {
-      // ev.type === 'canvas-mask'
+      // canvas-mask: multiply over the main composite
       applyMultiplyMask(ctx, ev.mask, canvasW, canvasH);
     }
   }
@@ -1013,9 +1034,10 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
   return canvas;
 }
 
+let renderSeq = 0;
 async function renderPreview() {
+  const seq = ++renderSeq;
   const container = document.getElementById('previewContainer');
-  container.innerHTML = '';
 
   const activeLayers = layersInfo
     .filter(l => activeState[l.name])
@@ -1025,9 +1047,14 @@ async function renderPreview() {
   const canvasH = layersInfo.length > 0 ? (layersInfo[0]._canvasH || 5000) : 5000;
 
   const canvas = await compositeToCanvas(activeLayers, canvasW, canvasH);
+  // Discard if a newer render started while we were compositing — keeps the
+  // visible canvas consistent with the latest activeState and avoids stale
+  // overwrites when the user clicks rapidly.
+  if (seq !== renderSeq) return;
+
   canvas.style.width = '100%';
   canvas.style.height = 'auto';
-  container.appendChild(canvas);
+  container.replaceChildren(canvas);
 
   updateUI();
 }
@@ -1089,7 +1116,7 @@ loadCharacter('Sherry');
 
 let zoomLevel = 1;
 let panX = 0, panY = 0;
-let isDragging = false, dragStartX, dragStartY, panStartX, panStartY;
+let isDragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
 const container = document.getElementById('previewContainer');
 const previewArea = document.getElementById('previewArea');
 
