@@ -405,25 +405,29 @@
       "name": "EffectB_ArmL05",
       "group": "Angle01/EffectB",
       "order": 8,
-      "empty": false
+      "empty": false,
+      "requires": "ArmL05"
     },
     {
       "name": "EffectB_Arms01",
       "group": "Angle01/EffectB",
       "order": 7,
-      "empty": false
+      "empty": false,
+      "requires": "Arms01"
     },
     {
       "name": "EffectB_Arms02",
       "group": "Angle01/EffectB",
       "order": 6,
-      "empty": false
+      "empty": false,
+      "requires": "Arms02"
     },
     {
       "name": "EffectB_Arms03",
       "group": "Angle01/EffectB",
       "order": 5,
-      "empty": false
+      "empty": false,
+      "requires": "Arms03"
     },
     {
       "name": "OptionB_Body01",
