@@ -471,10 +471,16 @@ function resetToDefault() {
 }
 
 function enforceDeps() {
-  // If a required layer is off, turn off all layers that depend on it
-  for (const l of layersInfo) {
-    if (l.requires && activeState[l.name] && !activeState[l.requires]) {
-      activeState[l.name] = false;
+  // If a required layer is off, turn off all layers that depend on it.
+  // Iterate until stable so chained requirements (A→B→C) all collapse.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const l of layersInfo) {
+      if (l.requires && activeState[l.name] && !activeState[l.requires]) {
+        activeState[l.name] = false;
+        changed = true;
+      }
     }
   }
 }
@@ -725,10 +731,21 @@ function buildGroups() {
     noneBtn.textContent = 'None';
     noneBtn.dataset.group = groupPath;
     noneBtn.onclick = () => {
+      // Only fall back to ArmL01 + ArmR01 when we actually clear an active
+      // Arms sprite — otherwise a no-op None click would clobber the user's
+      // existing ArmL/ArmR selection.
+      const armsWasActive = groupPath.split('/').pop() === 'Arms'
+        && layers.some(l => activeState[l.name]);
       for (const l of layers) {
         if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on
         if (!isLayerForActiveHead(l.name)) continue; // don't touch layers belonging to inactive head
         activeState[l.name] = false;
+      }
+      if (armsWasActive) {
+        for (const sub of ['ArmL', 'ArmR']) {
+          const arm01 = layersInfo.find(ol => ol.group.split('/').pop() === sub && ol.name === sub + '01');
+          if (arm01) activeState[arm01.name] = true;
+        }
       }
       enforceDeps();
       updateUI();
@@ -793,6 +810,7 @@ function buildGroups() {
           }
         }
 
+        enforceDeps();
         updateUI();
         renderPreview();
       };
