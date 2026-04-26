@@ -21,85 +21,113 @@
       "name": "OptionF_Head01_ArmR01",
       "group": "Angle01/OptionF",
       "order": 135,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR01", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR02",
       "group": "Angle01/OptionF",
       "order": 134,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR02", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR03",
       "group": "Angle01/OptionF",
       "order": 133,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR03", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR04",
       "group": "Angle01/OptionF",
       "order": 132,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR04", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR05",
       "group": "Angle01/OptionF",
       "order": 131,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR05", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR06",
       "group": "Angle01/OptionF",
       "order": 130,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR06", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR07",
       "group": "Angle01/OptionF",
       "order": 129,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR07", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR08",
       "group": "Angle01/OptionF",
       "order": 128,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR08", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR09",
       "group": "Angle01/OptionF",
       "order": 127,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR09", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR10",
       "group": "Angle01/OptionF",
       "order": 126,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR10", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR11",
       "group": "Angle01/OptionF",
       "order": 125,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR11", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR12",
       "group": "Angle01/OptionF",
       "order": 124,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR12", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_ArmR13",
       "group": "Angle01/OptionF",
       "order": 123,
-      "empty": false
+      "empty": false,
+      "requires": ["ArmR13", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "OptionF_Head01_Arms01",
       "group": "Angle01/OptionF",
       "order": 122,
-      "empty": false
+      "empty": false,
+      "requires": ["Arms01", "HeadBase01"],
+      "auto_enable": true
     },
     {
       "name": "ArmR01",

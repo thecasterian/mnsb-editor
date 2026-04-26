@@ -515,7 +515,8 @@ function enforceDeps() {
   while (changed) {
     changed = false;
     for (const l of layersInfo) {
-      if (l.requires && activeState[l.name] && !activeState[l.requires]) {
+      const reqs = getRequires(l);
+      if (reqs.length && activeState[l.name] && !reqs.every(r => activeState[r])) {
         activeState[l.name] = false;
         changed = true;
       }
@@ -529,10 +530,19 @@ function enforceDeps() {
 // the parent toggles off→on again.
 function autoEnableDependents(layerName) {
   for (const dep of layersInfo) {
-    if (dep.auto_enable && dep.requires === layerName) {
+    const reqs = getRequires(dep);
+    if (dep.auto_enable && reqs.includes(layerName) && reqs.every(r => activeState[r])) {
       activeState[dep.name] = true;
     }
   }
+}
+
+// Normalize the `requires` field to a list. A layer may declare `requires`
+// as a single layer name (string) or a list of names (array); both forms
+// mean "all listed layers must be active for this one to remain enabled".
+function getRequires(layer) {
+  if (!layer.requires) return [];
+  return Array.isArray(layer.requires) ? layer.requires : [layer.requires];
 }
 
 // Group exclusion / fallback engine. Layers may declare:
@@ -826,6 +836,10 @@ function buildGroups() {
     if (layers.every(l => l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase') || l.name.startsWith('HairB') || isAlwaysOnClipMask(l))) continue;
     // Skip groups belonging to inactive head
     if (!isGroupForActiveHead(groupPath)) continue;
+    // Skip groups with no selectable buttons for the active head — e.g. Meruru's
+    // OptionF on Head02, where every entry is name-tagged Head01 and would
+    // otherwise render an empty section with just the None button.
+    if (!layers.some(l => !isAlwaysOnClipMask(l) && isLayerForActiveHead(l.name))) continue;
 
     const div = document.createElement('div');
     div.className = 'group';
@@ -899,10 +913,15 @@ function buildGroups() {
           // Radio behavior: turn off all in group, turn on this one —
           // but additively preserve the clicked layer's `requires` chain.
           const keepOn = new Set([l.name]);
-          let cur = l;
-          while (cur && cur.requires) {
-            keepOn.add(cur.requires);
-            cur = layersInfo.find(x => x.name === cur.requires);
+          const queue = [l];
+          while (queue.length) {
+            const cur = queue.shift();
+            for (const r of getRequires(cur)) {
+              if (keepOn.has(r)) continue;
+              keepOn.add(r);
+              const parent = layersInfo.find(x => x.name === r);
+              if (parent) queue.push(parent);
+            }
           }
           for (const other of layers) {
             if (!keepOn.has(other.name)) {
@@ -973,7 +992,7 @@ function updateUI() {
   // Update layer buttons
   for (const btn of document.querySelectorAll('.layer-btn')) {
     const layer = layersInfo.find(l => l.name === btn.dataset.layer);
-    const reqMet = !layer || !layer.requires || !!activeState[layer.requires];
+    const reqMet = !layer || getRequires(layer).every(r => !!activeState[r]);
     btn.disabled = !reqMet;
     btn.classList.toggle('active', !!activeState[btn.dataset.layer]);
   }
