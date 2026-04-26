@@ -25,7 +25,7 @@
   },
   "ClippingMask_Eyes": {
     "target": "eyes",
-    "blend": "source-over"
+    "blend": "destination-out"
   },
   "Pale01": {
     "target": "canvas",
