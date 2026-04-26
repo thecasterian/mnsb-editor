@@ -51,7 +51,15 @@
       "name": "ArmL05",
       "group": "Angle01/ArmL",
       "order": 77,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmR",
+        "Arms"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "ArmL06",
@@ -129,25 +137,57 @@
       "name": "Arms01",
       "group": "Angle01/Arms",
       "order": 62,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "Arms02",
       "group": "Angle01/Arms",
       "order": 61,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "Arms03",
       "group": "Angle01/Arms",
       "order": 60,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "Arms04",
       "group": "Angle01/Arms",
       "order": 59,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "FacialLineDrawing01",
@@ -406,28 +446,32 @@
       "group": "Angle01/EffectB",
       "order": 8,
       "empty": false,
-      "requires": "ArmL05"
+      "requires": "ArmL05",
+      "auto_enable": true
     },
     {
       "name": "EffectB_Arms01",
       "group": "Angle01/EffectB",
       "order": 7,
       "empty": false,
-      "requires": "Arms01"
+      "requires": "Arms01",
+      "auto_enable": true
     },
     {
       "name": "EffectB_Arms02",
       "group": "Angle01/EffectB",
       "order": 6,
       "empty": false,
-      "requires": "Arms02"
+      "requires": "Arms02",
+      "auto_enable": true
     },
     {
       "name": "EffectB_Arms03",
       "group": "Angle01/EffectB",
       "order": 5,
       "empty": false,
-      "requires": "Arms03"
+      "requires": "Arms03",
+      "auto_enable": true
     },
     {
       "name": "OptionB_Body01",

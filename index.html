@@ -499,6 +499,74 @@ function enforceDeps() {
   }
 }
 
+// Layers with `auto_enable: true` follow their `requires` parent on the
+// off→on transition: when the user activates the parent, dependents flip on
+// once. The user can disable them manually afterward and they stay off until
+// the parent toggles off→on again.
+function autoEnableDependents(layerName) {
+  for (const dep of layersInfo) {
+    if (dep.auto_enable && dep.requires === layerName) {
+      activeState[dep.name] = true;
+    }
+  }
+}
+
+// Group exclusion / fallback engine. Layers may declare:
+//   excludes_groups: [groupLeaf, ...]     — clear these groups when I activate
+//   requires_groups: { groupLeaf: name }  — when I'm cleared, ensure these
+//                                           groups have a layer; if empty,
+//                                           fall back to `name`.
+// Single-side declaration: e.g. only Arms layers carry the rule, and
+// activating an ArmL/ArmR layer clears Arms via the inverse scan in step (2).
+function applyClearedFallbacks(clearedLayers, excludesContext) {
+  for (const ol of clearedLayers) {
+    if (!ol.requires_groups) continue;
+    for (const [gleaf, defaultName] of Object.entries(ol.requires_groups)) {
+      // Don't repopulate a group the activator just forbade.
+      if (excludesContext && excludesContext.includes(gleaf)) continue;
+      const groupHasActive = layersInfo.some(x =>
+        x.group.split('/').pop() === gleaf && activeState[x.name]);
+      if (!groupHasActive && activeState.hasOwnProperty(defaultName)) {
+        activeState[defaultName] = true;
+        autoEnableDependents(defaultName);
+      }
+    }
+  }
+}
+
+function enforceExclusions(activatedName) {
+  const me = layersInfo.find(l => l.name === activatedName);
+  if (!me) return;
+  const myLeaf = me.group.split('/').pop();
+  const cleared = [];
+
+  // (1) Clear groups I exclude.
+  if (me.excludes_groups) {
+    for (const gleaf of me.excludes_groups) {
+      for (const ol of layersInfo) {
+        if (ol.group.split('/').pop() === gleaf && activeState[ol.name]) {
+          activeState[ol.name] = false;
+          cleared.push(ol);
+        }
+      }
+    }
+  }
+
+  // (2) Inverse: any active layer whose excludes_groups names my group
+  //     gets cleared because I'm now in that group.
+  for (const ol of layersInfo) {
+    if (ol === me) continue;
+    if (ol.excludes_groups && ol.excludes_groups.includes(myLeaf) && activeState[ol.name]) {
+      activeState[ol.name] = false;
+      cleared.push(ol);
+    }
+  }
+
+  // (3) Fallbacks from each cleared layer's requires_groups, suppressed
+  //     for any group I forbid.
+  applyClearedFallbacks(cleared, me.excludes_groups);
+}
+
 
 function applyPreset(presetName) {
   const enabled = compositions[presetName];
@@ -707,6 +775,10 @@ function buildGroups() {
     if (leaf.includes('Sweat')) return 4;
     if (leaf.includes('Mask')) return 5;
 
+    // OptionB top-level group (Hiro/Nanoka) sits right before Clipping Masks
+    // (rank 30), after the Option_Arm clusters.
+    if (leaf === 'OptionB') return 29;
+
     // Arms: category first, then limb (L → R → combined within each category)
     if (leaf.includes('Arm')) {
       const limb = leaf.includes('ArmL') ? 0 : leaf.includes('ArmR') ? 1 : 2;
@@ -759,22 +831,16 @@ function buildGroups() {
     noneBtn.textContent = 'None';
     noneBtn.dataset.group = groupPath;
     noneBtn.onclick = () => {
-      // Only fall back to ArmL01 + ArmR01 when we actually clear an active
-      // Arms sprite — otherwise a no-op None click would clobber the user's
-      // existing ArmL/ArmR selection.
-      const armsWasActive = groupPath.split('/').pop() === 'Arms'
-        && layers.some(l => activeState[l.name]);
+      // Collect what we actually clear so cleared layers can drive their
+      // requires_groups fallbacks (e.g. clearing Arms repopulates ArmL/ArmR).
+      const cleared = [];
       for (const l of layers) {
         if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on
         if (!isLayerForActiveHead(l.name)) continue; // don't touch layers belonging to inactive head
+        if (activeState[l.name]) cleared.push(l);
         activeState[l.name] = false;
       }
-      if (armsWasActive) {
-        for (const sub of ['ArmL', 'ArmR']) {
-          const arm01 = layersInfo.find(ol => ol.group.split('/').pop() === sub && ol.name === sub + '01');
-          if (arm01) activeState[arm01.name] = true;
-        }
-      }
+      applyClearedFallbacks(cleared);
       enforceDeps();
       updateUI();
       renderPreview();
@@ -799,9 +865,12 @@ function buildGroups() {
           || /^Head\d+$/.test(leaf)
           || groupPath.startsWith('__ClippingMasks__'));
 
+        const activated = [];
+        const radioCleared = [];
         if (multiSelect) {
           // Toggle behavior: flip this layer on/off
           activeState[l.name] = !activeState[l.name];
+          if (activeState[l.name]) activated.push(l.name);
         } else {
           // Radio behavior: turn off all in group, turn on this one —
           // but additively preserve the clicked layer's `requires` chain.
@@ -812,30 +881,31 @@ function buildGroups() {
             cur = layersInfo.find(x => x.name === cur.requires);
           }
           for (const other of layers) {
-            if (!keepOn.has(other.name)) activeState[other.name] = false;
+            if (!keepOn.has(other.name)) {
+              if (activeState[other.name]) radioCleared.push(other);
+              activeState[other.name] = false;
+            }
           }
-          for (const n of keepOn) activeState[n] = true;
+          for (const n of keepOn) {
+            activeState[n] = true;
+            activated.push(n);
+          }
         }
 
-        // Arms mutual exclusion: Arms vs ArmL/ArmR
-        if (leaf === 'Arms') {
-          // Selecting Arms → clear ArmL and ArmR
-          for (const ol of layersInfo) {
-            const oleaf = ol.group.split('/').pop();
-            if (oleaf === 'ArmL' || oleaf === 'ArmR') activeState[ol.name] = false;
-          }
-        } else if (leaf === 'ArmL' || leaf === 'ArmR') {
-          // If Arms was active, clear it and set the other arm to 01
-          const armsActive = layersInfo.some(ol => ol.group.split('/').pop() === 'Arms' && activeState[ol.name]);
-          if (armsActive) {
-            for (const ol of layersInfo) {
-              if (ol.group.split('/').pop() === 'Arms') activeState[ol.name] = false;
-            }
-            // Set the other arm to 01
-            const otherArm = leaf === 'ArmL' ? 'ArmR' : 'ArmL';
-            const arm01 = layersInfo.find(ol => ol.group.split('/').pop() === otherArm && ol.name === otherArm + '01');
-            if (arm01) activeState[arm01.name] = true;
-          }
+        // Fallbacks for radio-cleared layers (e.g. ArmL05's requires_groups
+        // repopulating ArmR when replaced by a regular ArmL). Suppress per
+        // the combined excludes_groups of the activators so e.g. Arms01
+        // replacing ArmL05 still keeps ArmR/ArmL bare.
+        const suppression = new Set();
+        for (const n of activated) {
+          const me = layersInfo.find(x => x.name === n);
+          if (me?.excludes_groups) for (const g of me.excludes_groups) suppression.add(g);
+        }
+        applyClearedFallbacks(radioCleared, [...suppression]);
+
+        for (const n of activated) {
+          enforceExclusions(n);
+          autoEnableDependents(n);
         }
 
         enforceDeps();

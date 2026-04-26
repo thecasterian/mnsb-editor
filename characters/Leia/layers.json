@@ -27,7 +27,15 @@
       "name": "Arms01",
       "group": "Angle01/Arms",
       "order": 80,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "ArmL01",
@@ -406,35 +414,40 @@
       "group": "Angle01/Shadow_Arms",
       "order": 8,
       "empty": false,
-      "requires": "Arms01"
+      "requires": "Arms01",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmL03",
       "group": "Angle01/Shadow_ArmL",
       "order": 6,
       "empty": false,
-      "requires": "ArmL03"
+      "requires": "ArmL03",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmL04",
       "group": "Angle01/Shadow_ArmL",
       "order": 5,
       "empty": false,
-      "requires": "ArmL04"
+      "requires": "ArmL04",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmL05",
       "group": "Angle01/Shadow_ArmL",
       "order": 4,
       "empty": false,
-      "requires": "ArmL05"
+      "requires": "ArmL05",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmR05",
       "group": "Angle01/Shadow_ArmR",
       "order": 2,
       "empty": false,
-      "requires": "ArmR05"
+      "requires": "ArmR05",
+      "auto_enable": true
     },
     {
       "name": "Body",

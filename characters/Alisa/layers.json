@@ -21,7 +21,15 @@
       "name": "Arms01",
       "group": "Angle01/Arms",
       "order": 92,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "ArmR01",
@@ -82,7 +90,8 @@
       "group": "Angle01/Effect_Middle_ArmR",
       "order": 80,
       "empty": false,
-      "requires": "ArmR07"
+      "requires": "ArmR07",
+      "auto_enable": true
     },
     {
       "name": "Option_ArmL11",
@@ -420,77 +429,88 @@
       "group": "Angle01/Effect_Back_Arms",
       "order": 14,
       "empty": false,
-      "requires": "Arms01"
+      "requires": "Arms01",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR01",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 12,
       "empty": false,
-      "requires": "ArmR01"
+      "requires": "ArmR01",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR02",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 11,
       "empty": false,
-      "requires": "ArmR02"
+      "requires": "ArmR02",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR03",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 10,
       "empty": false,
-      "requires": "ArmR03"
+      "requires": "ArmR03",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR04",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 9,
       "empty": false,
-      "requires": "ArmR04"
+      "requires": "ArmR04",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR05",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 8,
       "empty": false,
-      "requires": "ArmR05"
+      "requires": "ArmR05",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR06",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 7,
       "empty": false,
-      "requires": "ArmR06"
+      "requires": "ArmR06",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR07",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 6,
       "empty": false,
-      "requires": "ArmR07"
+      "requires": "ArmR07",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR08",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 5,
       "empty": false,
-      "requires": "ArmR08"
+      "requires": "ArmR08",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmR09",
       "group": "Angle01/Effect_Back_ArmR",
       "order": 4,
       "empty": false,
-      "requires": "ArmR09"
+      "requires": "ArmR09",
+      "auto_enable": true
     },
     {
       "name": "Effect_Back_ArmL05",
       "group": "Angle01/Effect_Back_ArmL",
       "order": 2,
       "empty": false,
-      "requires": "ArmL05"
+      "requires": "ArmL05",
+      "auto_enable": true
     },
     {
       "name": "Body",

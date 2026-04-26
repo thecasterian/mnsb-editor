@@ -177,13 +177,29 @@
       "name": "Arms01",
       "group": "Angle01/Arms",
       "order": 100,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "Arms02",
       "group": "Angle01/Arms",
       "order": 99,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "HairClippingMask01",

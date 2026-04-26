@@ -279,7 +279,15 @@
       "name": "Arms01",
       "group": "Angle01/Arms",
       "order": 89,
-      "empty": false
+      "empty": false,
+      "excludes_groups": [
+        "ArmL",
+        "ArmR"
+      ],
+      "requires_groups": {
+        "ArmL": "ArmL01",
+        "ArmR": "ArmR01"
+      }
     },
     {
       "name": "ClippingMask_Facial01_01",

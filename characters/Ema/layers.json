@@ -744,21 +744,24 @@
       "group": "Angle01/Shadow",
       "order": 4,
       "empty": false,
-      "requires": "ArmR10"
+      "requires": "ArmR10",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmR12",
       "group": "Angle01/Shadow",
       "order": 3,
       "empty": false,
-      "requires": "ArmR12"
+      "requires": "ArmR12",
+      "auto_enable": true
     },
     {
       "name": "Shadow_ArmR13",
       "group": "Angle01/Shadow",
       "order": 2,
       "empty": false,
-      "requires": "ArmR13"
+      "requires": "ArmR13",
+      "auto_enable": true
     },
     {
       "name": "Body",
