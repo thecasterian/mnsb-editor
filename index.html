@@ -1531,6 +1531,32 @@ async function renderPreview() {
 
 // --- Export ---
 
+// Crop a canvas to its alpha bbox plus a transparent margin, so the exported
+// PNG hugs the character but keeps a uniform border on all sides. Empty input
+// is returned unchanged.
+function tightCrop(srcCanvas, margin = 10) {
+  const w = srcCanvas.width, h = srcCanvas.height;
+  const data = srcCanvas.getContext('2d').getImageData(0, 0, w, h).data;
+  let minX = w, minY = h, maxX = -1, maxY = -1;
+  for (let y = 0; y < h; y++) {
+    const row = y * w * 4;
+    for (let x = 0; x < w; x++) {
+      if (data[row + x * 4 + 3]) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return srcCanvas;
+  const out = document.createElement('canvas');
+  out.width = (maxX - minX + 1) + margin * 2;
+  out.height = (maxY - minY + 1) + margin * 2;
+  out.getContext('2d').drawImage(srcCanvas, margin - minX, margin - minY);
+  return out;
+}
+
 document.getElementById('exportBtn').onclick = async () => {
   const activeLayers = layersInfo
     .filter(l => activeState[l.name])
@@ -1541,7 +1567,8 @@ document.getElementById('exportBtn').onclick = async () => {
   const canvasW = layersInfo[0]._canvasW || 2500;
   const canvasH = layersInfo[0]._canvasH || 5000;
 
-  const canvas = await compositeToCanvas(activeLayers, canvasW, canvasH);
+  const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
+  const canvas = tightCrop(full);
 
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
