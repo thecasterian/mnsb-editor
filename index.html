@@ -477,6 +477,14 @@ function getLayerOffset(layer) {
   return { dx: o.dx || 0, dy: o.dy || 0, scale: o.scale ?? 1, rotate: o.rotate || 0 };
 }
 
+// Sprite top-left in canvas space. Layers without `pos` are canvas-sized PNGs
+// drawn at canvas origin; `pos` PNGs are tightly cropped sprites placed at the
+// recorded position. Both schemas coexist during the rollout — the renderer
+// just adds `pos` to every drawImage / mask op.
+function getPos(layer) {
+  return layer.pos || [0, 0];
+}
+
 // --- Data Loading ---
 
 async function loadCharacter(name) {
@@ -1227,45 +1235,6 @@ function updateUI() {
 
 // Image cache to avoid reloading on every render
 const imageCache = {};
-// Anchor cache: { "char/layer": {ax, ay} } — content-bbox center used as the
-// pivot when scaling. Computed lazily once per layer the first time scale != 1
-// and cleared alongside imageCache on character switch.
-const anchorCache = {};
-
-function getAnchor(charName, layerName, img, w, h) {
-  const key = `${charName}/${layerName}`;
-  if (anchorCache[key]) return anchorCache[key];
-  const dw = Math.min(400, w);
-  const dh = Math.min(800, h);
-  const tmp = document.createElement('canvas');
-  tmp.width = dw;
-  tmp.height = dh;
-  const tctx = tmp.getContext('2d');
-  tctx.drawImage(img, 0, 0, dw, dh);
-  const data = tctx.getImageData(0, 0, dw, dh).data;
-  let minX = dw, minY = dh, maxX = -1, maxY = -1;
-  for (let y = 0; y < dh; y++) {
-    for (let x = 0; x < dw; x++) {
-      if (data[(y * dw + x) * 4 + 3]) {
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x > maxX) maxX = x;
-        if (y > maxY) maxY = y;
-      }
-    }
-  }
-  let anchor;
-  if (maxX < 0) {
-    anchor = { ax: w / 2, ay: h / 2 };
-  } else {
-    anchor = {
-      ax: ((minX + maxX + 1) / 2) * (w / dw),
-      ay: ((minY + maxY + 1) / 2) * (h / dh),
-    };
-  }
-  anchorCache[key] = anchor;
-  return anchor;
-}
 
 function loadLayerImage(charName, layerName) {
   const key = `${charName}/${layerName}`;
@@ -1282,7 +1251,6 @@ function loadLayerImage(charName, layerName) {
 
 function invalidateImageCache() {
   for (const key in imageCache) delete imageCache[key];
-  for (const key in anchorCache) delete anchorCache[key];
 }
 
 async function compositeToCanvas(layers, canvasW, canvasH) {
@@ -1342,22 +1310,41 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     return null;
   }
 
-  // Per-pixel multiply on an arbitrary 2D context. Same arithmetic as the
-  // pool-multiply path: Cmul = Cb · (αs·Cs + (1-αs)); αout = αb. Outside the
-  // mask (αs=0) the pixel is untouched. `lightness` lerps the result toward
-  // white where the mask is active.
-  function applyMultiplyMask(targetCtx, mask, w, h) {
+  // Compute the overlap rectangle between a sprite at (offsetX, offsetY) of
+  // size (mw, mh) and a destination canvas of size (tileW, tileH). Returns
+  // null if there is no overlap. `dx,dy` are the destination top-left and
+  // `sx,sy,w,h` are the slice of the mask source to read.
+  function clipRegion(offsetX, offsetY, mw, mh, tileW, tileH) {
+    const dx = Math.max(0, offsetX);
+    const dy = Math.max(0, offsetY);
+    const sx = Math.max(0, -offsetX);
+    const sy = Math.max(0, -offsetY);
+    const w = Math.min(mw - sx, tileW - dx);
+    const h = Math.min(mh - sy, tileH - dy);
+    if (w <= 0 || h <= 0) return null;
+    return { dx, dy, sx, sy, w, h };
+  }
+
+  // Per-pixel multiply on an arbitrary 2D context. Cmul = Cb · (αs·Cs + (1-αs));
+  // αout = αb. Outside the mask (αs=0) the pixel is untouched. `lightness` lerps
+  // the result toward white where the mask is active. The mask sprite is drawn
+  // with its top-left at (offsetX, offsetY); for canvas-sized masks (no `pos`)
+  // the offset is (0, 0) and behaviour matches the pre-pos schema exactly.
+  function applyMultiplyMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
     const strength = clippingData[mask.layer.name]?.strength ?? 1;
     const lightness = clippingData[mask.layer.name]?.lightness ?? 0;
     const lInv = 1 - lightness;
     const lW = lightness * 255;
+    const mw = mask.img.width, mh = mask.img.height;
+    const r = clipRegion(offsetX, offsetY, mw, mh, targetCtx.canvas.width, targetCtx.canvas.height);
+    if (!r) return;
     const maskTmp = document.createElement('canvas');
-    maskTmp.width = w;
-    maskTmp.height = h;
+    maskTmp.width = r.w;
+    maskTmp.height = r.h;
     const mtCtx = maskTmp.getContext('2d');
-    mtCtx.drawImage(mask.img, 0, 0, w, h);
-    const pd = targetCtx.getImageData(0, 0, w, h);
-    const md = mtCtx.getImageData(0, 0, w, h);
+    mtCtx.drawImage(mask.img, r.sx, r.sy, r.w, r.h, 0, 0, r.w, r.h);
+    const pd = targetCtx.getImageData(r.dx, r.dy, r.w, r.h);
+    const md = mtCtx.getImageData(0, 0, r.w, r.h);
     const p = pd.data, mm = md.data;
     for (let i = 0; i < p.length; i += 4) {
       if (p[i + 3] === 0) continue;
@@ -1368,23 +1355,23 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
       p[i + 1] = p[i + 1] * (as * mm[i + 1] / 255 + k) * lInv + lW;
       p[i + 2] = p[i + 2] * (as * mm[i + 2] / 255 + k) * lInv + lW;
     }
-    targetCtx.putImageData(pd, 0, 0);
+    targetCtx.putImageData(pd, r.dx, r.dy);
   }
 
-  // Per-pixel screen on an arbitrary 2D context. Mirrors applyMultiplyMask's
-  // structure but inverted: Cscreen = 1 - (1-Cb)(1-Cs); weighted by mask alpha
-  // it collapses to Cout = Cb + αs·Cs·(255-Cb)/255; αout = αb. Black mask
-  // (Cs=0) and αs=0 are no-ops, so AA edges of bright "glow" sprites brighten
-  // the destination instead of multiplying it to identity.
-  function applyScreenMask(targetCtx, mask, w, h) {
+  // Per-pixel screen on an arbitrary 2D context. Cout = Cb + αs·Cs·(255-Cb)/255;
+  // αout = αb. Black mask (Cs=0) and αs=0 are no-ops.
+  function applyScreenMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
     const strength = clippingData[mask.layer.name]?.strength ?? 1;
+    const mw = mask.img.width, mh = mask.img.height;
+    const r = clipRegion(offsetX, offsetY, mw, mh, targetCtx.canvas.width, targetCtx.canvas.height);
+    if (!r) return;
     const maskTmp = document.createElement('canvas');
-    maskTmp.width = w;
-    maskTmp.height = h;
+    maskTmp.width = r.w;
+    maskTmp.height = r.h;
     const mtCtx = maskTmp.getContext('2d');
-    mtCtx.drawImage(mask.img, 0, 0, w, h);
-    const pd = targetCtx.getImageData(0, 0, w, h);
-    const md = mtCtx.getImageData(0, 0, w, h);
+    mtCtx.drawImage(mask.img, r.sx, r.sy, r.w, r.h, 0, 0, r.w, r.h);
+    const pd = targetCtx.getImageData(r.dx, r.dy, r.w, r.h);
+    const md = mtCtx.getImageData(0, 0, r.w, r.h);
     const p = pd.data, mm = md.data;
     for (let i = 0; i < p.length; i += 4) {
       if (p[i + 3] === 0) continue;
@@ -1394,68 +1381,75 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
       p[i + 1] = p[i + 1] + as * mm[i + 1] * (255 - p[i + 1]) / 255;
       p[i + 2] = p[i + 2] + as * mm[i + 2] * (255 - p[i + 2]) / 255;
     }
-    targetCtx.putImageData(pd, 0, 0);
+    targetCtx.putImageData(pd, r.dx, r.dy);
   }
 
   // Built-in compositing for source-over / destination-out (exact, AA-safe).
-  // Any other blend added here would need the per-pixel treatment above,
-  // otherwise W3C's (1-αb)·Cs term will leak mask color into AA edges.
-  function applyBuiltinMask(targetCtx, mask, w, h) {
+  // Mask is drawn at its native size with its top-left at (offsetX, offsetY).
+  function applyBuiltinMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
     const strength = clippingData[mask.layer.name]?.strength
       ?? (mask.clip.blendMode === 'destination-out' ? 0.5 : 1);
     targetCtx.globalCompositeOperation = mask.clip.blendMode;
     targetCtx.globalAlpha = strength;
-    targetCtx.drawImage(mask.img, 0, 0, w, h);
+    targetCtx.drawImage(mask.img, offsetX, offsetY);
     targetCtx.globalAlpha = 1;
     const opacity = clippingData[mask.layer.name]?.opacity ?? 1;
     if (opacity < 1) {
       targetCtx.globalCompositeOperation = 'destination-out';
       targetCtx.globalAlpha = 1 - opacity;
-      targetCtx.drawImage(mask.img, 0, 0, w, h);
+      targetCtx.drawImage(mask.img, offsetX, offsetY);
       targetCtx.globalAlpha = 1;
     }
     targetCtx.globalCompositeOperation = 'source-over';
   }
 
-  function drawLayerImg(targetCtx, entry, w, h, applyOffset = false) {
+  // Anchor used by Advanced-mode scale/rotate: sprite center in canvas space.
+  function getLayerAnchor(entry) {
+    const [px, py] = getPos(entry.layer);
+    return { ax: px + entry.img.width / 2, ay: py + entry.img.height / 2 };
+  }
+
+  function drawLayerImg(targetCtx, entry, applyOffset = false) {
     const off = applyOffset ? getLayerOffset(entry.layer) : { dx: 0, dy: 0, scale: 1, rotate: 0 };
+    const [px, py] = getPos(entry.layer);
     targetCtx.globalCompositeOperation = 'source-over';
     if (off.scale === 1 && off.rotate === 0) {
-      targetCtx.drawImage(entry.img, off.dx, off.dy, w, h);
+      targetCtx.drawImage(entry.img, px + off.dx, py + off.dy);
     } else {
-      const a = getAnchor(currentChar, entry.layer.name, entry.img, w, h);
+      const a = getLayerAnchor(entry);
       targetCtx.save();
       targetCtx.translate(off.dx + a.ax, off.dy + a.ay);
       if (off.rotate) targetCtx.rotate(off.rotate * Math.PI / 180);
       if (off.scale !== 1) targetCtx.scale(off.scale, off.scale);
       targetCtx.translate(-a.ax, -a.ay);
-      targetCtx.drawImage(entry.img, 0, 0, w, h);
+      targetCtx.drawImage(entry.img, px, py);
       targetCtx.restore();
     }
   }
 
-  // Pre-render each layer that belongs to a transform target, baking its
-  // masks into a canvas-sized tile. Layers without a target render directly
-  // via drawLayerImg. Each layer keeps its own z-order on the main timeline,
-  // so non-target layers (e.g. Eyes) can naturally sit between target layers
-  // (e.g. Cheeks under Eyes under Sweat, all in the 'facial' target).
+  // Pre-render each transform-target layer into a sprite-sized tile, baking
+  // its masks in. The tile represents canvas region (lx, ly)..(lx+lw, ly+lh);
+  // masks are drawn at offset (mx-lx, my-ly).
   function prerenderLayer(entry) {
     const target = assignTarget(entry.layer);
     if (!target) return null;
     const masks = masksByTarget.get(target);
+    const [lx, ly] = getPos(entry.layer);
     const tmp = document.createElement('canvas');
-    tmp.width = canvasW;
-    tmp.height = canvasH;
+    tmp.width = entry.img.width;
+    tmp.height = entry.img.height;
     const tCtx = tmp.getContext('2d');
-    drawLayerImg(tCtx, entry, canvasW, canvasH);
+    tCtx.drawImage(entry.img, 0, 0);
     for (const mask of masks) {
+      const [mx, my] = getPos(mask.layer);
+      const ox = mx - lx, oy = my - ly;
       if (mask.clip.blendMode === 'multiply') {
-        applyMultiplyMask(tCtx, mask, canvasW, canvasH);
+        applyMultiplyMask(tCtx, mask, ox, oy);
       } else {
-        applyBuiltinMask(tCtx, mask, canvasW, canvasH);
+        applyBuiltinMask(tCtx, mask, ox, oy);
       }
     }
-    return tmp;
+    return { tile: tmp, x: lx, y: ly };
   }
 
   const layerEvents = normalLayers.map(e => ({
@@ -1475,30 +1469,33 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     if (ev.type === 'layer') {
       if (ev.tile) {
         const off = getLayerOffset(ev.entry.layer);
+        const t = ev.tile;
         ctx.globalCompositeOperation = 'source-over';
         if (off.scale === 1 && off.rotate === 0) {
-          ctx.drawImage(ev.tile, off.dx, off.dy);
+          ctx.drawImage(t.tile, t.x + off.dx, t.y + off.dy);
         } else {
-          const a = getAnchor(currentChar, ev.entry.layer.name, ev.entry.img, canvasW, canvasH);
+          const a = getLayerAnchor(ev.entry);
           ctx.save();
           ctx.translate(off.dx + a.ax, off.dy + a.ay);
           if (off.rotate) ctx.rotate(off.rotate * Math.PI / 180);
           if (off.scale !== 1) ctx.scale(off.scale, off.scale);
           ctx.translate(-a.ax, -a.ay);
-          ctx.drawImage(ev.tile, 0, 0);
+          ctx.drawImage(t.tile, t.x, t.y);
           ctx.restore();
         }
       } else {
-        drawLayerImg(ctx, ev.entry, canvasW, canvasH, true);
+        drawLayerImg(ctx, ev.entry, true);
       }
     } else if (ev.type === 'pass-mask') {
-      applyBuiltinMask(ctx, ev.mask, canvasW, canvasH);
+      const [mx, my] = getPos(ev.mask.layer);
+      applyBuiltinMask(ctx, ev.mask, mx, my);
     } else {
       // canvas-mask: multiply (darken) or screen (lighten) over the composite
+      const [mx, my] = getPos(ev.mask.layer);
       if (ev.mask.clip.blendMode === 'screen') {
-        applyScreenMask(ctx, ev.mask, canvasW, canvasH);
+        applyScreenMask(ctx, ev.mask, mx, my);
       } else {
-        applyMultiplyMask(ctx, ev.mask, canvasW, canvasH);
+        applyMultiplyMask(ctx, ev.mask, mx, my);
       }
     }
   }

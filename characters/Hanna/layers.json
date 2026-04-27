@@ -1,8 +1,5 @@
 {
-  "canvas_size": [
-    2778,
-    5556
-  ],
+  "canvas_size": [2778, 5556],
   "scale": 1.8519,
   "layers": [
     {
@@ -39,37 +36,43 @@
       "name": "ArmL01",
       "group": "Angle01/ArmL",
       "order": 48,
-      "empty": false
+      "empty": false,
+      "pos": [1306, 1930]
     },
     {
       "name": "ArmL02",
       "group": "Angle01/ArmL",
       "order": 47,
-      "empty": false
+      "empty": false,
+      "pos": [1568, 1918]
     },
     {
       "name": "ArmR01",
       "group": "Angle01/ArmR",
       "order": 45,
-      "empty": false
+      "empty": false,
+      "pos": [877, 1919]
     },
     {
       "name": "ArmR02",
       "group": "Angle01/ArmR",
       "order": 44,
-      "empty": false
+      "empty": false,
+      "pos": [692, 1920]
     },
     {
       "name": "ArmR03",
       "group": "Angle01/ArmR",
       "order": 43,
-      "empty": false
+      "empty": false,
+      "pos": [815, 1924]
     },
     {
       "name": "ArmR04",
       "group": "Angle01/ArmR",
       "order": 42,
-      "empty": false
+      "empty": false,
+      "pos": [861, 1646]
     },
     {
       "name": "Facial01_Softlight",
@@ -81,163 +84,190 @@
       "name": "Pale01_01",
       "group": "Angle01/Head01/Facial01/Pale01",
       "order": 37,
-      "empty": false
+      "empty": false,
+      "pos": [1128, 1292]
     },
     {
       "name": "Sweat01_01",
       "group": "Angle01/Head01/Facial01/Sweat01",
       "order": 35,
-      "empty": false
+      "empty": false,
+      "pos": [1254, 1736]
     },
     {
       "name": "HairClippingMask01",
       "group": "Angle01/Head01/HairClippingMask",
       "order": 34,
-      "empty": false
+      "empty": false,
+      "pos": [969, 1187]
     },
     {
       "name": "Eyes01_Normal_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 32,
-      "empty": false
+      "empty": false,
+      "pos": [1068, 1472]
     },
     {
       "name": "Eyes01_Smile_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 31,
-      "empty": false
+      "empty": false,
+      "pos": [1134, 1505]
     },
     {
       "name": "Eyes01_Angry_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 30,
-      "empty": false
+      "empty": false,
+      "pos": [1125, 1501]
     },
     {
       "name": "Eyes01_Angry_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 29,
-      "empty": false
+      "empty": false,
+      "pos": [1128, 1492]
     },
     {
       "name": "Eyes01_Pensive_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 28,
-      "empty": false
+      "empty": false,
+      "pos": [1129, 1513]
     },
     {
       "name": "Eyes01_Pensive_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 27,
-      "empty": false
+      "empty": false,
+      "pos": [1152, 1470]
     },
     {
       "name": "Eyes01_Cry_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 26,
-      "empty": false
+      "empty": false,
+      "pos": [1150, 1503]
     },
     {
       "name": "Eyes01_Surprised_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 25,
-      "empty": false
+      "empty": false,
+      "pos": [1129, 1449]
     },
     {
       "name": "Eyes01_Flushed_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 24,
-      "empty": false
+      "empty": false,
+      "pos": [1130, 1500]
     },
     {
       "name": "Eyes01_Fearful_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 23,
-      "empty": false
+      "empty": false,
+      "pos": [1123, 1467]
     },
     {
       "name": "Mouth01_Normal_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 21,
-      "empty": false
+      "empty": false,
+      "pos": [1348, 1762]
     },
     {
       "name": "Mouth01_Smile_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 20,
-      "empty": false
+      "empty": false,
+      "pos": [1335, 1748]
     },
     {
       "name": "Mouth01_Angry_Open01",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 19,
-      "empty": false
+      "empty": false,
+      "pos": [1324, 1737]
     },
     {
       "name": "Mouth01_Angry_Open02",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 18,
-      "empty": false
+      "empty": false,
+      "pos": [1308, 1726]
     },
     {
       "name": "Mouth01_Pensive_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 17,
-      "empty": false
+      "empty": false,
+      "pos": [1326, 1755]
     },
     {
       "name": "Mouth01_Pensive_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 16,
-      "empty": false
+      "empty": false,
+      "pos": [1348, 1755]
     },
     {
       "name": "Mouth01_Cry_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 15,
-      "empty": false
+      "empty": false,
+      "pos": [1333, 1724]
     },
     {
       "name": "Mouth01_Surprised_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 14,
-      "empty": false
+      "empty": false,
+      "pos": [1343, 1747]
     },
     {
       "name": "Mouth01_Flushed_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 13,
-      "empty": false
+      "empty": false,
+      "pos": [1315, 1739]
     },
     {
       "name": "Mouth01_Fearful_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 12,
-      "empty": false
+      "empty": false,
+      "pos": [1360, 1760]
     },
     {
       "name": "Mouth01_Neutral_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 11,
-      "empty": false
+      "empty": false,
+      "pos": [1348, 1772]
     },
     {
       "name": "Cheeks01_Normal",
       "group": "Angle01/Head01/Facial01/Cheeks01",
       "order": 9,
-      "empty": false
+      "empty": false,
+      "pos": [1170, 1609]
     },
     {
       "name": "Cheeks01_Flushed",
       "group": "Angle01/Head01/Facial01/Cheeks01",
       "order": 8,
-      "empty": false
+      "empty": false,
+      "pos": [1151, 1587]
     },
     {
       "name": "HeadBase01",
       "group": "Angle01/Head01",
       "order": 7,
-      "empty": false
+      "empty": false,
+      "pos": [779, 913]
     },
     {
       "name": "HeadBase02",
@@ -249,13 +279,15 @@
       "name": "Body",
       "group": "Angle01",
       "order": 4,
-      "empty": false
+      "empty": false,
+      "pos": [430, 1741]
     },
     {
       "name": "HairB01",
       "group": "Angle01/HairB",
       "order": 2,
-      "empty": false
+      "empty": false,
+      "pos": [214, 1268]
     },
     {
       "name": "HairB02",

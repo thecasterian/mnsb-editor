@@ -1,8 +1,5 @@
 {
-  "canvas_size": [
-    2337,
-    4675
-  ],
+  "canvas_size": [2337, 4675],
   "scale": 1.5583,
   "layers": [
     {
@@ -11,7 +8,8 @@
       "order": 78,
       "empty": false,
       "requires": "ArmL02",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1067, 1568]
     },
     {
       "name": "Effect_Front_ArmL03",
@@ -19,7 +17,8 @@
       "order": 77,
       "empty": false,
       "requires": "ArmL03",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1147, 1055]
     },
     {
       "name": "Effect_Front_ArmL04",
@@ -27,7 +26,8 @@
       "order": 76,
       "empty": false,
       "requires": "ArmL04",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1176, 1240]
     },
     {
       "name": "Effect_Front_ArmL05",
@@ -35,7 +35,8 @@
       "order": 75,
       "empty": false,
       "requires": "ArmL05",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [832, 1633]
     },
     {
       "name": "Effect_Front_ArmR01",
@@ -43,7 +44,8 @@
       "order": 73,
       "empty": false,
       "requires": "ArmR01",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [467, 1709]
     },
     {
       "name": "Effect_Front_ArmR02",
@@ -51,7 +53,8 @@
       "order": 72,
       "empty": false,
       "requires": "ArmR02",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [693, 1101]
     },
     {
       "name": "Effect_Front_ArmR03",
@@ -59,7 +62,8 @@
       "order": 71,
       "empty": false,
       "requires": "ArmR03",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [717, 1225]
     },
     {
       "name": "Effect_Front_ArmR04",
@@ -67,7 +71,8 @@
       "order": 70,
       "empty": false,
       "requires": "ArmR04",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [583, 885]
     },
     {
       "name": "Effect_Front_ArmR05",
@@ -75,7 +80,8 @@
       "order": 69,
       "empty": false,
       "requires": "ArmR05",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [681, 1223]
     },
     {
       "name": "Effect_Front_ArmR06",
@@ -83,7 +89,8 @@
       "order": 68,
       "empty": false,
       "requires": "ArmR06",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [570, 1223]
     },
     {
       "name": "Effect_Front_ArmR07",
@@ -91,85 +98,99 @@
       "order": 67,
       "empty": false,
       "requires": "ArmR07",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [693, 1667]
     },
     {
       "name": "ArmL01",
       "group": "Angle01/ArmL",
       "order": 65,
-      "empty": false
+      "empty": false,
+      "pos": [1389, 1218]
     },
     {
       "name": "ArmL02",
       "group": "Angle01/ArmL",
       "order": 64,
-      "empty": false
+      "empty": false,
+      "pos": [1006, 1031]
     },
     {
       "name": "ArmL03",
       "group": "Angle01/ArmL",
       "order": 63,
-      "empty": false
+      "empty": false,
+      "pos": [1147, 1056]
     },
     {
       "name": "ArmL04",
       "group": "Angle01/ArmL",
       "order": 62,
-      "empty": false
+      "empty": false,
+      "pos": [1020, 1008]
     },
     {
       "name": "ArmL05",
       "group": "Angle01/ArmL",
       "order": 61,
-      "empty": false
+      "empty": false,
+      "pos": [722, 1217]
     },
     {
       "name": "ArmR01",
       "group": "Angle01/ArmR",
       "order": 59,
-      "empty": false
+      "empty": false,
+      "pos": [292, 1193]
     },
     {
       "name": "ArmR02",
       "group": "Angle01/ArmR",
       "order": 58,
-      "empty": false
+      "empty": false,
+      "pos": [640, 1100]
     },
     {
       "name": "ArmR03",
       "group": "Angle01/ArmR",
       "order": 57,
-      "empty": false
+      "empty": false,
+      "pos": [640, 1010]
     },
     {
       "name": "ArmR04",
       "group": "Angle01/ArmR",
       "order": 56,
-      "empty": false
+      "empty": false,
+      "pos": [562, 887]
     },
     {
       "name": "ArmR05",
       "group": "Angle01/ArmR",
       "order": 55,
-      "empty": false
+      "empty": false,
+      "pos": [624, 1218]
     },
     {
       "name": "ArmR06",
       "group": "Angle01/ArmR",
       "order": 54,
-      "empty": false
+      "empty": false,
+      "pos": [526, 1193]
     },
     {
       "name": "ArmR07",
       "group": "Angle01/ArmR",
       "order": 53,
-      "empty": false
+      "empty": false,
+      "pos": [563, 1165]
     },
     {
       "name": "ClippingMask_Facial_Normal01",
       "group": "Angle01",
       "order": 52,
-      "empty": false
+      "empty": false,
+      "pos": [949, 633]
     },
     {
       "name": "ClippingMask_Facial_Normal02",
@@ -181,187 +202,218 @@
       "name": "ClippingMask_Facial_Multiply",
       "group": "Angle01",
       "order": 50,
-      "empty": false
+      "empty": false,
+      "pos": [952, 629]
     },
     {
       "name": "ClippingMask_Facial_Normal03",
       "group": "Angle01",
       "order": 49,
-      "empty": false
+      "empty": false,
+      "pos": [791, 474]
     },
     {
       "name": "Pale01",
       "group": "Angle01/Facial/Pale",
       "order": 46,
-      "empty": false
+      "empty": false,
+      "pos": [958, 641]
     },
     {
       "name": "Sweat01",
       "group": "Angle01/Facial/Sweat",
       "order": 44,
-      "empty": false
+      "empty": false,
+      "pos": [1258, 966]
     },
     {
       "name": "Eyes_Normal_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 42,
-      "empty": false
+      "empty": false,
+      "pos": [907, 781]
     },
     {
       "name": "Eyes_Normal_Closed",
       "group": "Angle01/Facial/Eyes",
       "order": 41,
-      "empty": false
+      "empty": false,
+      "pos": [932, 785]
     },
     {
       "name": "Eyes_Smile_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 40,
-      "empty": false
+      "empty": false,
+      "pos": [919, 770]
     },
     {
       "name": "Eyes_Smile_Middle",
       "group": "Angle01/Facial/Eyes",
       "order": 39,
-      "empty": false
+      "empty": false,
+      "pos": [930, 736]
     },
     {
       "name": "Eyes_Smile_Closed",
       "group": "Angle01/Facial/Eyes",
       "order": 38,
-      "empty": false
+      "empty": false,
+      "pos": [923, 741]
     },
     {
       "name": "Eyes_Angry_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 37,
-      "empty": false
+      "empty": false,
+      "pos": [907, 778]
     },
     {
       "name": "Eyes_Angry_Middle",
       "group": "Angle01/Facial/Eyes",
       "order": 36,
-      "empty": false
+      "empty": false,
+      "pos": [908, 772]
     },
     {
       "name": "Eyes_Pensive_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 35,
-      "empty": false
+      "empty": false,
+      "pos": [907, 779]
     },
     {
       "name": "Eyes_Pensive_Middle",
       "group": "Angle01/Facial/Eyes",
       "order": 34,
-      "empty": false
+      "empty": false,
+      "pos": [935, 772]
     },
     {
       "name": "Eyes_Cry_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 33,
-      "empty": false
+      "empty": false,
+      "pos": [925, 770]
     },
     {
       "name": "Eyes_Surprised_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 32,
-      "empty": false
+      "empty": false,
+      "pos": [926, 760]
     },
     {
       "name": "Eyes_Fearful_Open",
       "group": "Angle01/Facial/Eyes",
       "order": 31,
-      "empty": false
+      "empty": false,
+      "pos": [915, 790]
     },
     {
       "name": "Eyes_Uncomfortable_Open01",
       "group": "Angle01/Facial/Eyes",
       "order": 30,
-      "empty": false
+      "empty": false,
+      "pos": [918, 763]
     },
     {
       "name": "Eyes_Uncomfortable_Open02",
       "group": "Angle01/Facial/Eyes",
       "order": 29,
-      "empty": false
+      "empty": false,
+      "pos": [918, 796]
     },
     {
       "name": "Mouth_Normal_Open",
       "group": "Angle01/Facial/Mouth",
       "order": 27,
-      "empty": false
+      "empty": false,
+      "pos": [1112, 1009]
     },
     {
       "name": "Mouth_Normal_Closed",
       "group": "Angle01/Facial/Mouth",
       "order": 26,
-      "empty": false
+      "empty": false,
+      "pos": [1123, 1018]
     },
     {
       "name": "Mouth_Smile_Open",
       "group": "Angle01/Facial/Mouth",
       "order": 25,
-      "empty": false
+      "empty": false,
+      "pos": [1096, 1004]
     },
     {
       "name": "Mouth_Smile_Middle",
       "group": "Angle01/Facial/Mouth",
       "order": 24,
-      "empty": false
+      "empty": false,
+      "pos": [1122, 1014]
     },
     {
       "name": "Mouth_Angry_Closed",
       "group": "Angle01/Facial/Mouth",
       "order": 23,
-      "empty": false
+      "empty": false,
+      "pos": [1137, 1027]
     },
     {
       "name": "Mouth_Pensive_Open",
       "group": "Angle01/Facial/Mouth",
       "order": 22,
-      "empty": false
+      "empty": false,
+      "pos": [1138, 1016]
     },
     {
       "name": "Mouth_Pensive_Closed",
       "group": "Angle01/Facial/Mouth",
       "order": 21,
-      "empty": false
+      "empty": false,
+      "pos": [1132, 1023]
     },
     {
       "name": "Mouth_Cry_Closed",
       "group": "Angle01/Facial/Mouth",
       "order": 20,
-      "empty": false
+      "empty": false,
+      "pos": [1130, 1015]
     },
     {
       "name": "Mouth_Surprised_Open",
       "group": "Angle01/Facial/Mouth",
       "order": 19,
-      "empty": false
+      "empty": false,
+      "pos": [1138, 1007]
     },
     {
       "name": "Mouth_Neutral_Open",
       "group": "Angle01/Facial/Mouth",
       "order": 18,
-      "empty": false
+      "empty": false,
+      "pos": [1141, 1025]
     },
     {
       "name": "Mouth_Neutral_Closed",
       "group": "Angle01/Facial/Mouth",
       "order": 17,
-      "empty": false
+      "empty": false,
+      "pos": [1142, 1033]
     },
     {
       "name": "Cheeks_Normal",
       "group": "Angle01/Facial/Cheeks",
       "order": 15,
-      "empty": false
+      "empty": false,
+      "pos": [961, 851]
     },
     {
       "name": "Cheeks_Flushed",
       "group": "Angle01/Facial/Cheeks",
       "order": 14,
-      "empty": false
+      "empty": false,
+      "pos": [959, 773]
     },
     {
       "name": "Effect_Back_ArmL02",
@@ -369,7 +421,8 @@
       "order": 12,
       "empty": false,
       "requires": "ArmL02",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1208, 1556]
     },
     {
       "name": "Effect_Back_ArmL03",
@@ -377,7 +430,8 @@
       "order": 11,
       "empty": false,
       "requires": "ArmL03",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1271, 1311]
     },
     {
       "name": "Effect_Back_ArmL04",
@@ -385,7 +439,8 @@
       "order": 10,
       "empty": false,
       "requires": "ArmL04",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1271, 1311]
     },
     {
       "name": "Effect_Back_ArmL05",
@@ -393,7 +448,8 @@
       "order": 9,
       "empty": false,
       "requires": "ArmL05",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [1060, 2103]
     },
     {
       "name": "Effect_Back_ArmR02",
@@ -401,7 +457,8 @@
       "order": 7,
       "empty": false,
       "requires": "ArmR02",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [821, 1285]
     },
     {
       "name": "Effect_Back_ArmR03",
@@ -409,7 +466,8 @@
       "order": 6,
       "empty": false,
       "requires": "ArmR03",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [821, 1285]
     },
     {
       "name": "Effect_Back_ArmR04",
@@ -417,7 +475,8 @@
       "order": 5,
       "empty": false,
       "requires": "ArmR04",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [828, 2005]
     },
     {
       "name": "Effect_Back_ArmR05",
@@ -425,7 +484,8 @@
       "order": 4,
       "empty": false,
       "requires": "ArmR05",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [721, 1892]
     },
     {
       "name": "Effect_Back_ArmR06",
@@ -433,7 +493,8 @@
       "order": 3,
       "empty": false,
       "requires": "ArmR06",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [777, 1298]
     },
     {
       "name": "Effect_Back_ArmR07",
@@ -441,13 +502,15 @@
       "order": 2,
       "empty": false,
       "requires": "ArmR07",
-      "auto_enable": true
+      "auto_enable": true,
+      "pos": [810, 1927]
     },
     {
       "name": "Body",
       "group": "Angle01",
       "order": 1,
-      "empty": false
+      "empty": false,
+      "pos": [648, 328]
     }
   ]
 }
