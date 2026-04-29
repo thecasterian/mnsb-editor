@@ -11,7 +11,11 @@
     "target": "eyes",
     "blend": "destination-out"
   },
-  "Pale01": {
+  "Pale01_01": {
+    "target": "canvas",
+    "blend": "multiply"
+  },
+  "Pale01_02": {
     "target": "canvas",
     "blend": "multiply"
   },

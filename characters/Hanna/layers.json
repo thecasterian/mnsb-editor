@@ -1,299 +1,775 @@
 {
-  "canvas_size": [2778, 5556],
-  "scale": 1.8519,
+  "canvas_size": [
+    2400,
+    3734
+  ],
   "layers": [
     {
       "name": "Blending01",
       "group": "Angle01",
       "order": 56,
-      "empty": true
+      "empty": true,
+      "pos": [
+        760,
+        375
+      ],
+      "render": {
+        "blend": "overlay",
+        "stencil": {
+          "role": "read",
+          "ref": 1
+        }
+      }
     },
     {
       "name": "ArmL01_Softlight",
       "group": "Angle01/ArmL_EffectF",
       "order": 54,
-      "empty": true
+      "empty": true,
+      "pos": [
+        862,
+        1969
+      ],
+      "render": {
+        "blend": "softlight",
+        "stencil": {
+          "role": "read",
+          "ref": 1
+        }
+      }
     },
     {
       "name": "ArmL02_Softlight",
       "group": "Angle01/ArmL_EffectF",
       "order": 53,
-      "empty": true
+      "empty": true,
+      "pos": [
+        1282,
+        1623
+      ],
+      "render": {
+        "blend": "softlight",
+        "stencil": {
+          "role": "read",
+          "ref": 1
+        }
+      }
     },
     {
       "name": "ArmR01_Softlight",
       "group": "Angle01/ArmR_EffectF",
       "order": 51,
-      "empty": true
+      "empty": true,
+      "pos": [
+        740,
+        1984
+      ],
+      "render": {
+        "blend": "softlight",
+        "stencil": {
+          "role": "read",
+          "ref": 1
+        }
+      }
     },
     {
       "name": "ArmR02_Overlay",
       "group": "Angle01/ArmR_EffectF",
       "order": 50,
-      "empty": true
+      "empty": true,
+      "pos": [
+        732,
+        1618
+      ],
+      "render": {
+        "blend": "overlay",
+        "stencil": {
+          "role": "read",
+          "ref": 1
+        }
+      }
     },
     {
       "name": "ArmL01",
       "group": "Angle01/ArmL",
       "order": 48,
       "empty": false,
-      "pos": [1306, 1930]
+      "pos": [
+        1080,
+        1018
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "ArmL02",
       "group": "Angle01/ArmL",
       "order": 47,
       "empty": false,
-      "pos": [1568, 1918]
+      "pos": [
+        1343,
+        1007
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "ArmR01",
       "group": "Angle01/ArmR",
       "order": 45,
       "empty": false,
-      "pos": [877, 1919]
+      "pos": [
+        694,
+        1008
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "ArmR02",
       "group": "Angle01/ArmR",
       "order": 44,
       "empty": false,
-      "pos": [692, 1920]
+      "pos": [
+        507,
+        1010
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "ArmR03",
       "group": "Angle01/ArmR",
       "order": 43,
       "empty": false,
-      "pos": [815, 1924]
+      "pos": [
+        589,
+        1013
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "ArmR04",
       "group": "Angle01/ArmR",
       "order": 42,
       "empty": false,
-      "pos": [861, 1646]
+      "pos": [
+        635,
+        735
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Facial01_Softlight",
       "group": "Angle01/Head01",
       "order": 40,
-      "empty": true
+      "empty": true,
+      "pos": [
+        690,
+        5
+      ],
+      "render": {
+        "blend": "softlight",
+        "stencil": {
+          "role": "read",
+          "ref": 2
+        }
+      }
     },
     {
       "name": "Pale01_01",
       "group": "Angle01/Head01/Facial01/Pale01",
       "order": 37,
       "empty": false,
-      "pos": [1128, 1292]
+      "pos": [
+        903,
+        391
+      ],
+      "render": {
+        "blend": "multiply",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.05
+        }
+      }
     },
     {
       "name": "Sweat01_01",
       "group": "Angle01/Head01/Facial01/Sweat01",
       "order": 35,
       "empty": false,
-      "pos": [1254, 1736]
+      "pos": [
+        1029,
+        825
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "HairClippingMask01",
       "group": "Angle01/Head01/HairClippingMask",
       "order": 34,
       "empty": false,
-      "pos": [969, 1187]
+      "pos": [
+        744,
+        278
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "read",
+          "ref": 2
+        }
+      }
     },
     {
       "name": "Eyes01_Normal_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 32,
       "empty": false,
-      "pos": [1068, 1472]
+      "pos": [
+        842,
+        561
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Smile_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 31,
       "empty": false,
-      "pos": [1134, 1505]
+      "pos": [
+        908,
+        594
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Angry_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 30,
       "empty": false,
-      "pos": [1125, 1501]
+      "pos": [
+        899,
+        590
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Angry_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 29,
       "empty": false,
-      "pos": [1128, 1492]
+      "pos": [
+        902,
+        581
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Pensive_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 28,
       "empty": false,
-      "pos": [1129, 1513]
+      "pos": [
+        907,
+        603
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Pensive_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 27,
       "empty": false,
-      "pos": [1152, 1470]
+      "pos": [
+        926,
+        565
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Cry_Closed",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 26,
       "empty": false,
-      "pos": [1150, 1503]
+      "pos": [
+        924,
+        597
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Surprised_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 25,
       "empty": false,
-      "pos": [1129, 1449]
+      "pos": [
+        903,
+        538
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Flushed_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 24,
       "empty": false,
-      "pos": [1130, 1500]
+      "pos": [
+        904,
+        602
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Eyes01_Fearful_Open",
       "group": "Angle01/Head01/Facial01/Eyes01",
       "order": 23,
       "empty": false,
-      "pos": [1123, 1467]
+      "pos": [
+        897,
+        557
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Normal_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 21,
       "empty": false,
-      "pos": [1348, 1762]
+      "pos": [
+        1126,
+        850
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Smile_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 20,
       "empty": false,
-      "pos": [1335, 1748]
+      "pos": [
+        1109,
+        836
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Angry_Open01",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 19,
       "empty": false,
-      "pos": [1324, 1737]
+      "pos": [
+        1097,
+        829
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Angry_Open02",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 18,
       "empty": false,
-      "pos": [1308, 1726]
+      "pos": [
+        1082,
+        820
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Pensive_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 17,
       "empty": false,
-      "pos": [1326, 1755]
+      "pos": [
+        1106,
+        843
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Pensive_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 16,
       "empty": false,
-      "pos": [1348, 1755]
+      "pos": [
+        1122,
+        844
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Cry_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 15,
       "empty": false,
-      "pos": [1333, 1724]
+      "pos": [
+        1107,
+        813
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Surprised_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 14,
       "empty": false,
-      "pos": [1343, 1747]
+      "pos": [
+        1122,
+        836
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Flushed_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 13,
       "empty": false,
-      "pos": [1315, 1739]
+      "pos": [
+        1094,
+        832
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Fearful_Open",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 12,
       "empty": false,
-      "pos": [1360, 1760]
+      "pos": [
+        1133,
+        849
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Mouth01_Neutral_Closed",
       "group": "Angle01/Head01/Facial01/Mouth01",
       "order": 11,
       "empty": false,
-      "pos": [1348, 1772]
+      "pos": [
+        1121,
+        861
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Cheeks01_Normal",
       "group": "Angle01/Head01/Facial01/Cheeks01",
       "order": 9,
       "empty": false,
-      "pos": [1170, 1609]
+      "pos": [
+        941,
+        696
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.012
+        }
+      }
     },
     {
       "name": "Cheeks01_Flushed",
       "group": "Angle01/Head01/Facial01/Cheeks01",
       "order": 8,
       "empty": false,
-      "pos": [1151, 1587]
+      "pos": [
+        920,
+        673
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 2,
+          "cutoff": 0.012
+        }
+      }
     },
     {
       "name": "HeadBase01",
       "group": "Angle01/Head01",
       "order": 7,
       "empty": false,
-      "pos": [779, 913]
+      "pos": [
+        547,
+        5
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "HeadBase02",
       "group": "Angle01/Head02",
       "order": 5,
-      "empty": true
+      "empty": true,
+      "pos": [
+        567,
+        0
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "Body",
       "group": "Angle01",
       "order": 4,
       "empty": false,
-      "pos": [430, 1741]
+      "pos": [
+        78,
+        165
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "HairB01",
       "group": "Angle01/HairB",
       "order": 2,
       "empty": false,
-      "pos": [214, 1268]
+      "pos": [
+        0,
+        214
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     },
     {
       "name": "HairB02",
       "group": "Angle01/HairB",
       "order": 1,
-      "empty": true
+      "empty": true,
+      "pos": [
+        36,
+        211
+      ],
+      "render": {
+        "blend": "source-over",
+        "stencil": {
+          "role": "write",
+          "ref": 1,
+          "cutoff": 0.2
+        }
+      }
     }
   ]
 }
