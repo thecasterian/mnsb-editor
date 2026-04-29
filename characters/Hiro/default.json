@@ -3,9 +3,12 @@
     "enabled": [
       "ArmL01",
       "ArmR01",
+      "Blending01",
+      "Blending02",
       "Body",
       "Cheeks01_Normal",
       "Eyes01_Normal_Open",
+      "HairClippingMask01",
       "HeadBase01",
       "Mouth01_Normal_Closed",
       "OptionB_Head01"
@@ -15,11 +18,15 @@
     "enabled": [
       "ArmL01",
       "ArmR01",
+      "Blending01",
+      "Blending02",
       "Body",
       "Cheeks02_Normal",
       "Eyes02_Normal_Open",
+      "HairClippingMask02",
       "HeadBase02",
       "Mouth02_Normal_Closed",
+      "OptionB_Head01",
       "OptionB_Head02"
     ]
   }

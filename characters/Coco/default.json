@@ -4,9 +4,12 @@
     "ArmR01",
     "Body",
     "Cheeks_Normal",
+    "ClippingMask_Eyes_Normal",
+    "ClippingMask_Root_Overlay",
+    "ClippingMask_Root_Softlight",
     "Eyes_Normal_Open",
-    "Mouth_Normal_Open",
+    "Hair_Multiply",
     "Hair_Normal",
-    "Hair_Multiply"
+    "Mouth_Normal_Open"
   ]
 }

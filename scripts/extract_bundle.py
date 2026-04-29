@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
@@ -25,6 +26,11 @@ from pathlib import Path
 from typing import Optional
 
 import UnityPy
+
+# Layers whose name embeds an arm pose (Effect_Back_ArmR07, ArmL01_Softlight,
+# Option_ArmL11, …) depend on that arm being active. Auto-derive the requires
+# field from the embedded arm token so they disappear when the arm switches.
+_ARM_REQUIRES_PATTERN = re.compile(r"(Arm[LR]\d+|Arms\d+)")
 
 # Curation fields preserved from an existing layers.json across re-extraction.
 # `group` is preserved because the bundle hierarchy doesn't always match the
@@ -45,7 +51,6 @@ class Leaf:
     group: str          # bundle hierarchy path minus root, e.g. "Angle01/ArmR"
     order: int          # SpriteRenderer.sortingOrder
     sprite_pathid: int
-    enabled: bool       # SpriteRenderer.m_Enabled (the in-game default)
     # World footprint in pixels (Unity Y-up, accumulated transforms × PTU)
     left: float
     right: float
@@ -250,7 +255,6 @@ def extract(bundle_path: str, out_dir: str) -> None:
             group=group_path[tid],
             order=int(getattr(sr, "m_SortingOrder", 0)),
             sprite_pathid=sp_id,
-            enabled=bool(getattr(sr, "m_Enabled", True)),
             left=left, right=right, top_y_up=top, bottom_y_up=bottom,
             width=int(w), height=int(h),
             render=render,
@@ -290,12 +294,11 @@ def extract(bundle_path: str, out_dir: str) -> None:
             "pos": [pos_x, pos_y],
             "render": L.render,
         }
-        # For stencil readers (clipping masks), the bundle's m_Enabled is the
-        # in-game default — emit it so the renderer can seed default state.
-        # Non-readers stay default.json-driven, no emission needed.
-        stc = L.render.get("stencil") or {}
-        if stc.get("role") == "read" and not L.enabled:
-            entry["enabled"] = False
+        # Auto-derive arm-pose requirement from name (e.g. ArmL01_Softlight →
+        # requires ArmL01); skip self-reference (ArmL01 itself).
+        m = _ARM_REQUIRES_PATTERN.search(L.name)
+        if m and m.group(1) != L.name:
+            entry["requires"] = m.group(1)
         layer_entries.append(entry)
     # Sort by order descending — matches existing layers.json convention.
     layer_entries.sort(key=lambda e: -e["order"])

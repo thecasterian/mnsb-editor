@@ -3,8 +3,14 @@
     "ArmL01",
     "ArmR01",
     "Body",
-    "Normal",
+    "ClippingMask_Facial_Multiply",
+    "ClippingMask_Facial_Normal01",
+    "ClippingMask_Facial_Normal02",
+    "ClippingMask_Root_Overlay01",
+    "ClippingMask_Root_Overlay02",
+    "ClippingMask_Root_Softlight",
     "Eyes_Normal_Open01",
-    "Mouth_Normal_Closed"
+    "Mouth_Normal_Closed",
+    "Normal"
   ]
 }

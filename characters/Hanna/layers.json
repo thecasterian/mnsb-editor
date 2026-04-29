@@ -48,7 +48,9 @@
           0.7529,
           0.0157
         ]
-      }
+      },
+      "requires": "ArmL01",
+      "auto_enable": true
     },
     {
       "name": "ArmL02_Softlight",
@@ -72,7 +74,8 @@
           0.1255
         ]
       },
-      "enabled": false
+      "requires": "ArmL02",
+      "auto_enable": true
     },
     {
       "name": "ArmR01_Softlight",
@@ -96,7 +99,8 @@
           0.0196
         ]
       },
-      "enabled": false
+      "requires": "ArmR01",
+      "auto_enable": true
     },
     {
       "name": "ArmR02_Overlay",
@@ -120,7 +124,8 @@
           0.0627
         ]
       },
-      "enabled": false
+      "requires": "ArmR02",
+      "auto_enable": true
     },
     {
       "name": "ArmL01",

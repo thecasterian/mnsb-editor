@@ -4,9 +4,16 @@
     "ArmR01",
     "Body",
     "Cheeks_Normal",
+    "ClippingMask_Eyes",
+    "ClippingMask_Facial_01",
+    "ClippingMask_Facial_02",
+    "ClippingMask_Root_01",
+    "ClippingMask_Root_02",
+    "Effect_Back_ArmR01",
+    "Effect_Back_Arms01",
     "Eyes_Normal_Open01",
     "Mask01",
     "Mouth_Normal_Closed",
-    "Effect_Back_ArmR01"
+    "Mouth_Normal_Open"
   ]
 }

@@ -25,8 +25,7 @@
           0.8784,
           0.0314
         ]
-      },
-      "enabled": false
+      }
     },
     {
       "name": "RootBlendingSoftlight",

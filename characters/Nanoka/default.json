@@ -4,10 +4,16 @@
     "ArmR01",
     "Body01",
     "Cheeks01_Normal",
+    "ClippingMask_Angle01_01",
+    "ClippingMask_Angle01_02",
+    "ClippingMask_Angle01_03",
+    "ClippingMask_Facial01_01",
+    "ClippingMask_Facial01_02",
     "Eyes01_Normal_Open01",
     "FacialLineDrawing01",
     "HeadBase01",
     "Mouth01_Normal_Closed01",
+    "Mouth01_Normal_Open01",
     "OptionB_Body01"
   ]
 }

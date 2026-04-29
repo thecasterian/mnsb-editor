@@ -870,7 +870,9 @@
           1.0,
           0.4314
         ]
-      }
+      },
+      "requires": "Pale01_01",
+      "auto_enable": true
     },
     {
       "name": "Pale02",

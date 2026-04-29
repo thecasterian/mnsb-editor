@@ -1,11 +1,15 @@
 {
   "enabled": [
     "ArmL01",
+    "ArmL01_Softlight",
     "ArmR03",
+    "Blending01",
     "Body",
     "Cheeks01_Normal",
     "Eyes01_Normal_Open",
+    "Facial01_Softlight",
     "HairB01",
+    "HairClippingMask01",
     "HeadBase01",
     "Mouth01_Normal_Open"
   ]

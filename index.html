@@ -502,13 +502,20 @@ async function loadCharacter(name) {
   compositions = compsJson;
   defaultJsonRaw = defaultJson || {};
 
-  // Detect head bases (Head01, Head02, etc.)
+  // Detect head bases (Head01, Head02, etc.). A head is only kept if it has
+  // at least one facial feature scoped to it — Hanna's bundle ships HeadBase02
+  // + HairB02 with no Head02-side eyes/mouths, so Head02 is unused and would
+  // otherwise show as a broken option in the head selector.
   const headSet = new Set();
   for (const l of layersInfo) {
     const match = l.group.match(/Head(\d+)/);
     if (match) headSet.add('Head' + match[1]);
   }
-  headBases = [...headSet].sort();
+  const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Facial'];
+  const hasFacialFeatures = head => layersInfo.some(l =>
+    l.group.includes(head) &&
+    facialKeywords.some(k => l.group.includes(k) || l.name.includes(k)));
+  headBases = [...headSet].filter(hasFacialFeatures).sort();
   if (headBases.length > 1) {
     // Per-head shape: pick first head that has a block; else legacy fallback via HeadBase entry
     const perHead = headBases.find(h => defaultJsonRaw[h]);
@@ -551,6 +558,12 @@ function isStencilReader(l) {
   return getRender(l).stencil?.role === 'read';
 }
 
+// Body and HeadBase* are render-foundation layers — disabling them produces a
+// broken composite. Treat as always-on: skip in panel UI and the "None" sweep.
+function isAlwaysOnBase(l) {
+  return l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase');
+}
+
 // UI bucketing for Effect_* layer families: cluster sibling effect variants
 // (e.g. Effect_Back_ArmR01..09) under a single section regardless of how the
 // bundle nested them. Everything else falls through to its bundle-derived
@@ -578,14 +591,7 @@ function computeDefaultEnabled() {
 function resetToDefault() {
   activeState = {};
   for (const l of layersInfo) {
-    if (isStencilReader(l)) {
-      // Clipping masks default to the bundle's m_Enabled (in-game baseline);
-      // omitted = true. User can override per-layer via the panel toggle.
-      activeState[l.name] = l.enabled !== false;
-    } else {
-      // Normal layers: default-on iff listed in default.json.
-      activeState[l.name] = defaultEnabled.includes(l.name);
-    }
+    activeState[l.name] = defaultEnabled.includes(l.name);
   }
 }
 
@@ -689,14 +695,18 @@ function applyPreset(presetName) {
 
   // Turn off all facial layers, then enable the preset's list
   const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
-  const isFacial = name => facialKeywords.some(k => name.includes(k));
+  // Match by name OR group path: some characters (e.g. Leia) name their cheek
+  // sprites bare ('Flushed', 'Normal') under an 'Angle01/Facial/Cheeks' group,
+  // so a name-only check misses them.
+  const isFacial = l => facialKeywords.some(k =>
+    l.name.includes(k) || l.group.includes(k));
 
   // Only clear facial layers belonging to the active head (or all if single head).
   // Stencil readers (clipping masks) are preset-independent and stay on/off
   // per their own state; we only cycle the regular facial sprites here.
   for (const l of layersInfo) {
     if (isStencilReader(l)) continue;
-    if (isFacial(l.name)) {
+    if (isFacial(l)) {
       if (!activeHead || l.group.includes(activeHead)) {
         activeState[l.name] = false;
       }
@@ -741,8 +751,7 @@ function buildHeadSelector() {
       }
       activeHead = head;
       defaultEnabled = computeDefaultEnabled();
-      // Enable head-scoped layers from the new head's default
-      // (HeadBase, FacialLineDrawing, OptionB_Head*, HairB*, etc.)
+      // Enable head-scoped layers per the new head's default.json entries.
       for (const l of layersInfo) {
         if (belongsToHead(l, head) && defaultEnabled.includes(l.name)) {
           activeState[l.name] = true;
@@ -934,6 +943,7 @@ function buildGroups() {
       const cleared = [];
       for (const l of layers) {
         if (!isLayerForActiveHead(l.name)) continue; // don't touch layers belonging to inactive head
+        if (isAlwaysOnBase(l)) continue; // Body/HeadBase stay on regardless
         if (activeState[l.name]) cleared.push(l);
         activeState[l.name] = false;
       }
@@ -946,13 +956,17 @@ function buildGroups() {
 
     for (const l of layers) {
       if (!isLayerForActiveHead(l.name)) continue; // hide layers that belong to a different head
+      if (isAlwaysOnBase(l)) continue; // Body/HeadBase aren't user-toggleable
       const btn = document.createElement('button');
       btn.className = 'layer-btn';
-      btn.textContent = l.name
-        .replace(/^ClippingMask_/, '')
-        .replace(/^(Eyes|Mouth|Cheeks|Sweat|Pale)\d+_/, '')
-        .replace(/^(ArmL|ArmR|Eyes_|Mouth_|Cheeks_|Sweat|Pale)/, '')
-        .replace(/^_/, '') || l.name;
+      // Strip the group's leaf segment from the start of the layer name —
+      // e.g. for group leaf "Eyes", "Eyes_Normal_Open01" → "Normal_Open01".
+      // If the name doesn't start with the leaf, leave it unchanged.
+      const leaf = groupPath.split('/').pop();
+      let label = l.name;
+      if (label.startsWith(leaf + '_')) label = label.slice(leaf.length + 1);
+      else if (label.startsWith(leaf)) label = label.slice(leaf.length);
+      btn.textContent = label || l.name;
       btn.dataset.layer = l.name;
       btn.dataset.group = groupPath;
       btn.onclick = () => {
@@ -1122,11 +1136,12 @@ function updateUI() {
   // (within applyPreset's scope: same head, controllable) equal the preset
   // exactly. Looser "every" matching falsely highlights when extras are on.
   const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
-  const isFacial = name => facialKeywords.some(k => name.includes(k));
+  const isFacial = l => facialKeywords.some(k =>
+    l.name.includes(k) || l.group.includes(k));
   const isControllable = l => !isStencilReader(l);
   const facialOnNames = new Set(
     layersInfo
-      .filter(l => isFacial(l.name)
+      .filter(l => isFacial(l)
         && (!activeHead || l.group.includes(activeHead))
         && isControllable(l)
         && activeState[l.name])
