@@ -8,7 +8,7 @@
       "name": "Blending01",
       "group": "Angle01",
       "order": 56,
-      "empty": true,
+      "empty": false,
       "pos": [
         760,
         375
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0235
+        ]
       }
     },
     {
       "name": "ArmL01_Softlight",
       "group": "Angle01/ArmL_EffectF",
       "order": 54,
-      "empty": true,
+      "empty": false,
       "pos": [
         862,
         1969
@@ -35,14 +41,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0157
+        ]
       }
     },
     {
       "name": "ArmL02_Softlight",
       "group": "Angle01/ArmL_EffectF",
       "order": 53,
-      "empty": true,
+      "empty": false,
       "pos": [
         1282,
         1623
@@ -52,14 +64,21 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
-      }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.1255
+        ]
+      },
+      "enabled": false
     },
     {
       "name": "ArmR01_Softlight",
       "group": "Angle01/ArmR_EffectF",
       "order": 51,
-      "empty": true,
+      "empty": false,
       "pos": [
         740,
         1984
@@ -69,14 +88,21 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
-      }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0196
+        ]
+      },
+      "enabled": false
     },
     {
       "name": "ArmR02_Overlay",
       "group": "Angle01/ArmR_EffectF",
       "order": 50,
-      "empty": true,
+      "empty": false,
       "pos": [
         732,
         1618
@@ -86,8 +112,15 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
-      }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0627
+        ]
+      },
+      "enabled": false
     },
     {
       "name": "ArmL01",
@@ -201,7 +234,7 @@
       "name": "Facial01_Softlight",
       "group": "Angle01/Head01",
       "order": 40,
-      "empty": true,
+      "empty": false,
       "pos": [
         690,
         5
@@ -211,7 +244,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0196
+        ]
       }
     },
     {
@@ -264,7 +303,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.7529
+        ]
       }
     },
     {
@@ -703,7 +748,7 @@
       "name": "HeadBase02",
       "group": "Angle01/Head02",
       "order": 5,
-      "empty": true,
+      "empty": false,
       "pos": [
         567,
         0
@@ -757,7 +802,7 @@
       "name": "HairB02",
       "group": "Angle01/HairB",
       "order": 1,
-      "empty": true,
+      "empty": false,
       "pos": [
         36,
         211

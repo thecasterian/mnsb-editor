@@ -15,7 +15,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmL02",
       "auto_enable": true
@@ -31,7 +37,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmL03",
       "auto_enable": true
@@ -47,7 +59,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmL04",
       "auto_enable": true
@@ -63,7 +81,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmL05",
       "auto_enable": true
@@ -79,7 +103,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR01",
       "auto_enable": true
@@ -95,7 +125,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR02",
       "auto_enable": true
@@ -111,7 +147,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR03",
       "auto_enable": true
@@ -127,7 +169,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR04",
       "auto_enable": true
@@ -143,7 +191,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR05",
       "auto_enable": true
@@ -159,7 +213,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR06",
       "auto_enable": true
@@ -175,7 +235,13 @@
       ],
       "render": {
         "blend": "overlay",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.1255
+        ]
       },
       "requires": "ArmR07",
       "auto_enable": true
@@ -413,7 +479,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.6275
+        ]
       }
     },
     {

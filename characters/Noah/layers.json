@@ -8,7 +8,7 @@
       "name": "ClippingMask_Effect_Root_01",
       "group": "Angle01",
       "order": 66,
-      "empty": true,
+      "empty": false,
       "pos": [
         700,
         6
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.0471
+        ]
       }
     },
     {
       "name": "ClippingMask_Effect_Root_02",
       "group": "Angle01",
       "order": 65,
-      "empty": true,
+      "empty": false,
       "pos": [
         1317,
         1229
@@ -35,14 +41,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.502,
+          0.502,
+          0.502,
+          0.502
+        ]
       }
     },
     {
       "name": "ClippingMask_Effect_Root_03",
       "group": "Angle01",
       "order": 64,
-      "empty": true,
+      "empty": false,
       "pos": [
         757,
         519
@@ -52,14 +64,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.1882
+        ]
       }
     },
     {
       "name": "ClippingMask_Effect_Root_04",
       "group": "Angle01",
       "order": 63,
-      "empty": true,
+      "empty": false,
       "pos": [
         314,
         159
@@ -69,21 +87,33 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.0314
+        ]
       }
     },
     {
       "name": "Effect_Front_ArmL01",
       "group": "Angle01/Effect_Front_ArmL",
       "order": 61,
-      "empty": true,
+      "empty": false,
       "pos": [
         1486,
         1098
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmL01"
     },
@@ -91,14 +121,20 @@
       "name": "Effect_Front_ArmL04",
       "group": "Angle01/Effect_Front_ArmL",
       "order": 60,
-      "empty": true,
+      "empty": false,
       "pos": [
         1054,
         1023
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmL04"
     },
@@ -106,14 +142,20 @@
       "name": "Effect_Front_ArmL05",
       "group": "Angle01/Effect_Front_ArmL",
       "order": 59,
-      "empty": true,
+      "empty": false,
       "pos": [
         1220,
         330
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmL05"
     },
@@ -121,14 +163,20 @@
       "name": "Effect_Front_ArmR02",
       "group": "Angle01/Effect_Front_ArmR",
       "order": 57,
-      "empty": true,
+      "empty": false,
       "pos": [
         657,
         1038
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmR02"
     },
@@ -136,14 +184,20 @@
       "name": "Effect_Front_ArmR04",
       "group": "Angle01/Effect_Front_ArmR",
       "order": 56,
-      "empty": true,
+      "empty": false,
       "pos": [
         852,
         645
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmR04"
     },
@@ -151,14 +205,20 @@
       "name": "Effect_Front_ArmR05",
       "group": "Angle01/Effect_Front_ArmR",
       "order": 55,
-      "empty": true,
+      "empty": false,
       "pos": [
         472,
         997
       ],
       "render": {
         "blend": "softlight",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.051
+        ]
       },
       "requires": "ArmR05"
     },
@@ -454,7 +514,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.502
+        ]
       }
     },
     {

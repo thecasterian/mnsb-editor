@@ -8,7 +8,7 @@
       "name": "Blending01",
       "group": "Angle01",
       "order": 131,
-      "empty": true,
+      "empty": false,
       "pos": [
         542,
         0
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          0.0,
+          0.3838,
+          0.3333
+        ]
       }
     },
     {
       "name": "Blending02",
       "group": "Angle01",
       "order": 130,
-      "empty": true,
+      "empty": false,
       "pos": [
         198,
         220
@@ -35,7 +41,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          0.1934,
+          0.3231,
+          0.0784
+        ]
       }
     },
     {
@@ -460,7 +472,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.6
+        ]
       }
     },
     {
@@ -1099,7 +1117,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.6
+        ]
       }
     },
     {

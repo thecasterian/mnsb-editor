@@ -45,7 +45,7 @@ class Leaf:
     group: str          # bundle hierarchy path minus root, e.g. "Angle01/ArmR"
     order: int          # SpriteRenderer.sortingOrder
     sprite_pathid: int
-    enabled: bool       # SpriteRenderer.m_Enabled
+    enabled: bool       # SpriteRenderer.m_Enabled (the in-game default)
     # World footprint in pixels (Unity Y-up, accumulated transforms × PTU)
     left: float
     right: float
@@ -233,6 +233,18 @@ def extract(bundle_path: str, out_dir: str) -> None:
                 shader_name = shader_name_by_pid.get(_pptr(mat.m_Shader), "?")
                 render = _parse_render(shader_name, _read_material_floats(mat))
 
+        # SpriteRenderer-level tint (per-instance color override). Unity's
+        # sprite shader multiplies fragment_color = texture · m_Color, then
+        # runs alpha test against _Cutoff. Mirror that order in the renderer.
+        sr_color = getattr(sr, "m_Color", None)
+        if sr_color is not None:
+            r = round(getattr(sr_color, "r", 1.0), 4)
+            g = round(getattr(sr_color, "g", 1.0), 4)
+            b = round(getattr(sr_color, "b", 1.0), 4)
+            a = round(getattr(sr_color, "a", 1.0), 4)
+            if (r, g, b, a) != (1.0, 1.0, 1.0, 1.0):
+                render["tint"] = [r, g, b, a]
+
         leaves.append(Leaf(
             name=go_name.get(td["go"], "?"),
             group=group_path[tid],
@@ -270,14 +282,21 @@ def extract(bundle_path: str, out_dir: str) -> None:
         # PIL pixel coords: top-left of sprite on canvas, Y-flipped
         pos_x = int(round(L.left - g_left))
         pos_y = int(round(g_top - L.top_y_up))
-        layer_entries.append({
+        entry = {
             "name": L.name,
             "group": L.group,
             "order": L.order,
             "empty": L.width == 0 or L.height == 0,
             "pos": [pos_x, pos_y],
             "render": L.render,
-        })
+        }
+        # For stencil readers (clipping masks), the bundle's m_Enabled is the
+        # in-game default — emit it so the renderer can seed default state.
+        # Non-readers stay default.json-driven, no emission needed.
+        stc = L.render.get("stencil") or {}
+        if stc.get("role") == "read" and not L.enabled:
+            entry["enabled"] = False
+        layer_entries.append(entry)
     # Sort by order descending — matches existing layers.json convention.
     layer_entries.sort(key=lambda e: -e["order"])
 
@@ -296,10 +315,11 @@ def extract(bundle_path: str, out_dir: str) -> None:
         for k in PRESERVED_LAYER_FIELDS:
             if k in prev:
                 e[k] = prev[k]
-        # User-set "empty: true" beats auto-detected (sprite present means
-        # not empty by default, but user may want to suppress rendering).
-        if prev.get("empty") is True:
-            e["empty"] = True
+        # `empty` is bundle-driven: a sprite exists (and is rendered) unless
+        # the bundle ships a zero-sized placeholder. We don't preserve a
+        # user-set `empty: true` because it was historically used to hide
+        # layers we hadn't yet extracted hi-res versions of — the bundle
+        # supersedes that workaround.
 
     out_data = {
         "canvas_size": [canvas_w, canvas_h],

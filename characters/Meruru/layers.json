@@ -8,7 +8,7 @@
       "name": "ClippingMask_Angle01_01",
       "group": "Angle01",
       "order": 138,
-      "empty": true,
+      "empty": false,
       "pos": [
         132,
         0
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.9151,
+          0.8331,
+          0.87,
+          0.1333
+        ]
       }
     },
     {
       "name": "ClippingMask_Angle01_02",
       "group": "Angle01",
       "order": 137,
-      "empty": true,
+      "empty": false,
       "pos": [
         236,
         203
@@ -35,7 +41,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.9294,
+          0.4,
+          0.4784,
+          0.0392
+        ]
       }
     },
     {

@@ -8,7 +8,7 @@
       "name": "RootBlendingOverlay",
       "group": "Angle01",
       "order": 97,
-      "empty": true,
+      "empty": false,
       "pos": [
         156,
         13
@@ -18,14 +18,21 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
-      }
+        },
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.0314
+        ]
+      },
+      "enabled": false
     },
     {
       "name": "RootBlendingSoftlight",
       "group": "Angle01",
       "order": 96,
-      "empty": true,
+      "empty": false,
       "pos": [
         540,
         282
@@ -35,7 +42,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.8784,
+          0.8784,
+          0.8784,
+          0.0314
+        ]
       }
     },
     {
@@ -663,7 +676,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.3765
+        ]
       }
     },
     {

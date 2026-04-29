@@ -460,7 +460,6 @@ let defaultJsonRaw = {};   // raw default.json (may be flat or per-head)
 let headBases = [];        // e.g. ['Head01', 'Head02'] if multi-head
 let activeHead = null;     // currently active head base name
 let activeState = {};      // { layerName: true/false }
-let clippingData = {};     // from clipping.json: { layerName: { target, blend } }
 let advancedMode = false;
 let groupOffsets = {};     // { displayGroupPath: { dx, dy } } — facial groups only
 
@@ -491,11 +490,10 @@ async function loadCharacter(name) {
 
   invalidateImageCache();
   groupOffsets = {};
-  const [layersJson, compsJson, defaultJson, clippingJson] = await Promise.all([
+  const [layersJson, compsJson, defaultJson] = await Promise.all([
     fetch(`characters/${name}/layers.json`).then(r => r.json()),
     fetch(`characters/${name}/compositions.json`).then(r => r.json()),
     fetch(`characters/${name}/default.json`).then(r => r.json()),
-    fetch(`characters/${name}/clipping.json`).then(r => r.ok ? r.json() : {}),
   ]);
 
   layersInfo = layersJson.layers.filter(l => !l.empty);
@@ -503,7 +501,6 @@ async function loadCharacter(name) {
   layersInfo.forEach(l => { l._canvasW = canvasSize[0]; l._canvasH = canvasSize[1]; });
   compositions = compsJson;
   defaultJsonRaw = defaultJson || {};
-  clippingData = clippingJson || {};
 
   // Detect head bases (Head01, Head02, etc.)
   const headSet = new Set();
@@ -538,77 +535,33 @@ async function loadCharacter(name) {
   renderPreview();
 }
 
-// --- Clipping Mask ---
+// --- Render descriptor helpers ---
+//
+// Every layer carries a `render` object derived from its Unity material:
+//   { blend: 'source-over' | 'multiply' | 'overlay' | 'softlight',
+//     stencil: null | { role: 'write' | 'read', ref: int, cutoff?: float } }
+// Writers contribute their alpha to the per-ref stencil buffer (binary,
+// thresholded by `cutoff`). Readers are gated by that buffer when composited.
 
-function getClipInfo(name) {
-  const info = clippingData[name];
-  if (!info) return null;
-  return { target: info.target, blendMode: info.blend || 'source-over', head: info.head || null };
+function getRender(layer) {
+  return layer.render || { blend: 'source-over', stencil: null };
 }
 
-function isClipMaskLayer(l) {
-  return getClipInfo(l.name) !== null;
+function isStencilReader(l) {
+  return getRender(l).stencil?.role === 'read';
 }
 
-function isToggleableClipMask(l) {
-  const info = getClipInfo(l.name);
-  if (info === null) return false;
-  // Canvas-target masks (Pale) are user-toggleable expression effects.
-  if (info.target === 'canvas') return true;
-  return info.blendMode === 'source-over';
-}
-
-function isAlwaysOnClipMask(l) {
-  return isClipMaskLayer(l) && !isToggleableClipMask(l);
-}
-
+// UI bucketing for Effect_* layer families: cluster sibling effect variants
+// (e.g. Effect_Back_ArmR01..09) under a single section regardless of how the
+// bundle nested them. Everything else falls through to its bundle-derived
+// group.
 function getDisplayGroup(l) {
-  if (!isToggleableClipMask(l)) return l.group;
-  const info = getClipInfo(l.name);
-  // Canvas-multiply masks get their own UI buckets keyed by the relevant
-  // source-group segment so siblings stay together while per-head buckets
-  // (e.g. Ema's ".../Head01/...") stay separated. Each mask family routes
-  // to its own bucket: Effect_* → __EffectMask__, Shadow_* → __ShadowMask__,
-  // Pale → __PaleMask__ (default).
-  if (info && info.target === 'canvas') {
-    const segments = l.group.split('/');
-    const headMatch = l.group.match(/Head\d+/);
-    const headPrefix = headMatch ? `${headMatch[0]}/` : '';
-    // Option_Arm*_Back layers are shadow effects whose group has no Shadow
-    // segment — detect by name and bucket by the parent Option_Arm segment so
-    // all variants under one Option_Arm group gather into a single section.
-    if (/^Option_Arm.*_Back$/.test(l.name)) {
-      const optSeg = segments.find(s => /^Option_Arm/.test(s));
-      if (optSeg) return `__ShadowMask__/${headPrefix}${optSeg}`;
-    }
-    for (const [bucket, regex] of [
-      ['__EffectMask__', /^Effect/],
-      ['__ShadowMask__', /^Shadow/],
-    ]) {
-      const seg = [...segments].reverse().find(s => regex.test(s));
-      if (seg) return `${bucket}/${headPrefix}${seg}`;
-    }
-    const paleSegment = [...segments].reverse().find(s => /^Pale/.test(s)) || 'Pale';
-    return `__PaleMask__/${headPrefix}${paleSegment}`;
-  }
-  if (headBases.length <= 1) return '__ClippingMasks__';
+  const segments = l.group.split('/');
   const headMatch = l.group.match(/Head\d+/);
-  return headMatch ? `__ClippingMasks__/${headMatch[0]}` : '__ClippingMasks__';
-}
-
-function isInClipTarget(layer, target) {
-  if (isClipMaskLayer(layer)) return false;
-  const group = layer.group;
-  const segments = group.split('/');
-  if (target === 'facial') {
-    if (segments.some(s => /^Facial\d*$/.test(s))) return true;
-    // Flat-hierarchy characters (e.g. Meruru) skip the Facial## group and
-    // park facial features directly under Head##; recognize them by leaf.
-    const underHead = segments.some(s => /^Head\d*$/.test(s));
-    return underHead && segments.some(s => /^(Mouth|Cheeks|Pale|Sweat)\d*$/.test(s));
-  }
-  if (target === 'eyes') return segments.some(s => /^Eyes\d*$/.test(s));
-  return false;
+  const headPrefix = headMatch ? `${headMatch[0]}/` : '';
+  const effectSeg = [...segments].reverse().find(s => /^Effect/.test(s));
+  if (effectSeg) return `__EffectMask__/${headPrefix}${effectSeg}`;
+  return l.group;
 }
 
 // --- State Management ---
@@ -625,9 +578,14 @@ function computeDefaultEnabled() {
 function resetToDefault() {
   activeState = {};
   for (const l of layersInfo) {
-    // Non-toggleable clip masks (destination-out, pool-multiply) are always on;
-    // everything else is on iff listed in the resolved default.
-    activeState[l.name] = isAlwaysOnClipMask(l) || defaultEnabled.includes(l.name);
+    if (isStencilReader(l)) {
+      // Clipping masks default to the bundle's m_Enabled (in-game baseline);
+      // omitted = true. User can override per-layer via the panel toggle.
+      activeState[l.name] = l.enabled !== false;
+    } else {
+      // Normal layers: default-on iff listed in default.json.
+      activeState[l.name] = defaultEnabled.includes(l.name);
+    }
   }
 }
 
@@ -734,11 +692,10 @@ function applyPreset(presetName) {
   const isFacial = name => facialKeywords.some(k => name.includes(k));
 
   // Only clear facial layers belonging to the active head (or all if single head).
-  // Pool-target clip masks (source-over / destination-out / pool-multiply) stay
-  // preset-independent; canvas-target masks (Pale) are toggled by presets.
+  // Stencil readers (clipping masks) are preset-independent and stay on/off
+  // per their own state; we only cycle the regular facial sprites here.
   for (const l of layersInfo) {
-    const info = getClipInfo(l.name);
-    if (info && info.target !== 'canvas') continue;
+    if (isStencilReader(l)) continue;
     if (isFacial(l.name)) {
       if (!activeHead || l.group.includes(activeHead)) {
         activeState[l.name] = false;
@@ -779,9 +736,8 @@ function buildHeadSelector() {
         return !!(m && 'Head' + m[1] === h);
       };
       // Turn off all layers of the old head (matched by group OR by Head## suffix in name).
-      // Always-on clip masks are head-scoped at render time, not state time — leave them on.
       for (const l of layersInfo) {
-        if (belongsToHead(l, oldHead) && !isAlwaysOnClipMask(l)) activeState[l.name] = false;
+        if (belongsToHead(l, oldHead)) activeState[l.name] = false;
       }
       activeHead = head;
       defaultEnabled = computeDefaultEnabled();
@@ -882,9 +838,8 @@ function buildGroups() {
   const container = document.getElementById('groups');
   container.innerHTML = '';
 
-  // Group layers by their group path. Toggleable clip masks are rerouted into a
-  // synthetic "__ClippingMasks__" group so they appear in a dedicated UI section.
-  // Preserve any Head## segment so per-head filtering still works.
+  // Group layers by their display path (mostly bundle-derived; Pale/Effect/
+  // Shadow get synthetic buckets via getDisplayGroup so siblings cluster).
   const groups = new Map();
   for (const l of layersInfo) {
     const key = getDisplayGroup(l);
@@ -894,7 +849,6 @@ function buildGroups() {
 
   // Simplify group names for display
   function displayName(group) {
-    if (group.startsWith('__ClippingMasks__')) return 'Clipping Masks';
     const parts = group.split('/');
     return parts[parts.length - 1];
   }
@@ -905,45 +859,28 @@ function buildGroups() {
   // stability then exposed file-iteration order, which differs per
   // character. Each leaf gets a distinct rank.
   function groupOrder(path) {
-    if (path.startsWith('__PaleMask__')) return 3;
-    if (path.startsWith('__ClippingMasks__')) return 30;
-
-    // __ShadowMask__/Option_Arm* (Option_*_Back shadows) ride alongside their
-    // parent limb (Option_Arm groups at 20+limb*2; shadow at 21+limb*2). E.g.
-    // AnAn: Option_ArmR variants (22) → Option_ArmR shadow (23) → Option_Arms
-    // (24), so Option_Arms doesn't get sandwiched mid-ArmR cluster.
-    if (path.startsWith('__ShadowMask__/')) {
-      const sub = path.split('/').pop();
-      if (sub.startsWith('Option_Arm')) {
-        const limb = sub.includes('ArmL') ? 0 : sub.includes('ArmR') ? 1 : 2;
-        return 21 + limb * 2;
-      }
-    }
-
     const leaf = path.split('/').pop();
+
+    // ClippingMask group sits between OptionB (29) and Effect_Front_ArmL (40).
+    // Checked first so the looser `Mask` substring match below doesn't catch it.
+    if (leaf === 'ClippingMask') return 35;
 
     // Facial features
     if (leaf.includes('Eyes')) return 0;
     if (leaf.includes('Mouth')) return 1;
     if (leaf.includes('Cheeks')) return 2;
-    // Pale falls here only if a Pale group is ever a non-synthetic leaf;
-    // currently every Pale layer is a clip mask routed to __PaleMask__.
     if (leaf.includes('Pale')) return 3;
     if (leaf.includes('Sweat')) return 4;
     if (leaf.includes('Mask')) return 5;
 
-    // OptionB top-level group (Hiro/Nanoka) sits right before Clipping Masks
-    // (rank 30), after the Option_Arm clusters.
+    // OptionB top-level group (Hiro/Nanoka) sits after the Option_Arm clusters.
     if (leaf === 'OptionB') return 29;
 
     // Arms: category first, then limb (L → R → combined within each category)
     if (leaf.includes('Arm')) {
       const limb = leaf.includes('ArmL') ? 0 : leaf.includes('ArmR') ? 1 : 2;
       if (leaf === 'ArmL' || leaf === 'ArmR' || leaf === 'Arms') return 10 + limb;
-      // limb*2 leaves room for __ShadowMask__/Option_Arm* shadow buckets to
-      // slot in between limbs (see the synthetic-bucket branch above).
-      if (leaf.startsWith('Option_Arm')) return 20 + limb * 2;
-      // Effects come AFTER __ClippingMasks__ (rank 30).
+      if (leaf.startsWith('Option_Arm')) return 20 + limb;
       if (leaf.startsWith('Effect_Front_Arm')) return 40 + limb;
       if (leaf.startsWith('Effect_Middle_Arm')) return 50 + limb;
       if (leaf.startsWith('Effect_Back_Arm')) return 60 + limb;
@@ -956,13 +893,13 @@ function buildGroups() {
 
   for (const [groupPath, layers] of sortedGroups) {
     // Skip groups whose layers are all always-on (Body, HeadBase, HairB, non-source-over masks)
-    if (layers.every(l => l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase') || l.name.startsWith('HairB') || isAlwaysOnClipMask(l))) continue;
+    if (layers.every(l => l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase') || l.name.startsWith('HairB'))) continue;
     // Skip groups belonging to inactive head
     if (!isGroupForActiveHead(groupPath)) continue;
     // Skip groups with no selectable buttons for the active head — e.g. Meruru's
     // OptionF on Head02, where every entry is name-tagged Head01 and would
     // otherwise render an empty section with just the None button.
-    if (!layers.some(l => !isAlwaysOnClipMask(l) && isLayerForActiveHead(l.name))) continue;
+    if (!layers.some(l => isLayerForActiveHead(l.name))) continue;
 
     const div = document.createElement('div');
     div.className = 'group';
@@ -996,7 +933,6 @@ function buildGroups() {
       // requires_groups fallbacks (e.g. clearing Arms repopulates ArmL/ArmR).
       const cleared = [];
       for (const l of layers) {
-        if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on
         if (!isLayerForActiveHead(l.name)) continue; // don't touch layers belonging to inactive head
         if (activeState[l.name]) cleared.push(l);
         activeState[l.name] = false;
@@ -1009,7 +945,6 @@ function buildGroups() {
     opts.appendChild(noneBtn);
 
     for (const l of layers) {
-      if (isAlwaysOnClipMask(l)) continue; // non-source-over masks always on, not user-selectable
       if (!isLayerForActiveHead(l.name)) continue; // hide layers that belong to a different head
       const btn = document.createElement('button');
       btn.className = 'layer-btn';
@@ -1022,9 +957,11 @@ function buildGroups() {
       btn.dataset.group = groupPath;
       btn.onclick = () => {
         const leaf = groupPath.split('/').pop();
-        const multiSelect = (leaf === 'Facial' || leaf === 'ClippingMask' || leaf === 'Angle01'
-          || /^Head\d+$/.test(leaf)
-          || groupPath.startsWith('__ClippingMasks__'));
+        // Stencil readers are decorative overlays — multi-select makes sense
+        // (you may want both Hair_Normal AND Hair_Multiply, or several root masks).
+        const multiSelect = isStencilReader(l)
+          || leaf === 'Facial' || leaf === 'ClippingMask' || leaf === 'Angle01'
+          || /^Head\d+$/.test(leaf);
 
         const activated = [];
         const radioCleared = [];
@@ -1186,10 +1123,7 @@ function updateUI() {
   // exactly. Looser "every" matching falsely highlights when extras are on.
   const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
   const isFacial = name => facialKeywords.some(k => name.includes(k));
-  const isControllable = l => {
-    const info = getClipInfo(l.name);
-    return !info || info.target === 'canvas';
-  };
+  const isControllable = l => !isStencilReader(l);
   const facialOnNames = new Set(
     layersInfo
       .filter(l => isFacial(l.name)
@@ -1217,14 +1151,14 @@ function updateUI() {
   for (const btn of document.querySelectorAll('.none-btn')) {
     const group = btn.dataset.group;
     const anyActive = layersInfo.some(l =>
-      getDisplayGroup(l) === group && !isAlwaysOnClipMask(l) && activeState[l.name]);
+      getDisplayGroup(l) === group && activeState[l.name]);
     btn.classList.toggle('active', !anyActive);
   }
   // Update group status labels
   for (const span of document.querySelectorAll('.group-status')) {
     const group = span.dataset.statusGroup;
     const active = layersInfo.find(l =>
-      getDisplayGroup(l) === group && !isAlwaysOnClipMask(l) && activeState[l.name]);
+      getDisplayGroup(l) === group && activeState[l.name]);
     span.textContent = active ? ` — ${active.name}` : '';
   }
 }
@@ -1253,65 +1187,51 @@ function invalidateImageCache() {
 
 async function compositeToCanvas(layers, canvasW, canvasH) {
   // Load all images in parallel
-  const entries = await Promise.all(layers.map(async l => ({
+  const entries = (await Promise.all(layers.map(async l => ({
     layer: l,
+    render: getRender(l),
     img: await loadLayerImage(currentChar, l.name),
-    clip: getClipInfo(l.name),
-  })));
+  })))).filter(e => e.img);
 
   const canvas = document.createElement('canvas');
   canvas.width = canvasW;
   canvas.height = canvasH;
   const ctx = canvas.getContext('2d');
 
-  const normalLayers = entries.filter(e => !e.clip && e.img);
-  const allMasks = entries.filter(e =>
-    e.clip && e.img && (!e.clip.head || activeHead === null || e.clip.head === activeHead));
-
-  // Three mask categories, each with its own placement on the main timeline:
-  //  - canvas-target  : multiply over the entire main canvas at their own z-order.
-  //  - pass-through   : non-canvas source-over masks. Drawn as normal layers at
-  //                     their own z-order; the `target` field is metadata only,
-  //                     no per-layer transformation. (Source-over has no clipping
-  //                     behavior in canvas2D — it just draws normally — so a pool
-  //                     would just hijack the blit z-order without changing pixels.)
-  //  - transform      : non-canvas dest-out / pool-multiply. Applied per-layer:
-  //                     each affected layer is pre-rendered to a tile with the
-  //                     masks baked in, then drawn at the layer's own z-order.
-  //                     This preserves z-order interleaving with non-target
-  //                     layers — the previous pool model collapsed them onto a
-  //                     single blit z-order which broke when pool layers
-  //                     bracketed non-pool layers (e.g. Cheeks below Eyes below
-  //                     Sweat, with all three in the 'facial' target).
-  const canvasMasks = allMasks.filter(m => m.clip.target === 'canvas');
-  const passThroughMasks = allMasks.filter(m =>
-    m.clip.target !== 'canvas' && m.clip.blendMode === 'source-over');
-  const transformMasks = allMasks.filter(m =>
-    m.clip.target !== 'canvas' && m.clip.blendMode !== 'source-over');
-
-  // Group transform masks by target, sorted by z-order ascending so that
-  // applying them in array order matches their natural composition order.
-  const masksByTarget = new Map();
-  for (const m of transformMasks) {
-    if (!masksByTarget.has(m.clip.target)) masksByTarget.set(m.clip.target, []);
-    masksByTarget.get(m.clip.target).push(m);
-  }
-  for (const arr of masksByTarget.values()) {
-    arr.sort((a, b) => a.layer.order - b.layer.order);
-  }
-
-  const TARGET_PRIORITY = ['eyes', 'facial'];
-  function assignTarget(layer) {
-    for (const t of TARGET_PRIORITY) {
-      if (masksByTarget.has(t) && isInClipTarget(layer, t)) return t;
+  // Apply the SpriteRenderer's per-instance color tint to a sprite. Mirrors
+  // Unity's `fragment = texture · m_Color` step. Returns a tile canvas when
+  // tint is non-identity; returns the raw image otherwise so callers don't
+  // pay imageData cost on the common (untinted) path.
+  function applyTint(srcImg, tint) {
+    if (!tint) return srcImg;
+    const [tr, tg, tb, ta] = tint;
+    if (tr === 1 && tg === 1 && tb === 1 && ta === 1) return srcImg;
+    const sw = srcImg.width, sh = srcImg.height;
+    const out = document.createElement('canvas');
+    out.width = sw;
+    out.height = sh;
+    const oCtx = out.getContext('2d');
+    oCtx.drawImage(srcImg, 0, 0);
+    const td = oCtx.getImageData(0, 0, sw, sh);
+    const t = td.data;
+    for (let i = 0; i < t.length; i += 4) {
+      if (t[i + 3] === 0) continue;
+      t[i]     = t[i]     * tr;
+      t[i + 1] = t[i + 1] * tg;
+      t[i + 2] = t[i + 2] * tb;
+      t[i + 3] = t[i + 3] * ta;
     }
-    return null;
+    oCtx.putImageData(td, 0, 0);
+    return out;
   }
 
-  // Compute the overlap rectangle between a sprite at (offsetX, offsetY) of
-  // size (mw, mh) and a destination canvas of size (tileW, tileH). Returns
-  // null if there is no overlap. `dx,dy` are the destination top-left and
-  // `sx,sy,w,h` are the slice of the mask source to read.
+  // Pre-tint every entry once; downstream stencil + blend passes consume the
+  // tinted source. For untinted layers (most), e.tinted === e.img (no-op).
+  for (const e of entries) e.tinted = applyTint(e.img, e.render.tint);
+
+  // Compute the overlap rectangle between a sprite of size (mw, mh) placed at
+  // (offsetX, offsetY) and a destination of size (tileW, tileH). dx,dy are
+  // destination top-left; sx,sy,w,h are the source slice to read. null = miss.
   function clipRegion(offsetX, offsetY, mw, mh, tileW, tileH) {
     const dx = Math.max(0, offsetX);
     const dy = Math.max(0, offsetY);
@@ -1323,178 +1243,182 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
     return { dx, dy, sx, sy, w, h };
   }
 
-  // Per-pixel multiply on an arbitrary 2D context. Cmul = Cb · (αs·Cs + (1-αs));
-  // αout = αb. Outside the mask (αs=0) the pixel is untouched. `lightness` lerps
-  // the result toward white where the mask is active. The mask sprite is drawn
-  // with its top-left at (offsetX, offsetY); for canvas-sized masks (no `pos`)
-  // the offset is (0, 0) and behaviour matches the pre-pos schema exactly.
-  function applyMultiplyMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
-    const strength = clippingData[mask.layer.name]?.strength ?? 1;
-    const lightness = clippingData[mask.layer.name]?.lightness ?? 0;
-    const lInv = 1 - lightness;
-    const lW = lightness * 255;
-    const mw = mask.img.width, mh = mask.img.height;
-    const r = clipRegion(offsetX, offsetY, mw, mh, targetCtx.canvas.width, targetCtx.canvas.height);
-    if (!r) return;
-    const maskTmp = document.createElement('canvas');
-    maskTmp.width = r.w;
-    maskTmp.height = r.h;
-    const mtCtx = maskTmp.getContext('2d');
-    mtCtx.drawImage(mask.img, r.sx, r.sy, r.w, r.h, 0, 0, r.w, r.h);
-    const pd = targetCtx.getImageData(r.dx, r.dy, r.w, r.h);
-    const md = mtCtx.getImageData(0, 0, r.w, r.h);
-    const p = pd.data, mm = md.data;
-    for (let i = 0; i < p.length; i += 4) {
-      if (p[i + 3] === 0) continue;
-      const as = (mm[i + 3] / 255) * strength;
-      if (as === 0) continue;
-      const k = 1 - as;
-      p[i]     = p[i]     * (as * mm[i]     / 255 + k) * lInv + lW;
-      p[i + 1] = p[i + 1] * (as * mm[i + 1] / 255 + k) * lInv + lW;
-      p[i + 2] = p[i + 2] * (as * mm[i + 2] / 255 + k) * lInv + lW;
-    }
-    targetCtx.putImageData(pd, r.dx, r.dy);
-  }
-
-  // Per-pixel screen on an arbitrary 2D context. Cout = Cb + αs·Cs·(255-Cb)/255;
-  // αout = αb. Black mask (Cs=0) and αs=0 are no-ops.
-  function applyScreenMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
-    const strength = clippingData[mask.layer.name]?.strength ?? 1;
-    const mw = mask.img.width, mh = mask.img.height;
-    const r = clipRegion(offsetX, offsetY, mw, mh, targetCtx.canvas.width, targetCtx.canvas.height);
-    if (!r) return;
-    const maskTmp = document.createElement('canvas');
-    maskTmp.width = r.w;
-    maskTmp.height = r.h;
-    const mtCtx = maskTmp.getContext('2d');
-    mtCtx.drawImage(mask.img, r.sx, r.sy, r.w, r.h, 0, 0, r.w, r.h);
-    const pd = targetCtx.getImageData(r.dx, r.dy, r.w, r.h);
-    const md = mtCtx.getImageData(0, 0, r.w, r.h);
-    const p = pd.data, mm = md.data;
-    for (let i = 0; i < p.length; i += 4) {
-      if (p[i + 3] === 0) continue;
-      const as = (mm[i + 3] / 255) * strength;
-      if (as === 0) continue;
-      p[i]     = p[i]     + as * mm[i]     * (255 - p[i])     / 255;
-      p[i + 1] = p[i + 1] + as * mm[i + 1] * (255 - p[i + 1]) / 255;
-      p[i + 2] = p[i + 2] + as * mm[i + 2] * (255 - p[i + 2]) / 255;
-    }
-    targetCtx.putImageData(pd, r.dx, r.dy);
-  }
-
-  // Built-in compositing for source-over / destination-out (exact, AA-safe).
-  // Mask is drawn at its native size with its top-left at (offsetX, offsetY).
-  function applyBuiltinMask(targetCtx, mask, offsetX = 0, offsetY = 0) {
-    const strength = clippingData[mask.layer.name]?.strength
-      ?? (mask.clip.blendMode === 'destination-out' ? 0.5 : 1);
-    targetCtx.globalCompositeOperation = mask.clip.blendMode;
-    targetCtx.globalAlpha = strength;
-    targetCtx.drawImage(mask.img, offsetX, offsetY);
-    targetCtx.globalAlpha = 1;
-    const opacity = clippingData[mask.layer.name]?.opacity ?? 1;
-    if (opacity < 1) {
-      targetCtx.globalCompositeOperation = 'destination-out';
-      targetCtx.globalAlpha = 1 - opacity;
-      targetCtx.drawImage(mask.img, offsetX, offsetY);
-      targetCtx.globalAlpha = 1;
-    }
-    targetCtx.globalCompositeOperation = 'source-over';
-  }
-
   // Anchor used by Advanced-mode scale/rotate: sprite center in canvas space.
   function getLayerAnchor(entry) {
     const [px, py] = getPos(entry.layer);
     return { ax: px + entry.img.width / 2, ay: py + entry.img.height / 2 };
   }
 
-  function drawLayerImg(targetCtx, entry, applyOffset = false) {
-    const off = applyOffset ? getLayerOffset(entry.layer) : { dx: 0, dy: 0, scale: 1, rotate: 0 };
-    const [px, py] = getPos(entry.layer);
-    targetCtx.globalCompositeOperation = 'source-over';
-    if (off.scale === 1 && off.rotate === 0) {
-      targetCtx.drawImage(entry.img, px + off.dx, py + off.dy);
-    } else {
-      const a = getLayerAnchor(entry);
-      targetCtx.save();
-      targetCtx.translate(off.dx + a.ax, off.dy + a.ay);
-      if (off.rotate) targetCtx.rotate(off.rotate * Math.PI / 180);
-      if (off.scale !== 1) targetCtx.scale(off.scale, off.scale);
-      targetCtx.translate(-a.ax, -a.ay);
-      targetCtx.drawImage(entry.img, px, py);
-      targetCtx.restore();
-    }
+  // Pass 1: build per-ref stencil buffers from active writers.
+  // Each buffer is a canvas-sized ImageData where alpha[px] = 255 if any
+  // writer's source alpha at that pixel exceeds its cutoff, else 0. This is
+  // Unity stencil semantics: hard binary mask, multiple writers union.
+  const stencilBuffers = new Map();
+  function getOrCreateBuffer(ref) {
+    let buf = stencilBuffers.get(ref);
+    if (buf) return buf;
+    buf = ctx.createImageData(canvasW, canvasH);
+    stencilBuffers.set(ref, buf);
+    return buf;
   }
-
-  // Pre-render each transform-target layer into a sprite-sized tile, baking
-  // its masks in. The tile represents canvas region (lx, ly)..(lx+lw, ly+lh);
-  // masks are drawn at offset (mx-lx, my-ly).
-  function prerenderLayer(entry) {
-    const target = assignTarget(entry.layer);
-    if (!target) return null;
-    const masks = masksByTarget.get(target);
-    const [lx, ly] = getPos(entry.layer);
-    const tmp = document.createElement('canvas');
-    tmp.width = entry.img.width;
-    tmp.height = entry.img.height;
-    const tCtx = tmp.getContext('2d');
-    tCtx.drawImage(entry.img, 0, 0);
-    for (const mask of masks) {
-      const [mx, my] = getPos(mask.layer);
-      const ox = mx - lx, oy = my - ly;
-      if (mask.clip.blendMode === 'multiply') {
-        applyMultiplyMask(tCtx, mask, ox, oy);
-      } else {
-        applyBuiltinMask(tCtx, mask, ox, oy);
-      }
-    }
-    return { tile: tmp, x: lx, y: ly };
-  }
-
-  const layerEvents = normalLayers.map(e => ({
-    type: 'layer',
-    order: e.layer.order,
-    entry: e,
-    tile: prerenderLayer(e),
-  }));
-
-  const mainEvents = [
-    ...layerEvents,
-    ...passThroughMasks.map(m => ({ type: 'pass-mask', order: m.layer.order, mask: m })),
-    ...canvasMasks.map(m => ({ type: 'canvas-mask', order: m.layer.order, mask: m })),
-  ].sort((a, b) => a.order - b.order);
-
-  for (const ev of mainEvents) {
-    if (ev.type === 'layer') {
-      if (ev.tile) {
-        const off = getLayerOffset(ev.entry.layer);
-        const t = ev.tile;
-        ctx.globalCompositeOperation = 'source-over';
-        if (off.scale === 1 && off.rotate === 0) {
-          ctx.drawImage(t.tile, t.x + off.dx, t.y + off.dy);
-        } else {
-          const a = getLayerAnchor(ev.entry);
-          ctx.save();
-          ctx.translate(off.dx + a.ax, off.dy + a.ay);
-          if (off.rotate) ctx.rotate(off.rotate * Math.PI / 180);
-          if (off.scale !== 1) ctx.scale(off.scale, off.scale);
-          ctx.translate(-a.ax, -a.ay);
-          ctx.drawImage(t.tile, t.x, t.y);
-          ctx.restore();
+  for (const e of entries) {
+    const stc = e.render.stencil;
+    if (stc?.role !== 'write') continue;
+    const cutoffByte = (stc.cutoff ?? 0) * 255;
+    const [px, py] = getPos(e.layer);
+    const src = e.tinted;
+    const sw = src.width, sh = src.height;
+    const r = clipRegion(px, py, sw, sh, canvasW, canvasH);
+    if (!r) continue;
+    const tile = document.createElement('canvas');
+    tile.width = r.w;
+    tile.height = r.h;
+    const tctx = tile.getContext('2d');
+    tctx.drawImage(src, r.sx, r.sy, r.w, r.h, 0, 0, r.w, r.h);
+    const sd = tctx.getImageData(0, 0, r.w, r.h).data;
+    const buf = getOrCreateBuffer(stc.ref);
+    const bd = buf.data;
+    for (let yy = 0; yy < r.h; yy++) {
+      const dstRow = (r.dy + yy) * canvasW * 4;
+      const srcRow = yy * r.w * 4;
+      for (let xx = 0; xx < r.w; xx++) {
+        if (sd[srcRow + xx * 4 + 3] > cutoffByte) {
+          bd[dstRow + (r.dx + xx) * 4 + 3] = 255;
         }
-      } else {
-        drawLayerImg(ctx, ev.entry, true);
       }
-    } else if (ev.type === 'pass-mask') {
-      const [mx, my] = getPos(ev.mask.layer);
-      applyBuiltinMask(ctx, ev.mask, mx, my);
+    }
+  }
+
+  // Per-pixel blend kernels. All preserve dest alpha (αout = αb) so a layer
+  // never adds visible pixels outside the existing canvas content. Source α=0
+  // and dest α=0 are short-circuits. Formulas operate on 0–255 values; the
+  // (1-as) factor mixes the unblended dest back in at semi-transparent edges,
+  // matching Canvas2D's source-over behaviour at AA fringes.
+  const INV_255 = 1 / 255;
+  function applyBlendBlit(targetCtx, srcCanvas, mode, offsetX, offsetY) {
+    if (mode === 'source-over') {
+      targetCtx.drawImage(srcCanvas, offsetX, offsetY);
+      return;
+    }
+    const sw = srcCanvas.width, sh = srcCanvas.height;
+    const tw = targetCtx.canvas.width, th = targetCtx.canvas.height;
+    const r = clipRegion(offsetX, offsetY, sw, sh, tw, th);
+    if (!r) return;
+    const srcCtx = (srcCanvas.getContext ? srcCanvas : null);
+    const sCtx = srcCtx ? srcCtx.getContext('2d') : (() => {
+      const t = document.createElement('canvas');
+      t.width = sw; t.height = sh;
+      t.getContext('2d').drawImage(srcCanvas, 0, 0);
+      return t.getContext('2d');
+    })();
+    const sd = sCtx.getImageData(r.sx, r.sy, r.w, r.h).data;
+    const pd = targetCtx.getImageData(r.dx, r.dy, r.w, r.h);
+    const p = pd.data;
+    for (let i = 0; i < p.length; i += 4) {
+      const ab = p[i + 3];
+      if (ab === 0) continue;
+      const sa = sd[i + 3];
+      if (sa === 0) continue;
+      const as = sa * INV_255;
+      const k = 1 - as;
+      const r0 = p[i], g0 = p[i + 1], b0 = p[i + 2];
+      const sr = sd[i], sg = sd[i + 1], sb = sd[i + 2];
+      let or, og, ob;
+      if (mode === 'multiply') {
+        // Cmul = Cb · Cs / 255
+        or = (r0 * sr) * INV_255;
+        og = (g0 * sg) * INV_255;
+        ob = (b0 * sb) * INV_255;
+      } else if (mode === 'overlay') {
+        // Cb < 128: 2·Cb·Cs / 255 ; else: 255 − 2·(255−Cb)·(255−Cs) / 255
+        or = r0 < 128 ? (2 * r0 * sr) * INV_255 : 255 - (2 * (255 - r0) * (255 - sr)) * INV_255;
+        og = g0 < 128 ? (2 * g0 * sg) * INV_255 : 255 - (2 * (255 - g0) * (255 - sg)) * INV_255;
+        ob = b0 < 128 ? (2 * b0 * sb) * INV_255 : 255 - (2 * (255 - b0) * (255 - sb)) * INV_255;
+      } else if (mode === 'softlight') {
+        // Pegtop: Cout = (1 − 2·Cs')·Cb'² + 2·Cb'·Cs'  (normalized [0,1])
+        const cbR = r0 * INV_255, csR = sr * INV_255;
+        const cbG = g0 * INV_255, csG = sg * INV_255;
+        const cbB = b0 * INV_255, csB = sb * INV_255;
+        or = ((1 - 2 * csR) * cbR * cbR + 2 * cbR * csR) * 255;
+        og = ((1 - 2 * csG) * cbG * cbG + 2 * cbG * csG) * 255;
+        ob = ((1 - 2 * csB) * cbB * cbB + 2 * cbB * csB) * 255;
+      } else {
+        // Unknown blend → pass through as source-over color
+        or = sr; og = sg; ob = sb;
+      }
+      p[i]     = or * as + r0 * k;
+      p[i + 1] = og * as + g0 * k;
+      p[i + 2] = ob * as + b0 * k;
+      // αout = αb (preserved)
+    }
+    targetCtx.putImageData(pd, r.dx, r.dy);
+  }
+
+  // Pre-clip a sprite by a stencil buffer. Returns a sprite-sized canvas
+  // whose alpha = sprite.alpha · (stencilBuf.alpha at corresponding canvas
+  // coords) / 255. Pixels outside the canvas are zeroed.
+  function gateByStencil(srcImg, stencilBuf, posX, posY) {
+    const sw = srcImg.width, sh = srcImg.height;
+    const tile = document.createElement('canvas');
+    tile.width = sw;
+    tile.height = sh;
+    const tctx = tile.getContext('2d');
+    tctx.drawImage(srcImg, 0, 0);
+    const td = tctx.getImageData(0, 0, sw, sh);
+    const t = td.data;
+    const bd = stencilBuf.data;
+    for (let yy = 0; yy < sh; yy++) {
+      const cy = posY + yy;
+      const rowOff = yy * sw * 4;
+      if (cy < 0 || cy >= canvasH) {
+        for (let xx = 0; xx < sw; xx++) t[rowOff + xx * 4 + 3] = 0;
+        continue;
+      }
+      const bRow = cy * canvasW * 4;
+      for (let xx = 0; xx < sw; xx++) {
+        const cx = posX + xx;
+        const ti = rowOff + xx * 4 + 3;
+        if (cx < 0 || cx >= canvasW) { t[ti] = 0; continue; }
+        t[ti] = (t[ti] * bd[bRow + cx * 4 + 3]) >>> 8; // ≈ /256, safe for [0,255]·[0,255]
+      }
+    }
+    tctx.putImageData(td, 0, 0);
+    return tile;
+  }
+
+  // Pass 2: composite layers in z-order. Stencil readers are gated by their
+  // ref's buffer; non-readers compose directly. Blend mode is applied at the
+  // final blit (see applyBlendBlit). Advanced-mode dx/dy/scale/rotate offsets
+  // are honoured for source-over only — per-pixel blend kernels operate on
+  // axis-aligned tiles, so transformations are baked at sprite origin.
+  for (const e of entries) {
+    const r = e.render;
+    const [px, py] = getPos(e.layer);
+    let src = e.tinted;
+
+    if (r.stencil?.role === 'read') {
+      const buf = stencilBuffers.get(r.stencil.ref);
+      if (!buf) continue; // no writer this frame → reader contributes nothing
+      src = gateByStencil(src, buf, px, py);
+    }
+
+    if (r.blend === 'source-over') {
+      const off = getLayerOffset(e.layer);
+      ctx.globalCompositeOperation = 'source-over';
+      if (off.scale === 1 && off.rotate === 0) {
+        ctx.drawImage(src, px + off.dx, py + off.dy);
+      } else {
+        const a = getLayerAnchor(e);
+        ctx.save();
+        ctx.translate(off.dx + a.ax, off.dy + a.ay);
+        if (off.rotate) ctx.rotate(off.rotate * Math.PI / 180);
+        if (off.scale !== 1) ctx.scale(off.scale, off.scale);
+        ctx.translate(-a.ax, -a.ay);
+        ctx.drawImage(src, px, py);
+        ctx.restore();
+      }
     } else {
-      // canvas-mask: multiply (darken) or screen (lighten) over the composite
-      const [mx, my] = getPos(ev.mask.layer);
-      if (ev.mask.clip.blendMode === 'screen') {
-        applyScreenMask(ctx, ev.mask, mx, my);
-      } else {
-        applyMultiplyMask(ctx, ev.mask, mx, my);
-      }
+      applyBlendBlit(ctx, src, r.blend, px, py);
     }
   }
 

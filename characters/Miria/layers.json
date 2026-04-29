@@ -8,7 +8,7 @@
       "name": "ClippingMask_Effect_Root_01",
       "group": "Angle01",
       "order": 74,
-      "empty": true,
+      "empty": false,
       "pos": [
         534,
         0
@@ -18,14 +18,21 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
-      }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.0784
+        ]
+      },
+      "enabled": false
     },
     {
       "name": "ClippingMask_Effect_Root_02",
       "group": "Angle01",
       "order": 73,
-      "empty": true,
+      "empty": false,
       "pos": [
         5,
         184
@@ -35,7 +42,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.0118
+        ]
       }
     },
     {
@@ -463,7 +476,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.7529
+        ]
       }
     },
     {

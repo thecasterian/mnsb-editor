@@ -8,7 +8,7 @@
       "name": "ClippingMask_Angle01_01",
       "group": "Angle01",
       "order": 85,
-      "empty": true,
+      "empty": false,
       "pos": [
         543,
         76
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.1922
+        ]
       }
     },
     {
       "name": "ClippingMask_Angle01_02",
       "group": "Angle01",
       "order": 84,
-      "empty": true,
+      "empty": false,
       "pos": [
         353,
         164
@@ -35,14 +41,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.0392
+        ]
       }
     },
     {
       "name": "ClippingMask_Angle01_03",
       "group": "Angle01",
       "order": 83,
-      "empty": true,
+      "empty": false,
       "pos": [
         549,
         356
@@ -434,7 +446,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.5686
+        ]
       }
     },
     {
@@ -448,7 +466,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.5804
+        ]
       }
     },
     {
@@ -1046,7 +1070,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.5804
+        ]
       }
     },
     {
@@ -1090,7 +1120,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.6902
+        ]
       },
       "requires": "Arms01",
       "auto_enable": true
@@ -1106,7 +1142,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.6902
+        ]
       },
       "requires": "Arms02",
       "auto_enable": true
@@ -1122,7 +1164,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.7608
+        ]
       },
       "requires": "Arms03",
       "auto_enable": true

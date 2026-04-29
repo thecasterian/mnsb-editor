@@ -8,7 +8,7 @@
       "name": "ClippingMask_Root_Overlay",
       "group": "Angle01/ClippingMask",
       "order": 114,
-      "empty": true,
+      "empty": false,
       "pos": [
         693,
         0
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0078
+        ]
       }
     },
     {
       "name": "ClippingMask_Root_Softlight01",
       "group": "Angle01/ClippingMask",
       "order": 113,
-      "empty": true,
+      "empty": false,
       "pos": [
         1288,
         454
@@ -35,14 +41,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0078
+        ]
       }
     },
     {
       "name": "ClippingMask_Root_Softlight02",
       "group": "Angle01/ClippingMask",
       "order": 112,
-      "empty": true,
+      "empty": false,
       "pos": [
         172,
         57
@@ -52,14 +64,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0157
+        ]
       }
     },
     {
       "name": "ClippingMask_Root_Multiply",
       "group": "Angle01/ClippingMask",
       "order": 111,
-      "empty": true,
+      "empty": false,
       "pos": [
         0,
         2643
@@ -69,7 +87,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.3765
+        ]
       }
     },
     {
@@ -781,7 +805,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.5647
+        ]
       }
     },
     {
@@ -809,7 +839,13 @@
       ],
       "render": {
         "blend": "multiply",
-        "stencil": null
+        "stencil": null,
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.8078
+        ]
       }
     },
     {
@@ -827,7 +863,13 @@
           "role": "write",
           "ref": 2,
           "cutoff": 0.05
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.4314
+        ]
       }
     },
     {

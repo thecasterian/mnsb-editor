@@ -8,7 +8,7 @@
       "name": "ClippingMask_Root_Overlay",
       "group": "Angle01",
       "order": 82,
-      "empty": true,
+      "empty": false,
       "pos": [
         365,
         106
@@ -18,14 +18,20 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.6275,
+          0.6275,
+          0.6275,
+          0.0784
+        ]
       }
     },
     {
       "name": "ClippingMask_Root_Softlight",
       "group": "Angle01",
       "order": 81,
-      "empty": true,
+      "empty": false,
       "pos": [
         385,
         321
@@ -35,7 +41,13 @@
         "stencil": {
           "role": "read",
           "ref": 1
-        }
+        },
+        "tint": [
+          0.7529,
+          0.7529,
+          0.7529,
+          0.0078
+        ]
       }
     },
     {
@@ -583,7 +595,13 @@
         "stencil": {
           "role": "read",
           "ref": 2
-        }
+        },
+        "tint": [
+          1.0,
+          1.0,
+          1.0,
+          0.8784
+        ]
       }
     },
     {
