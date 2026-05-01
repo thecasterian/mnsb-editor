@@ -196,6 +196,55 @@
   .none-btn:hover { border-color: #777; color: var(--text-muted); }
   .none-btn.active { border-color: var(--accent); color: var(--accent); }
 
+  /* Switch-style toggle (pill track + sliding knob) for stateful flags. */
+  .switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  .switch:hover { color: var(--text); }
+  .switch input { display: none; }
+  .switch-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .switch input:checked ~ .switch-track {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .switch input:checked ~ .switch-track .switch-knob {
+    transform: translateX(16px);
+    background: #fff;
+  }
+  .switch:has(input:checked) { color: var(--text); }
+
   /* Advanced mode */
   .advanced-toggle {
     width: 100%;
@@ -352,22 +401,18 @@
 
   .preview-container {
     position: relative;
-    width: 500px;
-    aspect-ratio: 1 / 2;
+    display: inline-block;
     transform-origin: center center;
     transition: transform 0.15s ease;
     cursor: grab;
   }
   .preview-container.dragging { cursor: grabbing; transition: none; }
 
+  /* Canvas size is set by JS (height anchored, width derived from aspect);
+     container shrink-wraps around it. */
   .preview-container img,
   .preview-container canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    display: block;
     pointer-events: none;
   }
 
@@ -403,6 +448,12 @@
 <div class="panel">
   <h1>MNSB Character Editor</h1>
 
+  <label class="switch">
+    <span>Spoilers</span>
+    <input type="checkbox" id="spoilerToggle">
+    <span class="switch-track"><span class="switch-knob"></span></span>
+  </label>
+
   <select class="char-select" id="charSelect"></select>
 
   <button class="advanced-toggle" id="advancedToggle">Advanced</button>
@@ -412,7 +463,7 @@
     <div class="presets" id="headSelector"></div>
   </div>
 
-  <div>
+  <div id="expressionSection">
     <div class="section-label">Expression</div>
     <div class="presets" id="presets"></div>
   </div>
@@ -447,26 +498,72 @@
 </div>
 
 <script>
+// Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
+const BUILD_VERSION = '20260501e';
+const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
+
 const CHARACTERS = [
+  // Layered main cast
   "Alisa","AnAn","Coco","Ema","Hanna","Hiro",
-  "Leia","Margo","Meruru","Miria","Nanoka","Noah","Sherry"
+  "Leia","Margo","Meruru","Miria","Nanoka","Noah","Sherry",
+  // Diced NPCs
+  "Warden","Yuki","JailerA","JailerB","JailerC",
+  // Diced creature variants
+  "CreatureAlisa","CreatureAnAn","CreatureCoco","CreatureEma","CreatureHanna",
+  "CreatureHiro","CreatureLeia","CreatureMargo","CreatureMeruru","CreatureMiria",
+  "CreatureNanoka","CreatureNoah","CreatureSherry",
 ];
+// Naninovel diced atlases — full-frame poses, no layered rig. Loader takes a
+// separate path: meta.json instead of layers.json/compositions.json/default.json,
+// and a single Pose group instead of head/expression/layer panels.
+const DICED_CHARACTERS = new Set([
+  "Warden","Yuki","JailerA","JailerB","JailerC",
+  "CreatureAlisa","CreatureAnAn","CreatureCoco","CreatureEma","CreatureHanna",
+  "CreatureHiro","CreatureLeia","CreatureMargo","CreatureMeruru","CreatureMiria",
+  "CreatureNanoka","CreatureNoah","CreatureSherry",
+]);
+// Characters hidden behind the spoiler toggle (story-spoiler NPCs/creatures).
+// Kept separate from DICED_CHARACTERS even though they overlap today: a future
+// layered character could be a spoiler, or a future diced character could be
+// safe to show by default. Conflating the two would break that day.
+const SPOILER_CHARACTERS = new Set([
+  "Warden","Yuki","JailerA","JailerB","JailerC",
+  "CreatureAlisa","CreatureAnAn","CreatureCoco","CreatureEma","CreatureHanna",
+  "CreatureHiro","CreatureLeia","CreatureMargo","CreatureMeruru","CreatureMiria",
+  "CreatureNanoka","CreatureNoah","CreatureSherry",
+]);
 
 let currentChar = null;
-let layersInfo = [];       // from layers.json
-let compositions = {};     // from composition.txt
-let defaultEnabled = [];   // resolved default list for current active head
-let defaultJsonRaw = {};   // raw default.json (may be flat or per-head)
-let headBases = [];        // e.g. ['Head01', 'Head02'] if multi-head
-let activeHead = null;     // currently active head base name
-let activeState = {};      // { layerName: true/false }
+let charType = 'layered';  // 'layered' | 'diced'
+let layersInfo = [];       // layered: from layers.json
+let compositions = {};     // layered: from compositions.json
+let defaultEnabled = [];   // layered: resolved default list for current active head
+let defaultJsonRaw = {};   // layered: raw default.json (may be flat or per-head)
+let headBases = [];        // layered: e.g. ['Head01', 'Head02'] if multi-head
+let activeHead = null;     // layered: currently active head base name
+let activeState = {};      // layered: { layerName: true/false }
 let advancedMode = false;
-let groupOffsets = {};     // { displayGroupPath: { dx, dy } } — facial groups only
+let groupOffsets = {};     // layered: { displayGroupPath: { dx, dy } } — facial groups only
+let dicedMeta = null;      // diced: { type, name, canvas_size, poses }
+let activePose = null;     // diced: currently selected pose name
+let spoilerMode = false;   // false hides SPOILER_CHARACTERS from the dropdown
 
 function isFacialGroup(groupPath) {
   if (groupPath.startsWith('__')) return false; // synthetic mask buckets
   const leaf = groupPath.split('/').pop();
   return /^(Eyes|Mouth)\d*$/.test(leaf);
+}
+
+// Groups visible in non-advanced mode. Effects, shadows, clipping masks, and
+// other detail groups are hidden until Advanced is enabled.
+function isBasicGroup(groupPath) {
+  const leaf = groupPath.split('/').pop();
+  if (/^(Eyes|Mouth|Cheeks|Pale|Sweat)/.test(leaf)) return true;
+  if (leaf.startsWith('Option_Arm')) return true;
+  // Hiro's OptionB is a per-head silhouette layer (not a meaningful user choice);
+  // Nanoka's OptionB carries actual outfit variants and stays in basic mode.
+  if (leaf === 'OptionB') return currentChar !== 'Hiro';
+  return ['Mask', 'ArmL', 'ArmR', 'Arms'].includes(leaf);
 }
 
 function getLayerOffset(layer) {
@@ -487,13 +584,33 @@ function getPos(layer) {
 
 async function loadCharacter(name) {
   currentChar = name;
-
   invalidateImageCache();
   groupOffsets = {};
+
+  if (DICED_CHARACTERS.has(name)) {
+    await loadDicedCharacter(name);
+  } else {
+    await loadLayeredCharacter(name);
+  }
+
+  // Reset zoom/pan on character switch.
+  zoomLevel = 1; panX = 0; panY = 0;
+  applyTransform();
+
+  buildHeadSelector();
+  buildUI();
+  renderPreview();
+}
+
+async function loadLayeredCharacter(name) {
+  charType = 'layered';
+  dicedMeta = null;
+  activePose = null;
+
   const [layersJson, compsJson, defaultJson] = await Promise.all([
-    fetch(`characters/${name}/layers.json`).then(r => r.json()),
-    fetch(`characters/${name}/compositions.json`).then(r => r.json()),
-    fetch(`characters/${name}/default.json`).then(r => r.json()),
+    fetch(assetUrl(`characters/${name}/layers.json`)).then(r => r.json()),
+    fetch(assetUrl(`characters/${name}/compositions.json`)).then(r => r.json()),
+    fetch(assetUrl(`characters/${name}/default.json`)).then(r => r.json()),
   ]);
 
   layersInfo = layersJson.layers.filter(l => !l.empty);
@@ -530,16 +647,23 @@ async function loadCharacter(name) {
   }
   defaultEnabled = computeDefaultEnabled();
 
-  // Reset zoom/pan on character switch
-  zoomLevel = 1; panX = 0; panY = 0;
-  const pc = document.getElementById('previewContainer');
-  if (pc) pc.style.transform = '';
-
   resetToDefault();
   enforceDeps();
-  buildHeadSelector();
-  buildUI();
-  renderPreview();
+}
+
+async function loadDicedCharacter(name) {
+  charType = 'diced';
+  // Wipe layered state so a stale character can't leak into UI builders.
+  layersInfo = [];
+  compositions = {};
+  defaultEnabled = [];
+  defaultJsonRaw = {};
+  headBases = [];
+  activeHead = null;
+  activeState = {};
+
+  dicedMeta = await fetch(assetUrl(`characters/${name}/meta.json`)).then(r => r.json());
+  activePose = dicedMeta.poses[0];
 }
 
 // --- Render descriptor helpers ---
@@ -795,8 +919,72 @@ function isLayerForActiveHead(name) {
 }
 
 function buildUI() {
+  if (charType === 'diced') {
+    buildUIDiced();
+    return;
+  }
+  // Restore layered-only sections in case we're switching back from a diced
+  // character (head selector visibility is managed by buildHeadSelector).
+  document.getElementById('expressionSection').style.display = '';
+  document.getElementById('advancedToggle').style.display = '';
+  document.getElementById('resetBtn').style.display = '';
   buildPresets();
   buildGroups();
+}
+
+function buildUIDiced() {
+  // Diced characters have no expressions, head variants, advanced offsets,
+  // or default-state to reset to. Hide those controls; keep the dropdown
+  // and Export PNG. The head selector hides itself via buildHeadSelector
+  // when headBases is empty.
+  document.getElementById('expressionSection').style.display = 'none';
+  document.getElementById('advancedToggle').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'none';
+
+  // Single Pose group with one button per pose, reusing layer-btn styling.
+  const container = document.getElementById('groups');
+  container.innerHTML = '';
+
+  const div = document.createElement('div');
+  div.className = 'group';
+
+  const header = document.createElement('div');
+  header.className = 'group-header';
+  const titleSpan = document.createElement('span');
+  titleSpan.textContent = 'Pose';
+  const statusSpan = document.createElement('span');
+  statusSpan.className = 'group-status';
+  titleSpan.appendChild(statusSpan);
+  const arrowSpan = document.createElement('span');
+  arrowSpan.className = 'arrow';
+  arrowSpan.textContent = '▼';
+  header.appendChild(titleSpan);
+  header.appendChild(arrowSpan);
+  header.onclick = () => div.classList.toggle('collapsed');
+  div.appendChild(header);
+
+  const opts = document.createElement('div');
+  opts.className = 'group-options';
+
+  for (const pose of dicedMeta.poses) {
+    const btn = document.createElement('button');
+    btn.className = 'layer-btn' + (pose === activePose ? ' active' : '');
+    btn.textContent = pose;
+    btn.dataset.pose = pose;
+    btn.onclick = () => {
+      activePose = pose;
+      for (const b of opts.querySelectorAll('.layer-btn')) {
+        b.classList.toggle('active', b.dataset.pose === pose);
+      }
+      statusSpan.textContent = ` — ${pose}`;
+      renderPreview();
+    };
+    opts.appendChild(btn);
+  }
+  if (activePose) statusSpan.textContent = ` — ${activePose}`;
+
+  div.appendChild(opts);
+  container.appendChild(div);
 }
 
 function buildPresets() {
@@ -905,6 +1093,8 @@ function buildGroups() {
     if (layers.every(l => l.name === 'Body' || /^Body\d+$/.test(l.name) || l.name.startsWith('HeadBase') || l.name.startsWith('HairB'))) continue;
     // Skip groups belonging to inactive head
     if (!isGroupForActiveHead(groupPath)) continue;
+    // Hide detail groups (Effects, Shadows, ClippingMask, etc.) in non-advanced mode
+    if (!advancedMode && !isBasicGroup(groupPath)) continue;
     // Skip groups with no selectable buttons for the active head — e.g. Meruru's
     // OptionF on Head02, where every entry is name-tagged Head01 and would
     // otherwise render an empty section with just the None button.
@@ -1190,7 +1380,7 @@ function loadLayerImage(charName, layerName) {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src = `characters/${charName}/${layerName}.png`;
+    img.src = assetUrl(`characters/${charName}/${layerName}.png`);
   });
   imageCache[key] = promise;
   return promise;
@@ -1443,6 +1633,8 @@ async function compositeToCanvas(layers, canvasW, canvasH) {
 
 let renderSeq = 0;
 async function renderPreview() {
+  if (charType === 'diced') return renderDiced();
+
   const seq = ++renderSeq;
   const container = document.getElementById('previewContainer');
 
@@ -1459,11 +1651,26 @@ async function renderPreview() {
   // overwrites when the user clicks rapidly.
   if (seq !== renderSeq) return;
 
-  canvas.style.width = '100%';
-  canvas.style.height = 'auto';
+  canvas.style.height = '950px'
+  canvas.style.width = 'auto';
   container.replaceChildren(canvas);
 
   updateUI();
+}
+
+async function renderDiced() {
+  const seq = ++renderSeq;
+  const [w, h] = dicedMeta.canvas_size;
+  const img = await loadLayerImage(currentChar, activePose);
+  if (seq !== renderSeq) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  if (img) canvas.getContext('2d').drawImage(img, 0, 0);
+  canvas.style.height = '950px';
+  canvas.style.width = 'auto';
+  document.getElementById('previewContainer').replaceChildren(canvas);
 }
 
 // --- Export ---
@@ -1495,21 +1702,32 @@ function tightCrop(srcCanvas, margin = 10) {
 }
 
 document.getElementById('exportBtn').onclick = async () => {
-  const activeLayers = layersInfo
-    .filter(l => activeState[l.name])
-    .sort((a, b) => a.order - b.order);
-
-  if (activeLayers.length === 0) return;
-
-  const canvasW = layersInfo[0]._canvasW || 2500;
-  const canvasH = layersInfo[0]._canvasH || 5000;
-
-  const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
-  const canvas = tightCrop(full);
+  let canvas;
+  let downloadName;
+  if (charType === 'diced') {
+    const img = await loadLayerImage(currentChar, activePose);
+    if (!img) return;
+    const full = document.createElement('canvas');
+    full.width = img.width;
+    full.height = img.height;
+    full.getContext('2d').drawImage(img, 0, 0);
+    canvas = tightCrop(full);
+    downloadName = `${currentChar}_${activePose}_${Date.now()}.png`;
+  } else {
+    const activeLayers = layersInfo
+      .filter(l => activeState[l.name])
+      .sort((a, b) => a.order - b.order);
+    if (activeLayers.length === 0) return;
+    const canvasW = layersInfo[0]._canvasW || 2500;
+    const canvasH = layersInfo[0]._canvasH || 5000;
+    const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
+    canvas = tightCrop(full);
+    downloadName = `${currentChar}_${Date.now()}.png`;
+  }
 
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
-  a.download = `${currentChar}_${Date.now()}.png`;
+  a.download = downloadName;
   a.click();
 
   // Feedback
@@ -1528,8 +1746,10 @@ document.getElementById('exportBtn').onclick = async () => {
 document.getElementById('resetBtn').onclick = () => {
   resetToDefault();
   groupOffsets = {};
+  advancedMode = false;
+  document.getElementById('advancedToggle').classList.remove('active');
   enforceDeps();
-  if (advancedMode) buildGroups();
+  buildGroups();
   updateUI();
   renderPreview();
 };
@@ -1544,15 +1764,47 @@ document.getElementById('advancedToggle').onclick = (e) => {
 // --- Init ---
 
 const charSelect = document.getElementById('charSelect');
-for (const c of CHARACTERS) {
-  const opt = document.createElement('option');
-  opt.value = c;
-  opt.textContent = c;
-  charSelect.appendChild(opt);
-}
-charSelect.value = 'Sherry';
 charSelect.onchange = () => loadCharacter(charSelect.value);
 
+// Friendly display label for the dropdown. The internal name stays in
+// option.value so all data paths (`characters/{name}/`, image cache keys,
+// export filenames) keep working unchanged.
+function displayName(name) {
+  if (name.startsWith('Creature')) return `${name.slice('Creature'.length)} (Creature)`;
+  const m = name.match(/^Jailer([A-Z]+)$/);
+  if (m) return `Jailer (${m[1]})`;
+  return name;
+}
+
+// Repopulate the dropdown for the current spoilerMode. If the active character
+// was just hidden by toggling spoilers off, switch to the first visible one
+// rather than leaving the <select> showing a value that's no longer an option.
+function rebuildCharSelect() {
+  const visible = spoilerMode
+    ? CHARACTERS
+    : CHARACTERS.filter(c => !SPOILER_CHARACTERS.has(c));
+  charSelect.innerHTML = '';
+  for (const c of visible) {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = displayName(c);
+    charSelect.appendChild(opt);
+  }
+  if (currentChar && visible.includes(currentChar)) {
+    charSelect.value = currentChar;
+  } else if (currentChar) {
+    charSelect.value = visible[0];
+    loadCharacter(visible[0]);
+  }
+}
+
+document.getElementById('spoilerToggle').onchange = (e) => {
+  spoilerMode = e.currentTarget.checked;
+  rebuildCharSelect();
+};
+
+rebuildCharSelect();
+charSelect.value = 'Sherry';
 loadCharacter('Sherry');
 
 // --- Zoom & Pan ---
