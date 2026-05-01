@@ -196,6 +196,60 @@
   .none-btn:hover { border-color: #777; color: var(--text-muted); }
   .none-btn.active { border-color: var(--accent); color: var(--accent); }
 
+  /* In-page confirmation modal — replaces native confirm() for spoiler /
+     reset prompts so the dialog matches the app's theme. */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 420px;
+    margin: 16px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  }
+  .modal-message {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    white-space: pre-line;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .modal-cancel {
+    background: var(--bg-card);
+    color: var(--text-muted);
+  }
+  .modal-cancel:hover { color: var(--text); border-color: #555; }
+  .modal-confirm {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .modal-confirm:hover { background: #ff8266; }
+
   /* Switch-style toggle (pill track + sliding knob) for stateful flags. */
   .switch {
     display: flex;
@@ -497,9 +551,19 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMessage">
+    <div class="modal-message" id="modalMessage"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-cancel" id="modalCancel">Cancel</button>
+      <button class="modal-btn modal-confirm" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
-const BUILD_VERSION = '20260501e';
+const BUILD_VERSION = '20260502c';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 const CHARACTERS = [
@@ -532,6 +596,9 @@ const SPOILER_CHARACTERS = new Set([
   "CreatureHiro","CreatureLeia","CreatureMargo","CreatureMeruru","CreatureMiria",
   "CreatureNanoka","CreatureNoah","CreatureSherry",
 ]);
+// Initial selection on load; also the fallback when the active character
+// disappears from the dropdown (e.g. spoilers toggled off while viewing one).
+const DEFAULT_CHARACTER = "Sherry";
 
 let currentChar = null;
 let charType = 'layered';  // 'layered' | 'diced'
@@ -1743,7 +1810,8 @@ document.getElementById('exportBtn').onclick = async () => {
 
 // --- Reset ---
 
-document.getElementById('resetBtn').onclick = () => {
+document.getElementById('resetBtn').onclick = async () => {
+  if (!await showModal('Reset all customizations to default?')) return;
   resetToDefault();
   groupOffsets = {};
   advancedMode = false;
@@ -1793,19 +1861,61 @@ function rebuildCharSelect() {
   if (currentChar && visible.includes(currentChar)) {
     charSelect.value = currentChar;
   } else if (currentChar) {
-    charSelect.value = visible[0];
-    loadCharacter(visible[0]);
+    charSelect.value = DEFAULT_CHARACTER;
+    loadCharacter(DEFAULT_CHARACTER);
   }
 }
 
-document.getElementById('spoilerToggle').onchange = (e) => {
-  spoilerMode = e.currentTarget.checked;
+// Themed in-page replacement for window.confirm. Returns true on Confirm,
+// false on Cancel / Esc / click-outside. Resolves on the first user action
+// and clears all listeners — safe to call back-to-back.
+function showModal(message) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    const messageEl = document.getElementById('modalMessage');
+    const confirmBtn = document.getElementById('modalConfirm');
+    const cancelBtn = document.getElementById('modalCancel');
+    messageEl.textContent = message;
+    overlay.classList.add('active');
+    // Focus Cancel so an accidental Enter doesn't fire a destructive action.
+    cancelBtn.focus();
+
+    function close(result) {
+      overlay.classList.remove('active');
+      confirmBtn.onclick = cancelBtn.onclick = overlay.onclick = null;
+      document.removeEventListener('keydown', onKey);
+      resolve(result);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close(false);
+      else if (e.key === 'Enter') close(true);
+    }
+    confirmBtn.onclick = () => close(true);
+    cancelBtn.onclick = () => close(false);
+    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+    document.addEventListener('keydown', onKey);
+  });
+}
+
+document.getElementById('spoilerToggle').onchange = async (e) => {
+  const target = e.currentTarget;
+  if (target.checked) {
+    // Hold the toggle visually off while asking — prevents the flicker of
+    // sliding on then back off if the user cancels. Programmatic `checked`
+    // writes don't refire `change`, so this doesn't loop.
+    target.checked = false;
+    if (!await showModal('Show spoiler characters?')) {
+      return;
+    }
+    target.checked = true;
+  }
+  spoilerMode = target.checked;
   rebuildCharSelect();
 };
 
 rebuildCharSelect();
-charSelect.value = 'Sherry';
-loadCharacter('Sherry');
+charSelect.value = DEFAULT_CHARACTER;
+loadCharacter(DEFAULT_CHARACTER);
 
 // --- Zoom & Pan ---
 
