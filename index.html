@@ -450,6 +450,8 @@
     background: radial-gradient(ellipse at 50% 60%, #1e1e24 0%, #0a0a0c 70%);
     overflow: hidden;
     position: relative;
+    /* Suppress browser-native pan / pinch-zoom so our pointer handlers run. */
+    touch-action: none;
   }
   .preview.bg-white { background: #ffffff; }
 
@@ -495,11 +497,167 @@
     transition: opacity 0.15s;
   }
   .zoom-btn:hover { opacity: 1; background: var(--bg-card); }
+
+  /* --- Mobile drawer (panel slides up from the bottom) ---
+     Hidden on desktop; only the @media block below activates them. */
+  .drawer-toggle { display: none; }
+  .drawer-backdrop { display: none; }
+  .drawer-handle-row { display: none; }
+
+  @media (max-width: 768px) {
+    /* Use dynamic viewport height so the layout doesn't jump when the
+       mobile browser's address bar collapses or expands. */
+    body { height: 100dvh; }
+
+    .preview {
+      width: 100%;
+      height: 100dvh;
+      padding: 8px;
+    }
+
+    /* Container fills the preview so the canvas can size against a real box.
+       Without this, .preview-container is inline-block and shrink-wraps the
+       canvas — leaving nothing for max-width:100% to anchor against. */
+    .preview-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Override the inline `style.height = '950px'` set by the JS render path.
+       With width/height auto + max-width/max-height 100%, the browser scales
+       the canvas down to fit while preserving its intrinsic aspect ratio. */
+    .preview-container canvas,
+    .preview-container img {
+      width: auto !important;
+      height: auto !important;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Panel becomes a bottom sheet. Fixed-positioned so it leaves the flex
+       layout entirely and the preview gets the whole viewport. */
+    .panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      min-width: 0;
+      height: 88dvh;
+      max-height: 88dvh;
+      border-right: none;
+      border-top: 1px solid var(--border);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      padding: 4px 16px 16px;
+      gap: 16px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      z-index: 200;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
+    }
+    body.drawer-open .panel { transform: translateY(0); }
+
+    .panel h1 { font-size: 20px; }
+
+    .drawer-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body.drawer-open .drawer-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Sticky so the close button + grab handle stay reachable when the
+       panel content scrolls. Negative margins extend the sticky background
+       across the panel's horizontal padding so it covers cleanly. */
+    .drawer-handle-row {
+      display: flex;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      align-items: center;
+      justify-content: flex-end;
+      height: 32px;
+      margin: 0 -16px;
+      padding: 0 8px;
+      background: var(--bg-panel);
+    }
+    .drawer-handle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 5px;
+      background: #555;
+      border-radius: 3px;
+    }
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .drawer-close:active { background: var(--bg-card); color: var(--text); }
+
+    .drawer-toggle {
+      display: flex;
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      z-index: 100;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.2s ease;
+    }
+    body.drawer-open .drawer-toggle {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Bigger touch targets for the existing zoom controls. */
+    .zoom-btn { width: 44px; height: 44px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="panel">
+  <div class="drawer-handle-row" aria-hidden="true">
+    <span class="drawer-handle"></span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close panel">&times;</button>
+  </div>
   <h1>MNSB Character Editor</h1>
 
   <label class="switch">
@@ -551,6 +709,12 @@
   </div>
 </div>
 
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<button class="drawer-toggle" id="drawerToggle" aria-label="Open customize panel">
+  <span style="font-size:18px;line-height:1">&#9776;</span>
+  <span>Customize</span>
+</button>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMessage">
     <div class="modal-message" id="modalMessage"></div>
@@ -563,7 +727,7 @@
 
 <script>
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
-const BUILD_VERSION = '20260502c';
+const BUILD_VERSION = '20260502d';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 const CHARACTERS = [
@@ -1954,28 +2118,108 @@ document.getElementById('zoomOut').onclick = () => { zoom(-0.3, 0, 0); };
 document.getElementById('zoomReset').onclick = () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); };
 document.getElementById('bgToggle').onclick = () => { previewArea.classList.toggle('bg-white'); };
 
-// Pan with mouse drag
-previewArea.addEventListener('mousedown', e => {
-  if (e.button !== 0) return;
-  isDragging = true;
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
-  panStartX = panX;
-  panStartY = panY;
-  container.classList.add('dragging');
+// Pointer-based pan + pinch-to-zoom. Pointer Events unify mouse, touch, and
+// pen — one handler set covers desktop drag, mobile single-finger pan, and
+// two-finger pinch. The active-pointer Map lets us:
+//   * single pointer  → translate the preview (pan)
+//   * two pointers    → distance ratio between them drives zoomLevel
+// When a finger lifts during a pinch, the surviving pointer cleanly resumes
+// pan — without re-anchoring dragStart, the container would jump to the
+// pinch midpoint when the second finger left.
+const activePointers = new Map();
+let pinchStartDist = 0;
+let pinchStartZoom = 1;
+
+function pointerArray() { return [...activePointers.values()]; }
+function pointerDistance() {
+  const [a, b] = pointerArray();
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+function pointerMidpoint() {
+  const [a, b] = pointerArray();
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+previewArea.addEventListener('pointerdown', e => {
+  // Ignore right / middle mouse buttons; touch + pen always report button 0.
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  previewArea.setPointerCapture(e.pointerId);
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activePointers.size === 1) {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    panStartX = panX;
+    panStartY = panY;
+    container.classList.add('dragging');
+  } else if (activePointers.size === 2) {
+    isDragging = false;
+    container.classList.remove('dragging');
+    pinchStartDist = pointerDistance();
+    pinchStartZoom = zoomLevel;
+  }
 });
 
-window.addEventListener('mousemove', e => {
-  if (!isDragging) return;
-  panX = panStartX + (e.clientX - dragStartX);
-  panY = panStartY + (e.clientY - dragStartY);
-  applyTransform();
+previewArea.addEventListener('pointermove', e => {
+  if (!activePointers.has(e.pointerId)) return;
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activePointers.size === 2) {
+    if (pinchStartDist === 0) return;
+    const ratio = pointerDistance() / pinchStartDist;
+    const targetZoom = Math.min(8, Math.max(0.25, pinchStartZoom * ratio));
+    const mid = pointerMidpoint();
+    const rect = previewArea.getBoundingClientRect();
+    const cx = mid.x - rect.left - rect.width / 2;
+    const cy = mid.y - rect.top - rect.height / 2;
+    // Apply absolute zoom around the pinch midpoint. We can't use zoom() —
+    // that takes a delta and would compound across move events; we want a
+    // single ratio relative to pinchStartZoom.
+    const oldZoom = zoomLevel;
+    zoomLevel = targetZoom;
+    const scaleRatio = zoomLevel / oldZoom;
+    panX = cx - scaleRatio * (cx - panX);
+    panY = cy - scaleRatio * (cy - panY);
+    applyTransform();
+  } else if (isDragging && activePointers.size === 1) {
+    panX = panStartX + (e.clientX - dragStartX);
+    panY = panStartY + (e.clientY - dragStartY);
+    applyTransform();
+  }
 });
 
-window.addEventListener('mouseup', () => {
-  isDragging = false;
-  container.classList.remove('dragging');
-});
+function endPointer(e) {
+  if (!activePointers.has(e.pointerId)) return;
+  activePointers.delete(e.pointerId);
+  pinchStartDist = 0;
+  if (activePointers.size === 0) {
+    isDragging = false;
+    container.classList.remove('dragging');
+  } else if (activePointers.size === 1) {
+    // One finger lifted mid-pinch — re-anchor pan to the surviving pointer's
+    // current position so the next move doesn't snap.
+    const remaining = pointerArray()[0];
+    dragStartX = remaining.x;
+    dragStartY = remaining.y;
+    panStartX = panX;
+    panStartY = panY;
+    isDragging = true;
+  }
+}
+previewArea.addEventListener('pointerup', endPointer);
+previewArea.addEventListener('pointercancel', endPointer);
+
+// --- Drawer (mobile bottom sheet) ---
+// CSS gates visibility behind @media (max-width: 768px); these handlers run
+// on every viewport but the affected elements only render on mobile, so the
+// extra clicks on desktop are harmless.
+const drawerToggleBtn = document.getElementById('drawerToggle');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+const drawerCloseBtn = document.getElementById('drawerClose');
+drawerToggleBtn.onclick = () => document.body.classList.add('drawer-open');
+drawerBackdrop.onclick = () => document.body.classList.remove('drawer-open');
+drawerCloseBtn.onclick = () => document.body.classList.remove('drawer-open');
 </script>
 </body>
 </html>
