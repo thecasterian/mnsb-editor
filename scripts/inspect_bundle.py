@@ -105,14 +105,21 @@ def main(bundle_path: str) -> None:
         kid_ids = [safe(k, "path_id", default=0) for k in kids]
         go_pptr = safe(d, "m_GameObject", default=None)
         go_id = safe(go_pptr, "path_id", default=0) if go_pptr is not None else 0
-        pos = safe(d, "m_LocalPosition", default=None)
-        scale = safe(d, "m_LocalScale", default=None)
+        is_rect = obj.type.name == "RectTransform"
+        # Plain Transform uses LocalPosition; RectTransform layout lives in
+        # m_AnchoredPosition / m_SizeDelta / m_AnchorMin / m_AnchorMax / m_Pivot
+        # (m_LocalPosition is computed and not load-bearing for UI).
         transform_data[tid] = {
             "go_id": go_id,
-            "pos": pos,
-            "scale": scale,
-            "children": kid_ids,
             "type": obj.type.name,
+            "children": kid_ids,
+            "pos": safe(d, "m_LocalPosition", default=None) if not is_rect else None,
+            "scale": safe(d, "m_LocalScale", default=None),
+            "anchored_pos": safe(d, "m_AnchoredPosition", default=None) if is_rect else None,
+            "size_delta":   safe(d, "m_SizeDelta",       default=None) if is_rect else None,
+            "anchor_min":   safe(d, "m_AnchorMin",       default=None) if is_rect else None,
+            "anchor_max":   safe(d, "m_AnchorMax",       default=None) if is_rect else None,
+            "pivot":        safe(d, "m_Pivot",           default=None) if is_rect else None,
         }
         if father_id:
             parent_of[tid] = father_id
@@ -122,6 +129,13 @@ def main(bundle_path: str) -> None:
     roots = [tid for tid in transform_data if tid not in parent_of]
     print(f"## Roots: {len(roots)}")
 
+    def _xy(v, fmt: str = ".1f") -> str:
+        if v is None:
+            return "?"
+        x = safe(v, "x", "X", default=0)
+        y = safe(v, "y", "Y", default=0)
+        return f"({x:{fmt}},{y:{fmt}})"
+
     def fmt_pos(pos) -> str:
         if pos is None:
             return ""
@@ -130,6 +144,15 @@ def main(bundle_path: str) -> None:
         z = safe(pos, "z", default=0)
         return f"pos=({x:.1f},{y:.1f},{z:.1f})"
 
+    def fmt_rect(td) -> str:
+        # Anchors/pivot are normalized 0..1 → 2 decimals; anc/size are pixels.
+        return (
+            f"anc={_xy(td['anchored_pos'])} "
+            f"sz={_xy(td['size_delta'])} "
+            f"ax={_xy(td['anchor_min'], '.2g')}..{_xy(td['anchor_max'], '.2g')} "
+            f"pv={_xy(td['pivot'], '.2g')}"
+        )
+
     def walk(tid: int, depth: int, max_depth: int = 6, max_lines: list = [0]):
         if max_lines[0] > 80:
             return
@@ -137,7 +160,8 @@ def main(bundle_path: str) -> None:
         if not td:
             return
         name = go_name.get(td["go_id"], "?")
-        print(f"  {'  '*depth}{name}  [{td['type']}] {fmt_pos(td['pos'])}")
+        geom = fmt_rect(td) if td["type"] == "RectTransform" else fmt_pos(td["pos"])
+        print(f"  {'  '*depth}{name}  [{td['type']}] {geom}")
         max_lines[0] += 1
         if depth >= max_depth:
             if td["children"]:
