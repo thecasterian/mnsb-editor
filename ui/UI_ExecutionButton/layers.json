@@ -1,0 +1,149 @@
+{
+  "atlas": "UI_ExecutionButton",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "ExecutionButton_Base",
+      "file": "ExecutionButton_Base.png",
+      "size": [
+        412,
+        412
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ExecutionButton",
+          "go": "Base",
+          "group": "Wrapper/Smaptphone/ButtonContainer",
+          "order": 1,
+          "pos": [
+            1074,
+            514
+          ],
+          "rect_size": [
+            412,
+            412
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExecutionButton_CheckIcon",
+      "file": "ExecutionButton_CheckIcon.png",
+      "size": [
+        63,
+        79
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ExecutionButton",
+          "go": "CheckIcon",
+          "group": "Wrapper/Smaptphone/ButtonContainer",
+          "order": 4,
+          "pos": [
+            1252,
+            800
+          ],
+          "rect_size": [
+            63,
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExecutionButton_Frame",
+      "file": "ExecutionButton_Frame.png",
+      "size": [
+        412,
+        412
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ExecutionButton",
+          "go": "Frame",
+          "group": "Wrapper/Smaptphone/ButtonContainer",
+          "order": 2,
+          "pos": [
+            1074,
+            514
+          ],
+          "rect_size": [
+            412,
+            412
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExecutionButton_Label@Ja",
+      "file": "ExecutionButton_Label_Ja.png",
+      "size": [
+        269,
+        146
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ExecutionButton",
+          "go": "Label",
+          "group": "Wrapper/Smaptphone/ButtonContainer",
+          "order": 3,
+          "pos": [
+            1146,
+            647
+          ],
+          "rect_size": [
+            269,
+            146
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SmartphoneBase",
+      "file": "SmartphoneBase.png",
+      "size": [
+        774,
+        1290
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ExecutionButton",
+          "go": "Smaptphone",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            893,
+            75
+          ],
+          "rect_size": [
+            774,
+            1290
+          ]
+        }
+      ]
+    }
+  ]
+}

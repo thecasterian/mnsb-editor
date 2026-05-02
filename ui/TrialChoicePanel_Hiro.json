@@ -1,0 +1,89 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "TrialChoicePanel@Hiro",
+  "source": "naninovel-choicehandlers_assets_all.bundle",
+  "layers": [
+    {
+      "name": "TrialChoiceBase",
+      "file": "UI_Trial/TrialChoiceBase.png",
+      "go": "Base",
+      "atlas": "UI_Trial",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "ChoicePortrait_Hiro",
+      "file": "UI_Trial/ChoicePortrait_Hiro.png",
+      "go": "ChoicePortrait",
+      "atlas": "UI_Trial",
+      "group": "Wrapper",
+      "order": 1,
+      "pos": [
+        1470,
+        0
+      ],
+      "size": [
+        1090,
+        1440
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "go": "Content",
+      "group": "Wrapper",
+      "pos": [
+        1106,
+        787
+      ],
+      "size": [
+        899,
+        0
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "VerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleRight",
+        "spacing": 80.0,
+        "child_control_width": false,
+        "child_control_height": false,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "placement": {
+        "kind": "vertical",
+        "x_anchor_canvas_pil": 2005,
+        "x_anchor_basis": "right",
+        "y_pivot_canvas_pil": 787,
+        "y_pivot_position": 0.5,
+        "spacing": 80.0,
+        "padding_top": 0,
+        "padding_bottom": 0
+      },
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    }
+  ]
+}

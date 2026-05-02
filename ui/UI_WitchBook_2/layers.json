@@ -1,0 +1,2711 @@
+{
+  "atlas": "UI_WitchBook_2",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "AreaLabelPlate_1.png",
+      "size": [
+        140,
+        56
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+          "order": 12,
+          "pos": [
+            1209,
+            408
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+          "order": 17,
+          "pos": [
+            1209,
+            784
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+          "order": 22,
+          "pos": [
+            1507,
+            799
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+          "order": 27,
+          "pos": [
+            1574,
+            520
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+          "order": 32,
+          "pos": [
+            1574,
+            307
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+          "order": 37,
+          "pos": [
+            1810,
+            552
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+          "order": 42,
+          "pos": [
+            965,
+            741
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+          "order": 47,
+          "pos": [
+            655,
+            298
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+          "order": 52,
+          "pos": [
+            848,
+            298
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+          "order": 57,
+          "pos": [
+            987,
+            298
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+          "order": 62,
+          "pos": [
+            922,
+            199
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+          "order": 67,
+          "pos": [
+            672,
+            552
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+          "order": 72,
+          "pos": [
+            940,
+            552
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+          "order": 77,
+          "pos": [
+            811,
+            972
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+          "order": 82,
+          "pos": [
+            1741,
+            234
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+          "order": 87,
+          "pos": [
+            1581,
+            153
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+          "order": 92,
+          "pos": [
+            1740,
+            153
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+          "order": 97,
+          "pos": [
+            1900,
+            153
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+          "order": 102,
+          "pos": [
+            570,
+            150
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+          "order": 108,
+          "pos": [
+            277,
+            330
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+          "order": 114,
+          "pos": [
+            277,
+            636
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+          "order": 120,
+          "pos": [
+            277,
+            944
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+          "order": 126,
+          "pos": [
+            1210,
+            409
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+          "order": 131,
+          "pos": [
+            1507,
+            631
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+          "order": 136,
+          "pos": [
+            671,
+            481
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+          "order": 141,
+          "pos": [
+            966,
+            734
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+          "order": 147,
+          "pos": [
+            1210,
+            409
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+          "order": 152,
+          "pos": [
+            1507,
+            631
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+          "order": 157,
+          "pos": [
+            671,
+            481
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+          "order": 162,
+          "pos": [
+            966,
+            734
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+          "order": 168,
+          "pos": [
+            900,
+            365
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+          "order": 173,
+          "pos": [
+            1556,
+            743
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_1",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+          "order": 178,
+          "pos": [
+            793,
+            738
+          ],
+          "rect_size": [
+            140,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "AreaLabelPlate_2.png",
+      "size": [
+        226,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+          "order": 13,
+          "pos": [
+            1166,
+            404
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+          "order": 18,
+          "pos": [
+            1166,
+            780
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+          "order": 23,
+          "pos": [
+            1464,
+            795
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+          "order": 28,
+          "pos": [
+            1531,
+            516
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+          "order": 33,
+          "pos": [
+            1531,
+            303
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+          "order": 38,
+          "pos": [
+            1767,
+            548
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+          "order": 43,
+          "pos": [
+            922,
+            737
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+          "order": 48,
+          "pos": [
+            612,
+            294
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+          "order": 53,
+          "pos": [
+            805,
+            294
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+          "order": 58,
+          "pos": [
+            944,
+            294
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+          "order": 63,
+          "pos": [
+            879,
+            195
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+          "order": 68,
+          "pos": [
+            629,
+            548
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+          "order": 73,
+          "pos": [
+            897,
+            548
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+          "order": 78,
+          "pos": [
+            768,
+            968
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+          "order": 83,
+          "pos": [
+            1698,
+            230
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+          "order": 88,
+          "pos": [
+            1538,
+            149
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+          "order": 93,
+          "pos": [
+            1697,
+            149
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+          "order": 98,
+          "pos": [
+            1857,
+            149
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+          "order": 103,
+          "pos": [
+            527,
+            146
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+          "order": 109,
+          "pos": [
+            234,
+            326
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+          "order": 115,
+          "pos": [
+            234,
+            632
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+          "order": 121,
+          "pos": [
+            234,
+            940
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+          "order": 127,
+          "pos": [
+            1167,
+            405
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+          "order": 132,
+          "pos": [
+            1464,
+            627
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+          "order": 137,
+          "pos": [
+            628,
+            477
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+          "order": 142,
+          "pos": [
+            923,
+            730
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+          "order": 148,
+          "pos": [
+            1167,
+            405
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+          "order": 153,
+          "pos": [
+            1464,
+            627
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+          "order": 158,
+          "pos": [
+            628,
+            477
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+          "order": 163,
+          "pos": [
+            923,
+            730
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+          "order": 169,
+          "pos": [
+            857,
+            361
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+          "order": 174,
+          "pos": [
+            1513,
+            739
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_2",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+          "order": 179,
+          "pos": [
+            750,
+            734
+          ],
+          "rect_size": [
+            226,
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "AreaLabelPlate_3.png",
+      "size": [
+        304,
+        59
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+          "order": 14,
+          "pos": [
+            1127,
+            406
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+          "order": 19,
+          "pos": [
+            1127,
+            782
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+          "order": 24,
+          "pos": [
+            1425,
+            798
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+          "order": 29,
+          "pos": [
+            1492,
+            518
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+          "order": 34,
+          "pos": [
+            1492,
+            306
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+          "order": 39,
+          "pos": [
+            1728,
+            550
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+          "order": 44,
+          "pos": [
+            883,
+            740
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+          "order": 49,
+          "pos": [
+            573,
+            296
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+          "order": 54,
+          "pos": [
+            766,
+            296
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+          "order": 59,
+          "pos": [
+            905,
+            296
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+          "order": 64,
+          "pos": [
+            840,
+            198
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+          "order": 69,
+          "pos": [
+            590,
+            550
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+          "order": 74,
+          "pos": [
+            858,
+            550
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+          "order": 79,
+          "pos": [
+            729,
+            970
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+          "order": 84,
+          "pos": [
+            1659,
+            232
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+          "order": 89,
+          "pos": [
+            1499,
+            152
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+          "order": 94,
+          "pos": [
+            1658,
+            152
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+          "order": 99,
+          "pos": [
+            1818,
+            152
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+          "order": 104,
+          "pos": [
+            488,
+            148
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+          "order": 110,
+          "pos": [
+            195,
+            328
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+          "order": 116,
+          "pos": [
+            195,
+            634
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+          "order": 122,
+          "pos": [
+            195,
+            942
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+          "order": 128,
+          "pos": [
+            1128,
+            408
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+          "order": 133,
+          "pos": [
+            1425,
+            630
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+          "order": 138,
+          "pos": [
+            589,
+            480
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+          "order": 143,
+          "pos": [
+            884,
+            732
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+          "order": 149,
+          "pos": [
+            1128,
+            408
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+          "order": 154,
+          "pos": [
+            1425,
+            630
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+          "order": 159,
+          "pos": [
+            589,
+            480
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+          "order": 164,
+          "pos": [
+            884,
+            732
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+          "order": 170,
+          "pos": [
+            818,
+            364
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+          "order": 175,
+          "pos": [
+            1474,
+            742
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_3",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+          "order": 180,
+          "pos": [
+            711,
+            736
+          ],
+          "rect_size": [
+            304,
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "AreaLabelPlate_4.png",
+      "size": [
+        454,
+        56
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+          "order": 15,
+          "pos": [
+            1052,
+            408
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+          "order": 20,
+          "pos": [
+            1052,
+            784
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+          "order": 25,
+          "pos": [
+            1350,
+            799
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+          "order": 30,
+          "pos": [
+            1417,
+            520
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+          "order": 35,
+          "pos": [
+            1417,
+            307
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+          "order": 40,
+          "pos": [
+            1653,
+            552
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+          "order": 45,
+          "pos": [
+            808,
+            741
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+          "order": 50,
+          "pos": [
+            498,
+            298
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+          "order": 55,
+          "pos": [
+            691,
+            298
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+          "order": 60,
+          "pos": [
+            830,
+            298
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+          "order": 65,
+          "pos": [
+            765,
+            199
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+          "order": 70,
+          "pos": [
+            515,
+            552
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+          "order": 75,
+          "pos": [
+            783,
+            552
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+          "order": 80,
+          "pos": [
+            654,
+            972
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+          "order": 85,
+          "pos": [
+            1584,
+            234
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+          "order": 90,
+          "pos": [
+            1424,
+            153
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+          "order": 95,
+          "pos": [
+            1583,
+            153
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+          "order": 100,
+          "pos": [
+            1743,
+            153
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+          "order": 105,
+          "pos": [
+            413,
+            150
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+          "order": 111,
+          "pos": [
+            120,
+            330
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+          "order": 117,
+          "pos": [
+            120,
+            636
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+          "order": 123,
+          "pos": [
+            120,
+            944
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+          "order": 129,
+          "pos": [
+            1053,
+            409
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+          "order": 134,
+          "pos": [
+            1350,
+            631
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+          "order": 139,
+          "pos": [
+            514,
+            481
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+          "order": 144,
+          "pos": [
+            809,
+            734
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+          "order": 150,
+          "pos": [
+            1053,
+            409
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+          "order": 155,
+          "pos": [
+            1350,
+            631
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+          "order": 160,
+          "pos": [
+            514,
+            481
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+          "order": 165,
+          "pos": [
+            809,
+            734
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+          "order": 171,
+          "pos": [
+            743,
+            365
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+          "order": 176,
+          "pos": [
+            1399,
+            743
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_4",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+          "order": 181,
+          "pos": [
+            636,
+            738
+          ],
+          "rect_size": [
+            454,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "AreaLabelPlate_5.png",
+      "size": [
+        467,
+        52
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+          "order": 16,
+          "pos": [
+            1046,
+            410
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+          "order": 21,
+          "pos": [
+            1046,
+            786
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+          "order": 26,
+          "pos": [
+            1344,
+            801
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+          "order": 31,
+          "pos": [
+            1410,
+            522
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+          "order": 36,
+          "pos": [
+            1410,
+            309
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+          "order": 41,
+          "pos": [
+            1646,
+            554
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+          "order": 46,
+          "pos": [
+            802,
+            743
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+          "order": 51,
+          "pos": [
+            492,
+            300
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+          "order": 56,
+          "pos": [
+            684,
+            300
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+          "order": 61,
+          "pos": [
+            824,
+            300
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+          "order": 66,
+          "pos": [
+            758,
+            201
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+          "order": 71,
+          "pos": [
+            508,
+            554
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+          "order": 76,
+          "pos": [
+            776,
+            554
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+          "order": 81,
+          "pos": [
+            648,
+            974
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+          "order": 86,
+          "pos": [
+            1578,
+            236
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+          "order": 91,
+          "pos": [
+            1418,
+            155
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+          "order": 96,
+          "pos": [
+            1576,
+            155
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+          "order": 101,
+          "pos": [
+            1736,
+            155
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+          "order": 106,
+          "pos": [
+            406,
+            152
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+          "order": 112,
+          "pos": [
+            114,
+            332
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+          "order": 118,
+          "pos": [
+            114,
+            638
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+          "order": 124,
+          "pos": [
+            114,
+            946
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+          "order": 130,
+          "pos": [
+            1046,
+            411
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+          "order": 135,
+          "pos": [
+            1344,
+            633
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+          "order": 140,
+          "pos": [
+            508,
+            483
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+          "order": 145,
+          "pos": [
+            802,
+            736
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+          "order": 151,
+          "pos": [
+            1046,
+            411
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+          "order": 156,
+          "pos": [
+            1344,
+            633
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+          "order": 161,
+          "pos": [
+            508,
+            483
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+          "order": 166,
+          "pos": [
+            802,
+            736
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+          "order": 172,
+          "pos": [
+            736,
+            367
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+          "order": 177,
+          "pos": [
+            1392,
+            745
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Plate_5",
+          "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+          "order": 182,
+          "pos": [
+            630,
+            740
+          ],
+          "rect_size": [
+            467,
+            52
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Arrow_BottomLeft",
+      "file": "Arrow_BottomLeft.png",
+      "size": [
+        141,
+        122
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Arrow",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields",
+          "order": 119,
+          "pos": [
+            270,
+            811
+          ],
+          "rect_size": [
+            141,
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "Arrow_Left.png",
+      "size": [
+        171,
+        137
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Arrow",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Lake",
+          "order": 113,
+          "pos": [
+            254,
+            490
+          ],
+          "rect_size": [
+            171,
+            137
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Arrow_TopLeft",
+      "file": "Arrow_TopLeft.png",
+      "size": [
+        141,
+        122
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Arrow",
+          "group": "Wrapper/Pages/Page_Maps/F1_1/Wall",
+          "order": 107,
+          "pos": [
+            270,
+            195
+          ],
+          "rect_size": [
+            141,
+            122
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Background_2",
+      "file": "Background_2.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Rules",
+          "order": 184,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Layout_B1_1",
+      "file": "Layout_B1_1.png",
+      "size": [
+        1381,
+        734
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "B1_1",
+          "group": "Wrapper/Pages/Page_Maps",
+          "order": 167,
+          "pos": [
+            472,
+            205
+          ],
+          "rect_size": [
+            1381,
+            734
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Layout_Blueprint_1",
+      "file": "Layout_Blueprint_1.png",
+      "size": [
+        1631,
+        932
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Blueprint",
+          "group": "Wrapper/Pages/Page_Maps",
+          "order": 183,
+          "pos": [
+            458,
+            106
+          ],
+          "rect_size": [
+            1631,
+            932
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Layout_F1_1",
+      "file": "Layout_F1_1.png",
+      "size": [
+        1631,
+        932
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "F1_1",
+          "group": "Wrapper/Pages/Page_Maps",
+          "order": 11,
+          "pos": [
+            458,
+            106
+          ],
+          "rect_size": [
+            1631,
+            932
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Layout_F2_1",
+      "file": "Layout_F2_1.png",
+      "size": [
+        1631,
+        831
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "F2_1",
+          "group": "Wrapper/Pages/Page_Maps",
+          "order": 125,
+          "pos": [
+            458,
+            120
+          ],
+          "rect_size": [
+            1631,
+            831
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "F2_2",
+          "group": "Wrapper/Pages/Page_Maps",
+          "order": 146,
+          "pos": [
+            458,
+            120
+          ],
+          "rect_size": [
+            1631,
+            831
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Note_TitleUnderline",
+      "file": "Note_TitleUnderline.png",
+      "size": [
+        533,
+        107
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Underline",
+          "group": "Wrapper/Pages/Page_Notes/LeftArea/Subtitle/Label",
+          "order": 187,
+          "pos": [
+            376,
+            552
+          ],
+          "rect_size": [
+            519,
+            109
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rule_SubtitleUnderline",
+      "file": "Rule_SubtitleUnderline.png",
+      "size": [
+        533,
+        109
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Underline",
+          "group": "Wrapper/Pages/Page_Rules/LeftArea/Subtitle/Label",
+          "order": 186,
+          "pos": [
+            384,
+            757
+          ],
+          "rect_size": [
+            501,
+            109
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Rule_TitleBack",
+      "file": "Rule_TitleBack.png",
+      "size": [
+        708,
+        304
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Back",
+          "group": "Wrapper/Pages/Page_Rules/LeftArea/Title",
+          "order": 185,
+          "pos": [
+            281,
+            375
+          ],
+          "rect_size": [
+            708,
+            304
+          ]
+        }
+      ]
+    }
+  ]
+}

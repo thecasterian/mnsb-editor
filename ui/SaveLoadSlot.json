@@ -1,0 +1,84 @@
+{
+  "canvas_size": [
+    540,
+    374
+  ],
+  "name": "SaveLoadSlot",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "EmptySlot",
+      "file": "UI_SaveLoad/EmptySlot.png",
+      "go": "Back",
+      "atlas": "UI_SaveLoad",
+      "group": "",
+      "order": 0,
+      "pos": [
+        30,
+        39
+      ],
+      "size": [
+        480,
+        270
+      ]
+    },
+    {
+      "name": "SaveLoadSlotFrame",
+      "file": "UI_SaveLoad/SaveLoadSlotFrame.png",
+      "go": "Frame",
+      "atlas": "UI_SaveLoad",
+      "group": "Back",
+      "order": 1,
+      "pos": [
+        -10,
+        0
+      ],
+      "size": [
+        560,
+        348
+      ]
+    },
+    {
+      "name": "Icon_ArrowCircle",
+      "file": "Common/Icon_ArrowCircle.png",
+      "go": "Loading",
+      "atlas": "Common",
+      "group": "Back",
+      "order": 2,
+      "pos": [
+        170,
+        90
+      ],
+      "size": [
+        199,
+        167
+      ],
+      "color": [
+        0.6705882549285889,
+        0.6196078658103943,
+        0.6039215922355652,
+        1.0
+      ]
+    },
+    {
+      "name": "DeleteButton_Default",
+      "file": "UI_SaveLoad/DeleteButton_Default.png",
+      "go": "DeleteButton",
+      "atlas": "UI_SaveLoad",
+      "group": "",
+      "order": 3,
+      "pos": [
+        419,
+        8
+      ],
+      "size": [
+        127,
+        116
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    540,
+    374
+  ]
+}

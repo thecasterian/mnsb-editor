@@ -1,0 +1,673 @@
+{
+  "atlas": "UI_Trial",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Agreement@Ja",
+      "file": "Agreement_Ja.png",
+      "size": [
+        196,
+        166
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@Approval",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "rect_size": [
+            199,
+            166
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Balloon_Cancel",
+      "file": "Balloon_Cancel.png",
+      "size": [
+        767,
+        229
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@Cancel",
+          "go": "ChoiceButton_Trial@Cancel",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            767,
+            229
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Balloon_Default",
+      "file": "Balloon_Default.png",
+      "size": [
+        1099,
+        318
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial",
+          "go": "ChoiceButton_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@Approval",
+          "go": "ChoiceButton_Trial@Approval",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicAnAn",
+          "go": "ChoiceButton_Trial@MagicAnAn",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicCoco",
+          "go": "ChoiceButton_Trial@MagicCoco",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicEma",
+          "go": "ChoiceButton_Trial@MagicEma",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicLeia",
+          "go": "ChoiceButton_Trial@MagicLeia",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicMargo",
+          "go": "ChoiceButton_Trial@MagicMargo",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@MagicNanoka",
+          "go": "ChoiceButton_Trial@MagicNanoka",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@Objection",
+          "go": "ChoiceButton_Trial@Objection",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@Perjury",
+          "go": "ChoiceButton_Trial@Perjury",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Trial@Question",
+          "go": "ChoiceButton_Trial@Question",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1099,
+            318
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ChoicePortrait_Ema",
+      "file": "ChoicePortrait_Ema.png",
+      "size": [
+        946,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TrialChoicePanel@Ema",
+          "go": "ChoicePortrait",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            1614,
+            0
+          ],
+          "rect_size": [
+            946,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ChoicePortrait_Hiro",
+      "file": "ChoicePortrait_Hiro.png",
+      "size": [
+        1090,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TrialChoicePanel@Hiro",
+          "go": "ChoicePortrait",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            1470,
+            0
+          ],
+          "rect_size": [
+            1090,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ClockBase",
+      "file": "ClockBase.png",
+      "size": [
+        465,
+        151
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "DebateUI",
+          "go": "Back",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            2068,
+            46
+          ],
+          "rect_size": [
+            465,
+            151
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Doubt@Ja",
+      "file": "Doubt_Ja.png",
+      "size": [
+        195,
+        166
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@Question",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "rect_size": [
+            195,
+            166
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FastButtonBase",
+      "file": "FastButtonBase.png",
+      "size": [
+        208,
+        164
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "DebateUI",
+          "go": "SkipButton",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            1882,
+            38
+          ],
+          "rect_size": [
+            208,
+            164
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FastIcon",
+      "file": "FastIcon.png",
+      "size": [
+        52,
+        47
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "DebateUI",
+          "go": "Icon",
+          "group": "Wrapper/SkipButton/Button",
+          "order": 2,
+          "pos": [
+            1964,
+            96
+          ],
+          "rect_size": [
+            52,
+            47
+          ],
+          "color": [
+            1.0,
+            0.9411764740943909,
+            0.501960813999176,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Blue@Ja",
+      "file": "Magic_Blue_Ja.png",
+      "size": [
+        199,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicAnAn",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Gray@Ja",
+      "file": "Magic_Gray_Ja.png",
+      "size": [
+        198,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicNanoka",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Orange@Ja",
+      "file": "Magic_Orange_Ja.png",
+      "size": [
+        199,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicCoco",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Pink@Ja",
+      "file": "Magic_Pink_Ja.png",
+      "size": [
+        199,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicEma",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Purple@Ja",
+      "file": "Magic_Purple_Ja.png",
+      "size": [
+        199,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicMargo",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Magic_Yellow@Ja",
+      "file": "Magic_Yellow_Ja.png",
+      "size": [
+        199,
+        172
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@MagicLeia",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "rect_size": [
+            199,
+            172
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Objection@Ja",
+      "file": "Objection_Ja.png",
+      "size": [
+        199,
+        166
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@Objection",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "rect_size": [
+            199,
+            166
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Perjury@Ja",
+      "file": "Perjury_Ja.png",
+      "size": [
+        198,
+        166
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Trial@Perjury",
+          "go": "Tag",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "rect_size": [
+            198,
+            166
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TrialChoiceBase",
+      "file": "TrialChoiceBase.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TrialChoicePanel@Ema",
+          "go": "Base",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        },
+        {
+          "prefab": "TrialChoicePanel@Hiro",
+          "go": "Base",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    }
+  ]
+}

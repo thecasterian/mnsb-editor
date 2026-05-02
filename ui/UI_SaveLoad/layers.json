@@ -1,0 +1,261 @@
+{
+  "atlas": "UI_SaveLoad",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "DeleteButton_Default",
+      "file": "DeleteButton_Default.png",
+      "size": [
+        127,
+        116
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadSlot",
+          "go": "DeleteButton",
+          "group": "",
+          "order": 3,
+          "pos": [
+            419,
+            8
+          ],
+          "rect_size": [
+            127,
+            116
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EmptySlot",
+      "file": "EmptySlot.png",
+      "size": [
+        480,
+        270
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadSlot",
+          "go": "Back",
+          "group": "",
+          "order": 0,
+          "pos": [
+            30,
+            39
+          ],
+          "rect_size": [
+            480,
+            270
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Indication_Off",
+      "file": "Indication_Off.png",
+      "size": [
+        20,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "GalleryUI",
+          "go": "Off_Guide",
+          "group": "Wrapper/StillPanel/Pagination/Indicators/Dot",
+          "order": 3,
+          "pos": [
+            1288,
+            1350
+          ],
+          "rect_size": [
+            20,
+            20
+          ]
+        },
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Off_Guide",
+          "group": "Wrapper/Pagination/Indicators/Dot",
+          "order": 4,
+          "pos": [
+            1288,
+            1350
+          ],
+          "rect_size": [
+            20,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Indication_On",
+      "file": "Indication_On.png",
+      "size": [
+        20,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "GalleryUI",
+          "go": "DotIndicator",
+          "group": "Wrapper/StillPanel/Pagination/Indicators/Dot",
+          "order": 2,
+          "pos": [
+            1252,
+            1350
+          ],
+          "rect_size": [
+            20,
+            20
+          ]
+        },
+        {
+          "prefab": "SaveLoadUI",
+          "go": "DotIndicator",
+          "group": "Wrapper/Pagination/Indicators/Dot",
+          "order": 3,
+          "pos": [
+            1252,
+            1350
+          ],
+          "rect_size": [
+            20,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LoadTitle@Ja",
+      "file": "LoadTitle_Ja.png",
+      "size": [
+        426,
+        254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Title",
+          "group": "Wrapper/LoadPanel",
+          "order": 2,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            426,
+            254
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SaveLoadBase",
+      "file": "SaveLoadBase.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Underlay",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SaveLoadSlotFrame",
+      "file": "SaveLoadSlotFrame.png",
+      "size": [
+        560,
+        348
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadSlot",
+          "go": "Frame",
+          "group": "Back",
+          "order": 1,
+          "pos": [
+            -10,
+            0
+          ],
+          "rect_size": [
+            560,
+            348
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SaveTitle@Ja",
+      "file": "SaveTitle_Ja.png",
+      "size": [
+        426,
+        254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Title",
+          "group": "Wrapper/SavePanel",
+          "order": 1,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            426,
+            254
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "NormalPrinter",
+  "source": "naninovel-textprinters_assets_all.bundle",
+  "layers": [
+    {
+      "name": "NormalPrinter_Frame_Top",
+      "file": "UI_Adv/NormalPrinter_Frame_Top.png",
+      "go": "Frame_Top",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/Default-Stream",
+      "order": 0,
+      "pos": [
+        2273,
+        0
+      ],
+      "size": [
+        287,
+        470
+      ]
+    },
+    {
+      "name": "NormalPrinter_Frame_Bottom",
+      "file": "UI_Adv/NormalPrinter_Frame_Bottom.png",
+      "go": "Frame_Bottom",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/Default-Stream",
+      "order": 1,
+      "pos": [
+        0,
+        643
+      ],
+      "size": [
+        2560,
+        797
+      ]
+    },
+    {
+      "name": "NormalPrinter_Screen",
+      "file": "UI_Adv/NormalPrinter_Screen.png",
+      "go": "Screen",
+      "atlas": "UI_Adv",
+      "group": "Wrapper",
+      "order": 2,
+      "pos": [
+        0,
+        588
+      ],
+      "size": [
+        2560,
+        852
+      ]
+    },
+    {
+      "name": "NormalPrinter_Grass_1",
+      "file": "UI_Adv/NormalPrinter_Grass_1.png",
+      "go": "Grass_1",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/Default-Stream",
+      "order": 3,
+      "pos": [
+        2195,
+        0
+      ],
+      "size": [
+        365,
+        371
+      ]
+    },
+    {
+      "name": "NormalPrinter_Grass_2",
+      "file": "UI_Adv/NormalPrinter_Grass_2.png",
+      "go": "Grass_2",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/Default-Stream",
+      "order": 4,
+      "pos": [
+        0,
+        1011
+      ],
+      "size": [
+        371,
+        429
+      ]
+    },
+    {
+      "name": "NamePlateBase",
+      "file": "UI_Adv/NamePlateBase.png",
+      "go": "AuthorBase",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/AuthorPanel",
+      "order": 5,
+      "pos": [
+        340,
+        902
+      ],
+      "size": [
+        601,
+        289
+      ]
+    },
+    {
+      "name": "Icon_Arrow_Double",
+      "file": "Common/Icon_Arrow_Double.png",
+      "go": "Image",
+      "atlas": "Common",
+      "group": "Wrapper/Indicators/SkipModeIndicator",
+      "order": 6,
+      "pos": [
+        2014,
+        1238
+      ],
+      "size": [
+        200,
+        200
+      ]
+    }
+  ]
+}

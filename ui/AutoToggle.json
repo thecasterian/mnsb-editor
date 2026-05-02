@@ -1,0 +1,42 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "AutoToggle",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "AutoToggle_On",
+      "file": "UI_Adv/AutoToggle_On.png",
+      "go": "Background",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/AutoToggle/On",
+      "order": 0,
+      "pos": [
+        4,
+        1273
+      ],
+      "size": [
+        253,
+        169
+      ]
+    },
+    {
+      "name": "AutoToggle_Off",
+      "file": "UI_Adv/AutoToggle_Off.png",
+      "go": "Background",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/AutoToggle/Off",
+      "order": 1,
+      "pos": [
+        4,
+        1273
+      ],
+      "size": [
+        253,
+        169
+      ]
+    }
+  ]
+}

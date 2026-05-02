@@ -1,0 +1,2532 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "OptionsUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "OptionsUnderlay",
+      "file": "UI_Options/OptionsUnderlay.png",
+      "go": "Underlay",
+      "atlas": "UI_Options",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Message",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 1,
+      "pos": [
+        2287,
+        264
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Message_Inactive@Ja",
+      "file": "UI_Options/TabLabel_Message_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Message",
+      "order": 2,
+      "pos": [
+        2358,
+        307
+      ],
+      "size": [
+        176,
+        54
+      ]
+    },
+    {
+      "name": "TabLabel_Message_Active@Ja",
+      "file": "UI_Options/TabLabel_Message_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Message",
+      "order": 3,
+      "pos": [
+        2358,
+        307
+      ],
+      "size": [
+        176,
+        54
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Graphics",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 4,
+      "pos": [
+        2287,
+        404
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Graphics_Inactive@Ja",
+      "file": "UI_Options/TabLabel_Graphics_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Graphics",
+      "order": 5,
+      "pos": [
+        2359,
+        444
+      ],
+      "size": [
+        186,
+        61
+      ]
+    },
+    {
+      "name": "TabLabel_Graphics_Active@Ja",
+      "file": "UI_Options/TabLabel_Graphics_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Graphics",
+      "order": 6,
+      "pos": [
+        2359,
+        444
+      ],
+      "size": [
+        186,
+        61
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Audio",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 7,
+      "pos": [
+        2287,
+        544
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Audio_Inactive@Ja",
+      "file": "UI_Options/TabLabel_Audio_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Audio",
+      "order": 8,
+      "pos": [
+        2360,
+        582
+      ],
+      "size": [
+        149,
+        61
+      ]
+    },
+    {
+      "name": "TabLabel_Audio_Active@Ja",
+      "file": "UI_Options/TabLabel_Audio_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Tabs/Tab_Audio",
+      "order": 9,
+      "pos": [
+        2360,
+        582
+      ],
+      "size": [
+        149,
+        61
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed",
+      "order": 10,
+      "pos": [
+        220,
+        182
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider",
+      "order": 11,
+      "pos": [
+        1311,
+        238
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider/FillArea",
+      "order": 12,
+      "pos": [
+        1311,
+        263
+      ],
+      "size": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider",
+      "order": 13,
+      "pos": [
+        1309,
+        234
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider/HandleSlideArea",
+      "order": 14,
+      "pos": [
+        1300,
+        260
+      ],
+      "size": [
+        46,
+        14
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay",
+      "order": 15,
+      "pos": [
+        220,
+        312
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider",
+      "order": 16,
+      "pos": [
+        1311,
+        367
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider/FillArea",
+      "order": 17,
+      "pos": [
+        1311,
+        392
+      ],
+      "size": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider",
+      "order": 18,
+      "pos": [
+        1309,
+        364
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider/HandleSlideArea",
+      "order": 19,
+      "pos": [
+        1300,
+        389
+      ],
+      "size": [
+        46,
+        14
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode",
+      "order": 20,
+      "pos": [
+        220,
+        440
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+      "order": 21,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+      "order": 22,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+      "order": 23,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+      "order": 24,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+      "order": 25,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+      "order": 26,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles",
+      "order": 27,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode",
+      "order": 28,
+      "pos": [
+        220,
+        440
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+      "order": 29,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+      "order": 30,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+      "order": 31,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+      "order": 32,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+      "order": 33,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+      "order": 34,
+      "pos": [
+        1709,
+        475
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles",
+      "order": 35,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode",
+      "order": 36,
+      "pos": [
+        220,
+        570
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+      "order": 37,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+      "order": 38,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+      "order": 39,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+      "order": 40,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+      "order": 41,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+      "order": 42,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles",
+      "order": 43,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint",
+      "order": 44,
+      "pos": [
+        220,
+        570
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+      "order": 45,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+      "order": 46,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+      "order": 47,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+      "order": 48,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+      "order": 49,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+      "order": 50,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles",
+      "order": 51,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage",
+      "order": 52,
+      "pos": [
+        220,
+        698
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+      "order": 53,
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+      "order": 54,
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+      "order": 55,
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+      "order": 56,
+      "pos": [
+        1709,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+      "order": 57,
+      "pos": [
+        1709,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+      "order": 58,
+      "pos": [
+        1709,
+        733
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles",
+      "order": 59,
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+      "order": 60,
+      "pos": [
+        220,
+        709
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "DropDownEntry_Default",
+      "file": "UI_Options/DropDownEntry_Default.png",
+      "go": "Dropdown",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+      "order": 61,
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Template",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+      "order": 62,
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Disable",
+      "file": "UI_Options/DropDownItemBase_Disable.png",
+      "go": "DropdownItem",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items",
+      "order": 63,
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Enable",
+      "file": "UI_Options/DropDownItemBase_Enable.png",
+      "go": "Checkmark",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items/DropdownItem",
+      "order": 64,
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownSeparator",
+      "file": "UI_Options/DropDownSeparator.png",
+      "go": "Underline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items/DropdownItem",
+      "order": 65,
+      "pos": [
+        2129,
+        795
+      ],
+      "size": [
+        400,
+        4
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Outline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template",
+      "order": 66,
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Frame",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Message/ResetToDefaultButton",
+      "order": 67,
+      "pos": [
+        14,
+        1264
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle",
+      "order": 68,
+      "pos": [
+        220,
+        182
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+      "order": 69,
+      "pos": [
+        1309,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+      "order": 70,
+      "pos": [
+        1309,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+      "order": 71,
+      "pos": [
+        1309,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+      "order": 72,
+      "pos": [
+        1709,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+      "order": 73,
+      "pos": [
+        1709,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+      "order": 74,
+      "pos": [
+        1709,
+        217
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles",
+      "order": 75,
+      "pos": [
+        1309,
+        217
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+      "order": 76,
+      "pos": [
+        220,
+        322
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "DropDownEntry_Default",
+      "file": "UI_Options/DropDownEntry_Default.png",
+      "go": "Dropdown",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+      "order": 77,
+      "pos": [
+        1309,
+        346
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Template",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+      "order": 78,
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Disable",
+      "file": "UI_Options/DropDownItemBase_Disable.png",
+      "go": "DropdownItem",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items",
+      "order": 79,
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Enable",
+      "file": "UI_Options/DropDownItemBase_Enable.png",
+      "go": "Checkmark",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items/DropdownItem",
+      "order": 80,
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownSeparator",
+      "file": "UI_Options/DropDownSeparator.png",
+      "go": "Underline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items/DropdownItem",
+      "order": 81,
+      "pos": [
+        2129,
+        408
+      ],
+      "size": [
+        400,
+        4
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Outline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template",
+      "order": 82,
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+      "order": 83,
+      "pos": [
+        220,
+        451
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "DropDownEntry_Default",
+      "file": "UI_Options/DropDownEntry_Default.png",
+      "go": "Dropdown",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+      "order": 84,
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Template",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+      "order": 85,
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Disable",
+      "file": "UI_Options/DropDownItemBase_Disable.png",
+      "go": "DropdownItem",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items",
+      "order": 86,
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Enable",
+      "file": "UI_Options/DropDownItemBase_Enable.png",
+      "go": "Checkmark",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items/DropdownItem",
+      "order": 87,
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "DropDownSeparator",
+      "file": "UI_Options/DropDownSeparator.png",
+      "go": "Underline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items/DropdownItem",
+      "order": 88,
+      "pos": [
+        2129,
+        537
+      ],
+      "size": [
+        400,
+        4
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "UI_Options/DropDownOutline.png",
+      "go": "Outline",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template",
+      "order": 89,
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle",
+      "order": 90,
+      "pos": [
+        220,
+        570
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+      "order": 91,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+      "order": 92,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+      "order": 93,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "UI_Options/ToggleBody_Disabled.png",
+      "go": "Disabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+      "order": 94,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "UI_Options/ToggleBody_Enabled.png",
+      "go": "Enabled",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+      "order": 95,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "Highlighted",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+      "order": 96,
+      "pos": [
+        1709,
+        604
+      ],
+      "size": [
+        400,
+        68
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "UI_Options/ToggleOutline.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles",
+      "order": 97,
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Frame",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Graphics/ResetToDefaultButton",
+      "order": 98,
+      "pos": [
+        14,
+        1264
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume",
+      "order": 99,
+      "pos": [
+        220,
+        182
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider",
+      "order": 100,
+      "pos": [
+        1311,
+        238
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider/FillArea",
+      "order": 101,
+      "pos": [
+        1311,
+        239
+      ],
+      "size": [
+        397,
+        24
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider",
+      "order": 102,
+      "pos": [
+        1309,
+        234
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider/HandleSlideArea",
+      "order": 103,
+      "pos": [
+        1685,
+        228
+      ],
+      "size": [
+        46,
+        46
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume",
+      "order": 104,
+      "pos": [
+        220,
+        312
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider",
+      "order": 105,
+      "pos": [
+        1311,
+        367
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider/FillArea",
+      "order": 106,
+      "pos": [
+        1311,
+        368
+      ],
+      "size": [
+        397,
+        24
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider",
+      "order": 107,
+      "pos": [
+        1309,
+        364
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider/HandleSlideArea",
+      "order": 108,
+      "pos": [
+        1685,
+        357
+      ],
+      "size": [
+        46,
+        46
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume",
+      "order": 109,
+      "pos": [
+        220,
+        440
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider",
+      "order": 110,
+      "pos": [
+        1311,
+        496
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider/FillArea",
+      "order": 111,
+      "pos": [
+        1311,
+        497
+      ],
+      "size": [
+        397,
+        24
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider",
+      "order": 112,
+      "pos": [
+        1309,
+        492
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider/HandleSlideArea",
+      "order": 113,
+      "pos": [
+        1685,
+        486
+      ],
+      "size": [
+        46,
+        46
+      ]
+    },
+    {
+      "name": "AlphaZero",
+      "file": "UI_Options/AlphaZero.png",
+      "go": "HighlightedNotice",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume",
+      "order": 114,
+      "pos": [
+        220,
+        570
+      ],
+      "size": [
+        2006,
+        116
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "UI_Options/SliderBase.png",
+      "go": "Background",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider",
+      "order": 115,
+      "pos": [
+        1311,
+        625
+      ],
+      "size": [
+        794,
+        26
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "UI_Options/SliderFiller_Default.png",
+      "go": "Fill",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider/FillArea",
+      "order": 116,
+      "pos": [
+        1311,
+        626
+      ],
+      "size": [
+        397,
+        24
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "UI_Options/SliderFrame.png",
+      "go": "Frame",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider",
+      "order": 117,
+      "pos": [
+        1309,
+        622
+      ],
+      "size": [
+        800,
+        33
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "UI_Options/Handle_Default.png",
+      "go": "Handle",
+      "atlas": "UI_Options",
+      "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider/HandleSlideArea",
+      "order": 118,
+      "pos": [
+        1685,
+        615
+      ],
+      "size": [
+        46,
+        46
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Frame",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Audio/ResetToDefaultButton",
+      "order": 119,
+      "pos": [
+        14,
+        1264
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "OptionsTitle@Ja",
+      "file": "UI_Options/OptionsTitle_Ja.png",
+      "go": "Title",
+      "atlas": "UI_Options",
+      "group": "Wrapper",
+      "order": 120,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        426,
+        254
+      ]
+    },
+    {
+      "name": "CloseButton_Default",
+      "file": "UI_Common/CloseButton_Default.png",
+      "go": "CloseButton",
+      "atlas": "UI_Common",
+      "group": "Wrapper",
+      "order": 121,
+      "pos": [
+        2260,
+        0
+      ],
+      "size": [
+        300,
+        238
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "go": "Tabs",
+      "group": "Wrapper",
+      "pos": [
+        2287,
+        264
+      ],
+      "size": [
+        357,
+        424
+      ],
+      "pivot": [
+        1.0,
+        1.0
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperRight",
+        "spacing": -4.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "OptionModules",
+      "group": "Wrapper/Pages/Page_Message",
+      "pos": [
+        341,
+        231
+      ],
+      "size": [
+        1768,
+        978
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperCenter",
+        "spacing": 89.0,
+        "child_control_width": true,
+        "child_control_height": false,
+        "child_force_expand_width": true,
+        "child_force_expand_height": false
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode",
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode",
+      "pos": [
+        1309,
+        475
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode",
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint",
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage",
+      "pos": [
+        1309,
+        733
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Template",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Items",
+      "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template",
+      "pos": [
+        2129,
+        729
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "VerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": true,
+        "child_force_expand_height": false
+      },
+      "placement": {
+        "kind": "vertical",
+        "x_anchor_canvas_pil": 2329,
+        "x_anchor_basis": "center",
+        "y_pivot_canvas_pil": 763,
+        "y_pivot_position": 0.5,
+        "spacing": 0.0,
+        "padding_top": 0,
+        "padding_bottom": 0
+      },
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "OptionModules",
+      "group": "Wrapper/Pages/Page_Graphics",
+      "pos": [
+        341,
+        231
+      ],
+      "size": [
+        1768,
+        978
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperCenter",
+        "spacing": 89.0,
+        "child_control_width": false,
+        "child_control_height": false,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle",
+      "pos": [
+        1309,
+        217
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Template",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Items",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template",
+      "pos": [
+        2129,
+        342
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "VerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": true,
+        "child_force_expand_height": false
+      },
+      "placement": {
+        "kind": "vertical",
+        "x_anchor_canvas_pil": 2329,
+        "x_anchor_basis": "center",
+        "y_pivot_canvas_pil": 376,
+        "y_pivot_position": 0.5,
+        "spacing": 0.0,
+        "padding_top": 0,
+        "padding_bottom": 0
+      },
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Template",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Items",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template",
+      "pos": [
+        2129,
+        471
+      ],
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "VerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": true,
+        "child_force_expand_height": false
+      },
+      "placement": {
+        "kind": "vertical",
+        "x_anchor_canvas_pil": 2329,
+        "x_anchor_basis": "center",
+        "y_pivot_canvas_pil": 505,
+        "y_pivot_position": 0.5,
+        "spacing": 0.0,
+        "padding_top": 0,
+        "padding_bottom": 0
+      },
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Toggles",
+      "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle",
+      "pos": [
+        1309,
+        604
+      ],
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        1.0,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "OptionModules",
+      "group": "Wrapper/Pages/Page_Audio",
+      "pos": [
+        341,
+        231
+      ],
+      "size": [
+        1768,
+        978
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperCenter",
+        "spacing": 89.0,
+        "child_control_width": true,
+        "child_control_height": false,
+        "child_force_expand_width": true,
+        "child_force_expand_height": false
+      }
+    }
+  ]
+}

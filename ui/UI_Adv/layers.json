@@ -1,0 +1,317 @@
+{
+  "atlas": "UI_Adv",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "AutoToggle_Off",
+      "file": "AutoToggle_Off.png",
+      "size": [
+        253,
+        169
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "AutoToggle",
+          "go": "Background",
+          "group": "Wrapper/AutoToggle/Off",
+          "order": 1,
+          "pos": [
+            4,
+            1273
+          ],
+          "rect_size": [
+            253,
+            169
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AutoToggle_On",
+      "file": "AutoToggle_On.png",
+      "size": [
+        253,
+        169
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "AutoToggle",
+          "go": "Background",
+          "group": "Wrapper/AutoToggle/On",
+          "order": 0,
+          "pos": [
+            4,
+            1273
+          ],
+          "rect_size": [
+            253,
+            169
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ChoiceFrame_Default",
+      "file": "ChoiceFrame_Default.png",
+      "size": [
+        1300,
+        220
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Adv",
+          "go": "ChoiceButton_Adv",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1300,
+            220
+          ]
+        },
+        {
+          "prefab": "ChoiceButton_Adv@Bad",
+          "go": "ChoiceButton_Adv@Bad",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            1300,
+            220
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DangerNotice",
+      "file": "DangerNotice.png",
+      "size": [
+        148,
+        180
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Adv@Bad",
+          "go": "DangerNotice",
+          "group": "",
+          "order": 1,
+          "pos": [
+            112,
+            7
+          ],
+          "rect_size": [
+            148,
+            180
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NamePlateBase",
+      "file": "NamePlateBase.png",
+      "size": [
+        601,
+        289
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "AuthorBase",
+          "group": "Wrapper/AuthorPanel",
+          "order": 5,
+          "pos": [
+            340,
+            902
+          ],
+          "rect_size": [
+            601,
+            289
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "AuthorBase",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea/AuthorPanel",
+          "order": 8,
+          "pos": [
+            130,
+            747
+          ],
+          "rect_size": [
+            601,
+            289
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NormalPrinter_Frame_Bottom",
+      "file": "NormalPrinter_Frame_Bottom.png",
+      "size": [
+        2560,
+        797
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Frame_Bottom",
+          "group": "Wrapper/Default-Stream",
+          "order": 1,
+          "pos": [
+            0,
+            643
+          ],
+          "rect_size": [
+            2560,
+            797
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NormalPrinter_Frame_Top",
+      "file": "NormalPrinter_Frame_Top.png",
+      "size": [
+        287,
+        470
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Frame_Top",
+          "group": "Wrapper/Default-Stream",
+          "order": 0,
+          "pos": [
+            2273,
+            0
+          ],
+          "rect_size": [
+            287,
+            470
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NormalPrinter_Grass_1",
+      "file": "NormalPrinter_Grass_1.png",
+      "size": [
+        365,
+        371
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Grass_1",
+          "group": "Wrapper/Default-Stream",
+          "order": 3,
+          "pos": [
+            2195,
+            0
+          ],
+          "rect_size": [
+            365,
+            371
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NormalPrinter_Grass_2",
+      "file": "NormalPrinter_Grass_2.png",
+      "size": [
+        371,
+        429
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Grass_2",
+          "group": "Wrapper/Default-Stream",
+          "order": 4,
+          "pos": [
+            0,
+            1011
+          ],
+          "rect_size": [
+            371,
+            429
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NormalPrinter_Screen",
+      "file": "NormalPrinter_Screen.png",
+      "size": [
+        2560,
+        852
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Screen",
+          "group": "Wrapper",
+          "order": 2,
+          "pos": [
+            0,
+            588
+          ],
+          "rect_size": [
+            2560,
+            852
+          ]
+        }
+      ]
+    }
+  ]
+}

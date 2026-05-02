@@ -1,0 +1,191 @@
+{
+  "atlas": "UI_Log",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "LogBase",
+      "file": "LogBase.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "GalleryUI",
+          "go": "Background",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        },
+        {
+          "prefab": "LogUI",
+          "go": "Base",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NameUnderline",
+      "file": "NameUnderline.png",
+      "size": [
+        312,
+        4
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogMessage",
+          "go": "Underline",
+          "group": "AuthorPanel",
+          "order": 2,
+          "pos": [
+            46,
+            107
+          ],
+          "rect_size": [
+            312,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Scrollbar_Base",
+      "file": "Scrollbar_Base.png",
+      "size": [
+        6,
+        1000
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogUI",
+          "go": "Base",
+          "group": "Wrapper/Scrollbar",
+          "order": 2,
+          "pos": [
+            2393,
+            241
+          ],
+          "rect_size": [
+            6,
+            1000
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Scrollbar_Fill",
+      "file": "Scrollbar_Fill.png",
+      "size": [
+        6,
+        410
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogUI",
+          "go": "Handle",
+          "group": "Wrapper/Scrollbar/SlidingArea",
+          "order": 3,
+          "pos": [
+            2393,
+            1241
+          ],
+          "rect_size": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TitleBase@Ja",
+      "file": "TitleBase_Ja.png",
+      "size": [
+        426,
+        254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogUI",
+          "go": "Title",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            426,
+            254
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VoiceButton_Default",
+      "file": "VoiceButton_Default.png",
+      "size": [
+        116,
+        89
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogMessage",
+          "go": "Image",
+          "group": "AuthorPanel/Buttons/PlayVoiceButton",
+          "order": 0,
+          "pos": [
+            18,
+            17
+          ],
+          "rect_size": [
+            116,
+            89
+          ]
+        }
+      ]
+    }
+  ]
+}

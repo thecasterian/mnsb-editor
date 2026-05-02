@@ -1,0 +1,62 @@
+{
+  "canvas_size": [
+    225,
+    160
+  ],
+  "name": "WitchBookItemButton",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "ItemButton_Common_1",
+      "file": "UI_WitchBook_1/ItemButton_Common_1.png",
+      "go": "Image_1",
+      "atlas": "UI_WitchBook_1",
+      "group": "Mask/Backgrounds",
+      "order": 0,
+      "pos": [
+        17,
+        10
+      ],
+      "size": [
+        193,
+        148
+      ]
+    },
+    {
+      "name": "ItemButton_Common_2",
+      "file": "UI_WitchBook_1/ItemButton_Common_2.png",
+      "go": "Image_2",
+      "atlas": "UI_WitchBook_1",
+      "group": "Mask/Backgrounds",
+      "order": 1,
+      "pos": [
+        6,
+        10
+      ],
+      "size": [
+        213,
+        148
+      ]
+    },
+    {
+      "name": "ItemButton_Common_3",
+      "file": "UI_WitchBook_1/ItemButton_Common_3.png",
+      "go": "Image_3",
+      "atlas": "UI_WitchBook_1",
+      "group": "Mask/Backgrounds",
+      "order": 2,
+      "pos": [
+        6,
+        10
+      ],
+      "size": [
+        213,
+        148
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    225,
+    160
+  ]
+}

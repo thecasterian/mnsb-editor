@@ -1,0 +1,46 @@
+{
+  "canvas_size": [
+    1099,
+    318
+  ],
+  "name": "ChoiceButton_Trial@Perjury",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Balloon_Default",
+      "file": "UI_Trial/Balloon_Default.png",
+      "go": "ChoiceButton_Trial@Perjury",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1099,
+        318
+      ]
+    },
+    {
+      "name": "Perjury@Ja",
+      "file": "UI_Trial/Perjury_Ja.png",
+      "go": "Tag",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 1,
+      "pos": [
+        40,
+        -41
+      ],
+      "size": [
+        198,
+        166
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1099,
+    318
+  ]
+}

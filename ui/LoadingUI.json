@@ -1,0 +1,26 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "LoadingUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "LoadingIcon",
+      "file": "UI_Common/LoadingIcon.png",
+      "go": "Image",
+      "atlas": "UI_Common",
+      "group": "Wrapper/RollingIcon",
+      "order": 0,
+      "pos": [
+        2186,
+        1078
+      ],
+      "size": [
+        460,
+        467
+      ]
+    }
+  ]
+}

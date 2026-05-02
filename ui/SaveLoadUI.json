@@ -1,0 +1,324 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "SaveLoadUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "SaveLoadBase",
+      "file": "UI_SaveLoad/SaveLoadBase.png",
+      "go": "Underlay",
+      "atlas": "UI_SaveLoad",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "SaveTitle@Ja",
+      "file": "UI_SaveLoad/SaveTitle_Ja.png",
+      "go": "Title",
+      "atlas": "UI_SaveLoad",
+      "group": "Wrapper/SavePanel",
+      "order": 1,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        426,
+        254
+      ]
+    },
+    {
+      "name": "LoadTitle@Ja",
+      "file": "UI_SaveLoad/LoadTitle_Ja.png",
+      "go": "Title",
+      "atlas": "UI_SaveLoad",
+      "group": "Wrapper/LoadPanel",
+      "order": 2,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        426,
+        254
+      ]
+    },
+    {
+      "name": "Indication_On",
+      "file": "UI_SaveLoad/Indication_On.png",
+      "go": "DotIndicator",
+      "atlas": "UI_SaveLoad",
+      "group": "Wrapper/Pagination/Indicators/Dot",
+      "order": 3,
+      "pos": [
+        1252,
+        1350
+      ],
+      "size": [
+        20,
+        20
+      ]
+    },
+    {
+      "name": "Indication_Off",
+      "file": "UI_SaveLoad/Indication_Off.png",
+      "go": "Off_Guide",
+      "atlas": "UI_SaveLoad",
+      "group": "Wrapper/Pagination/Indicators/Dot",
+      "order": 4,
+      "pos": [
+        1288,
+        1350
+      ],
+      "size": [
+        20,
+        20
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "UI_Common/Arrow_Left.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pagination/MovingArrows/ButtonPrev",
+      "order": 5,
+      "pos": [
+        1037,
+        1289
+      ],
+      "size": [
+        110,
+        142
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "UI_Common/Arrow_Left.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pagination/MovingArrows/ButtonNext",
+      "order": 6,
+      "pos": [
+        1413,
+        1289
+      ],
+      "size": [
+        110,
+        142
+      ]
+    },
+    {
+      "name": "CloseButton_Default",
+      "file": "UI_Common/CloseButton_Default.png",
+      "go": "CloseButton",
+      "atlas": "UI_Common",
+      "group": "Wrapper",
+      "order": 7,
+      "pos": [
+        2260,
+        0
+      ],
+      "size": [
+        300,
+        238
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "go": "SaveGrid",
+      "group": "Wrapper/SavePanel",
+      "pos": [
+        1280,
+        717
+      ],
+      "size": [
+        0,
+        0
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "GridLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "cell_size": [
+          562.0,
+          374.0
+        ],
+        "spacing": [
+          -10.0,
+          10.0
+        ],
+        "start_corner": "UpperLeft",
+        "start_axis": "Horizontal",
+        "constraint": "FixedColumnCount",
+        "constraint_count": 4
+      },
+      "placement": {
+        "kind": "grid",
+        "first_cell_canvas_pil": [
+          1280,
+          717
+        ],
+        "cell_size": [
+          562,
+          374
+        ],
+        "step": [
+          552,
+          384
+        ],
+        "constraint": "FixedColumnCount",
+        "constraint_count": 4,
+        "start_corner": "UpperLeft",
+        "start_axis": "Horizontal"
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "LoadGrid",
+      "group": "Wrapper/LoadPanel",
+      "pos": [
+        1280,
+        717
+      ],
+      "size": [
+        0,
+        0
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "GridLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "cell_size": [
+          562.0,
+          374.0
+        ],
+        "spacing": [
+          -10.0,
+          10.0
+        ],
+        "start_corner": "UpperLeft",
+        "start_axis": "Horizontal",
+        "constraint": "FixedColumnCount",
+        "constraint_count": 4
+      },
+      "placement": {
+        "kind": "grid",
+        "first_cell_canvas_pil": [
+          1280,
+          717
+        ],
+        "cell_size": [
+          562,
+          374
+        ],
+        "step": [
+          552,
+          384
+        ],
+        "constraint": "FixedColumnCount",
+        "constraint_count": 4,
+        "start_corner": "UpperLeft",
+        "start_axis": "Horizontal"
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Dot",
+      "group": "Wrapper/Pagination/Indicators",
+      "pos": [
+        0,
+        1350
+      ],
+      "size": [
+        2560,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "spacing": 15.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": true
+      }
+    },
+    {
+      "go": "Tab",
+      "group": "Wrapper/Pagination/Indicators",
+      "pos": [
+        0,
+        1320
+      ],
+      "size": [
+        2560,
+        80
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "MiddleCenter",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": true
+      }
+    }
+  ]
+}

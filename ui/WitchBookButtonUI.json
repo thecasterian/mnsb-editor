@@ -1,0 +1,26 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "WitchBookButtonUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "BookButton",
+      "file": "UI_Common/BookButton.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Button",
+      "order": 0,
+      "pos": [
+        24,
+        12
+      ],
+      "size": [
+        241,
+        212
+      ]
+    }
+  ]
+}

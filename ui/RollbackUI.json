@@ -1,0 +1,26 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "RollbackUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "icon_History",
+      "file": "Common/icon_History.png",
+      "go": "Clock",
+      "atlas": "Common",
+      "group": "Wrapper/Back",
+      "order": 0,
+      "pos": [
+        1183,
+        622
+      ],
+      "size": [
+        198,
+        200
+      ]
+    }
+  ]
+}

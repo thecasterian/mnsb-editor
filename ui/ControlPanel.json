@@ -1,0 +1,170 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "ControlPanel",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "MenuButton",
+      "file": "UI_Common/MenuButton.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/OpenButton",
+      "order": 0,
+      "pos": [
+        2302,
+        2
+      ],
+      "size": [
+        235,
+        237
+      ]
+    },
+    {
+      "name": "MenuFrame",
+      "file": "UI_Menu/MenuFrame.png",
+      "go": "Back",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/Base",
+      "order": 1,
+      "pos": [
+        1645,
+        36
+      ],
+      "size": [
+        882,
+        1398
+      ]
+    },
+    {
+      "name": "WiFi_Notice",
+      "file": "UI_Menu/WiFi_Notice.png",
+      "go": "WiFi",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/Base",
+      "order": 2,
+      "pos": [
+        1800,
+        199
+      ],
+      "size": [
+        45,
+        34
+      ]
+    },
+    {
+      "name": "Pager_Decolation",
+      "file": "UI_Menu/Pager_Decolation.png",
+      "go": "Pager",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/Base",
+      "order": 3,
+      "pos": [
+        2067,
+        991
+      ],
+      "size": [
+        54,
+        12
+      ]
+    },
+    {
+      "name": "MenuButton_Save_Normal@Ja",
+      "file": "UI_Menu/MenuButton_Save_Normal_Ja.png",
+      "go": "Normal",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Save",
+      "order": 4,
+      "pos": [
+        1806,
+        238
+      ],
+      "size": [
+        293,
+        276
+      ]
+    },
+    {
+      "name": "MenuButton_Load_Normal@Ja",
+      "file": "UI_Menu/MenuButton_Load_Normal_Ja.png",
+      "go": "Normal",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Load",
+      "order": 5,
+      "pos": [
+        2110,
+        238
+      ],
+      "size": [
+        293,
+        276
+      ]
+    },
+    {
+      "name": "MenuButton_Log_Normal@Ja",
+      "file": "UI_Menu/MenuButton_Log_Normal_Ja.png",
+      "go": "Normal",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Log",
+      "order": 6,
+      "pos": [
+        1806,
+        475
+      ],
+      "size": [
+        293,
+        276
+      ]
+    },
+    {
+      "name": "MenuButton_Options_Normal@Ja",
+      "file": "UI_Menu/MenuButton_Options_Normal_Ja.png",
+      "go": "Normal",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Options",
+      "order": 7,
+      "pos": [
+        2110,
+        475
+      ],
+      "size": [
+        293,
+        276
+      ]
+    },
+    {
+      "name": "MenuButton_Title_Normal@Ja",
+      "file": "UI_Menu/MenuButton_Title_Normal_Ja.png",
+      "go": "Normal",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Title",
+      "order": 8,
+      "pos": [
+        1806,
+        712
+      ],
+      "size": [
+        293,
+        276
+      ]
+    },
+    {
+      "name": "MenuCloseIcon",
+      "file": "UI_Menu/MenuCloseIcon.png",
+      "go": "CloseButton",
+      "atlas": "UI_Menu",
+      "group": "Wrapper/Menu/SmartPhone/HomeContent",
+      "order": 9,
+      "pos": [
+        2332,
+        153
+      ],
+      "size": [
+        67,
+        65
+      ]
+    }
+  ]
+}

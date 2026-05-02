@@ -1,0 +1,58 @@
+{
+  "canvas_size": [
+    720,
+    96
+  ],
+  "name": "ChoiceButton_Debug@Cancel",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Icon_Back",
+      "file": "Common/Icon_Back.png",
+      "go": "Icon",
+      "atlas": "Common",
+      "group": "Label",
+      "order": 0,
+      "pos": [
+        -194,
+        -51
+      ],
+      "size": [
+        178,
+        198
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8470588326454163
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    720,
+    96
+  ],
+  "containers": [
+    {
+      "go": "Label",
+      "group": "",
+      "pos": [
+        16,
+        0
+      ],
+      "size": [
+        720,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "Unconstrained"
+      }
+    }
+  ]
+}

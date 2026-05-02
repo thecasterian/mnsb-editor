@@ -1,0 +1,46 @@
+{
+  "canvas_size": [
+    1099,
+    318
+  ],
+  "name": "ChoiceButton_Trial@Question",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Balloon_Default",
+      "file": "UI_Trial/Balloon_Default.png",
+      "go": "ChoiceButton_Trial@Question",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1099,
+        318
+      ]
+    },
+    {
+      "name": "Doubt@Ja",
+      "file": "UI_Trial/Doubt_Ja.png",
+      "go": "Tag",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 1,
+      "pos": [
+        40,
+        -41
+      ],
+      "size": [
+        195,
+        166
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1099,
+    318
+  ]
+}

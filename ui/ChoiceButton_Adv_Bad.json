@@ -1,0 +1,46 @@
+{
+  "canvas_size": [
+    1300,
+    220
+  ],
+  "name": "ChoiceButton_Adv@Bad",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "ChoiceFrame_Default",
+      "file": "UI_Adv/ChoiceFrame_Default.png",
+      "go": "ChoiceButton_Adv@Bad",
+      "atlas": "UI_Adv",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1300,
+        220
+      ]
+    },
+    {
+      "name": "DangerNotice",
+      "file": "UI_Adv/DangerNotice.png",
+      "go": "DangerNotice",
+      "atlas": "UI_Adv",
+      "group": "",
+      "order": 1,
+      "pos": [
+        112,
+        7
+      ],
+      "size": [
+        148,
+        180
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1300,
+    220
+  ]
+}

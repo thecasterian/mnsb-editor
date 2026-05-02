@@ -1,0 +1,429 @@
+{
+  "atlas": "UI_Common",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Arrow_Left",
+      "file": "Arrow_Left.png",
+      "size": [
+        110,
+        142
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "GalleryUI",
+          "go": "Icon",
+          "group": "Wrapper/StillPanel/Pagination/MovingArrows/ButtonPrev",
+          "order": 4,
+          "pos": [
+            101,
+            631
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        },
+        {
+          "prefab": "GalleryUI",
+          "go": "Icon",
+          "group": "Wrapper/StillPanel/Pagination/MovingArrows/ButtonNext",
+          "order": 5,
+          "pos": [
+            2349,
+            631
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        },
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Icon",
+          "group": "Wrapper/Pagination/MovingArrows/ButtonPrev",
+          "order": 5,
+          "pos": [
+            1037,
+            1289
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        },
+        {
+          "prefab": "SaveLoadUI",
+          "go": "Icon",
+          "group": "Wrapper/Pagination/MovingArrows/ButtonNext",
+          "order": 6,
+          "pos": [
+            1413,
+            1289
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Icon",
+          "group": "Wrapper/ItemList/Pagination/MovingArrows/ButtonPrev",
+          "order": 206,
+          "pos": [
+            37,
+            1193
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Icon",
+          "group": "Wrapper/ItemList/Pagination/MovingArrows/ButtonNext",
+          "order": 207,
+          "pos": [
+            2413,
+            1193
+          ],
+          "rect_size": [
+            110,
+            142
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BookButton",
+      "file": "BookButton.png",
+      "size": [
+        241,
+        212
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookButtonUI",
+          "go": "Icon",
+          "group": "Wrapper/Button",
+          "order": 0,
+          "pos": [
+            24,
+            12
+          ],
+          "rect_size": [
+            241,
+            212
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "ButtonBase_Default.png",
+      "size": [
+        505,
+        120
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/ResetToDefaultButton",
+          "order": 67,
+          "pos": [
+            14,
+            1264
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Graphics/ResetToDefaultButton",
+          "order": 98,
+          "pos": [
+            14,
+            1264
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Audio/ResetToDefaultButton",
+          "order": 119,
+          "pos": [
+            14,
+            1264
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Button",
+          "group": "Wrapper/Pages/Page_Clues/LeftArea/PresentEvidenceButton",
+          "order": 2,
+          "pos": [
+            364,
+            880
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Button",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea/PresentEvidenceButton",
+          "order": 9,
+          "pos": [
+            720,
+            910
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Button",
+          "group": "Wrapper/Pages/Page_Notes/LeftArea/PresentEvidenceButton",
+          "order": 188,
+          "pos": [
+            364,
+            880
+          ],
+          "rect_size": [
+            505,
+            120
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CloseButton_Default",
+      "file": "CloseButton_Default.png",
+      "size": [
+        300,
+        238
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "GalleryUI",
+          "go": "CloseButton",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            2260,
+            0
+          ],
+          "rect_size": [
+            300,
+            238
+          ]
+        },
+        {
+          "prefab": "LogUI",
+          "go": "CloseButton",
+          "group": "Wrapper",
+          "order": 4,
+          "pos": [
+            2260,
+            0
+          ],
+          "rect_size": [
+            300,
+            238
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "CloseButton",
+          "group": "Wrapper",
+          "order": 121,
+          "pos": [
+            2260,
+            0
+          ],
+          "rect_size": [
+            300,
+            238
+          ]
+        },
+        {
+          "prefab": "SaveLoadUI",
+          "go": "CloseButton",
+          "group": "Wrapper",
+          "order": 7,
+          "pos": [
+            2260,
+            0
+          ],
+          "rect_size": [
+            300,
+            238
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "CloseButton",
+          "group": "Wrapper",
+          "order": 209,
+          "pos": [
+            2260,
+            0
+          ],
+          "rect_size": [
+            300,
+            238
+          ]
+        }
+      ]
+    },
+    {
+      "name": "InitialFrame",
+      "file": "InitialFrame.png",
+      "size": [
+        139,
+        139
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LogMessage",
+          "go": "InitialFrame",
+          "group": "AuthorPanel",
+          "order": 1,
+          "pos": [
+            117,
+            0
+          ],
+          "rect_size": [
+            139,
+            139
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LoadingIcon",
+      "file": "LoadingIcon.png",
+      "size": [
+        460,
+        467
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "LoadingUI",
+          "go": "Image",
+          "group": "Wrapper/RollingIcon",
+          "order": 0,
+          "pos": [
+            2186,
+            1078
+          ],
+          "rect_size": [
+            460,
+            467
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuButton",
+      "file": "MenuButton.png",
+      "size": [
+        235,
+        237
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Icon",
+          "group": "Wrapper/OpenButton",
+          "order": 0,
+          "pos": [
+            2302,
+            2
+          ],
+          "rect_size": [
+            235,
+            237
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Toast_Simple",
+      "file": "Toast_Simple.png",
+      "size": [
+        539,
+        130
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ToastUI",
+          "go": "Simple",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            266
+          ],
+          "rect_size": [
+            539,
+            130
+          ]
+        }
+      ]
+    }
+  ]
+}

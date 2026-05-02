@@ -1,0 +1,137 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "LogUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "LogBase",
+      "file": "UI_Log/LogBase.png",
+      "go": "Base",
+      "atlas": "UI_Log",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "TitleBase@Ja",
+      "file": "UI_Log/TitleBase_Ja.png",
+      "go": "Title",
+      "atlas": "UI_Log",
+      "group": "Wrapper",
+      "order": 1,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        426,
+        254
+      ]
+    },
+    {
+      "name": "Scrollbar_Base",
+      "file": "UI_Log/Scrollbar_Base.png",
+      "go": "Base",
+      "atlas": "UI_Log",
+      "group": "Wrapper/Scrollbar",
+      "order": 2,
+      "pos": [
+        2393,
+        241
+      ],
+      "size": [
+        6,
+        1000
+      ]
+    },
+    {
+      "name": "Scrollbar_Fill",
+      "file": "UI_Log/Scrollbar_Fill.png",
+      "go": "Handle",
+      "atlas": "UI_Log",
+      "group": "Wrapper/Scrollbar/SlidingArea",
+      "order": 3,
+      "pos": [
+        2393,
+        1241
+      ],
+      "size": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "CloseButton_Default",
+      "file": "UI_Common/CloseButton_Default.png",
+      "go": "CloseButton",
+      "atlas": "UI_Common",
+      "group": "Wrapper",
+      "order": 4,
+      "pos": [
+        2260,
+        0
+      ],
+      "size": [
+        300,
+        238
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "go": "Content",
+      "group": "Wrapper/ScrollView/Viewport",
+      "pos": [
+        460,
+        0
+      ],
+      "size": [
+        1640,
+        0
+      ],
+      "pivot": [
+        0.5,
+        1.0
+      ],
+      "layout_group": {
+        "kind": "VerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          130,
+          0
+        ],
+        "child_alignment": "UpperLeft",
+        "spacing": 40.0,
+        "child_control_width": false,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "placement": {
+        "kind": "vertical",
+        "x_anchor_canvas_pil": 460,
+        "x_anchor_basis": "left",
+        "y_pivot_canvas_pil": 0,
+        "y_pivot_position": 0.0,
+        "spacing": 40.0,
+        "padding_top": 130,
+        "padding_bottom": 0
+      },
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    }
+  ]
+}

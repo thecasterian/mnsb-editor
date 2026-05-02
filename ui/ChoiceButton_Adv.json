@@ -1,0 +1,30 @@
+{
+  "canvas_size": [
+    1300,
+    220
+  ],
+  "name": "ChoiceButton_Adv",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "ChoiceFrame_Default",
+      "file": "UI_Adv/ChoiceFrame_Default.png",
+      "go": "ChoiceButton_Adv",
+      "atlas": "UI_Adv",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1300,
+        220
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1300,
+    220
+  ]
+}

@@ -1,0 +1,1913 @@
+{
+  "atlas": "UI_Options",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "AlphaZero",
+      "file": "AlphaZero.png",
+      "size": [
+        4,
+        4
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed",
+          "order": 10,
+          "pos": [
+            220,
+            182
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay",
+          "order": 15,
+          "pos": [
+            220,
+            312
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode",
+          "order": 20,
+          "pos": [
+            220,
+            440
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+          "order": 23,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+          "order": 26,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode",
+          "order": 28,
+          "pos": [
+            220,
+            440
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+          "order": 31,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+          "order": 34,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode",
+          "order": 36,
+          "pos": [
+            220,
+            570
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+          "order": 39,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+          "order": 42,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint",
+          "order": 44,
+          "pos": [
+            220,
+            570
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+          "order": 47,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+          "order": 50,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage",
+          "order": 52,
+          "pos": [
+            220,
+            698
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+          "order": 55,
+          "pos": [
+            1309,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+          "order": 58,
+          "pos": [
+            1709,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+          "order": 60,
+          "pos": [
+            220,
+            709
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle",
+          "order": 68,
+          "pos": [
+            220,
+            182
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+          "order": 71,
+          "pos": [
+            1309,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+          "order": 74,
+          "pos": [
+            1709,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+          "order": 76,
+          "pos": [
+            220,
+            322
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+          "order": 83,
+          "pos": [
+            220,
+            451
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle",
+          "order": 90,
+          "pos": [
+            220,
+            570
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+          "order": 93,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+          "order": 96,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume",
+          "order": 99,
+          "pos": [
+            220,
+            182
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume",
+          "order": 104,
+          "pos": [
+            220,
+            312
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume",
+          "order": 109,
+          "pos": [
+            220,
+            440
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "HighlightedNotice",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume",
+          "order": 114,
+          "pos": [
+            220,
+            570
+          ],
+          "rect_size": [
+            2006,
+            116
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DropDownEntry_Default",
+      "file": "DropDownEntry_Default.png",
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Dropdown",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+          "order": 61,
+          "pos": [
+            1309,
+            733
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Dropdown",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+          "order": 77,
+          "pos": [
+            1309,
+            346
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Dropdown",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+          "order": 84,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Disable",
+      "file": "DropDownItemBase_Disable.png",
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "DropdownItem",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items",
+          "order": 63,
+          "pos": [
+            2129,
+            729
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "DropdownItem",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items",
+          "order": 79,
+          "pos": [
+            2129,
+            342
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "DropdownItem",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items",
+          "order": 86,
+          "pos": [
+            2129,
+            471
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DropDownItemBase_Enable",
+      "file": "DropDownItemBase_Enable.png",
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Checkmark",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items/DropdownItem",
+          "order": 64,
+          "pos": [
+            2129,
+            729
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Checkmark",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items/DropdownItem",
+          "order": 80,
+          "pos": [
+            2129,
+            342
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Checkmark",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items/DropdownItem",
+          "order": 87,
+          "pos": [
+            2129,
+            471
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DropDownOutline",
+      "file": "DropDownOutline.png",
+      "size": [
+        400,
+        204
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Template",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language",
+          "order": 62,
+          "pos": [
+            2129,
+            729
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Outline",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template",
+          "order": 66,
+          "pos": [
+            2129,
+            729
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Template",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown",
+          "order": 78,
+          "pos": [
+            2129,
+            342
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Outline",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template",
+          "order": 82,
+          "pos": [
+            2129,
+            342
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Template",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown",
+          "order": 85,
+          "pos": [
+            2129,
+            471
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Outline",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template",
+          "order": 89,
+          "pos": [
+            2129,
+            471
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DropDownSeparator",
+      "file": "DropDownSeparator.png",
+      "size": [
+        312,
+        4
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Underline",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/Language/Template/Items/DropdownItem",
+          "order": 65,
+          "pos": [
+            2129,
+            795
+          ],
+          "rect_size": [
+            400,
+            4
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Underline",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ResolutionDropDown/Template/Items/DropdownItem",
+          "order": 81,
+          "pos": [
+            2129,
+            408
+          ],
+          "rect_size": [
+            400,
+            4
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Underline",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/FrameRateDropDown/Template/Items/DropdownItem",
+          "order": 88,
+          "pos": [
+            2129,
+            537
+          ],
+          "rect_size": [
+            400,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Handle_Default",
+      "file": "Handle_Default.png",
+      "size": [
+        46,
+        46
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider/HandleSlideArea",
+          "order": 14,
+          "pos": [
+            1300,
+            260
+          ],
+          "rect_size": [
+            46,
+            14
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider/HandleSlideArea",
+          "order": 19,
+          "pos": [
+            1300,
+            389
+          ],
+          "rect_size": [
+            46,
+            14
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider/HandleSlideArea",
+          "order": 103,
+          "pos": [
+            1685,
+            228
+          ],
+          "rect_size": [
+            46,
+            46
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider/HandleSlideArea",
+          "order": 108,
+          "pos": [
+            1685,
+            357
+          ],
+          "rect_size": [
+            46,
+            46
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider/HandleSlideArea",
+          "order": 113,
+          "pos": [
+            1685,
+            486
+          ],
+          "rect_size": [
+            46,
+            46
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Handle",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider/HandleSlideArea",
+          "order": 118,
+          "pos": [
+            1685,
+            615
+          ],
+          "rect_size": [
+            46,
+            46
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OptionsTitle@Ja",
+      "file": "OptionsTitle_Ja.png",
+      "size": [
+        426,
+        254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Title",
+          "group": "Wrapper",
+          "order": 120,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            426,
+            254
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OptionsUnderlay",
+      "file": "OptionsUnderlay.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Underlay",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SliderBase",
+      "file": "SliderBase.png",
+      "size": [
+        794,
+        26
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider",
+          "order": 11,
+          "pos": [
+            1311,
+            238
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider",
+          "order": 16,
+          "pos": [
+            1311,
+            367
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider",
+          "order": 100,
+          "pos": [
+            1311,
+            238
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider",
+          "order": 105,
+          "pos": [
+            1311,
+            367
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider",
+          "order": 110,
+          "pos": [
+            1311,
+            496
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Background",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider",
+          "order": 115,
+          "pos": [
+            1311,
+            625
+          ],
+          "rect_size": [
+            794,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SliderFiller_Default",
+      "file": "SliderFiller_Default.png",
+      "size": [
+        392,
+        14
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider/FillArea",
+          "order": 12,
+          "pos": [
+            1311,
+            263
+          ],
+          "rect_size": [
+            0,
+            0
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider/FillArea",
+          "order": 17,
+          "pos": [
+            1311,
+            392
+          ],
+          "rect_size": [
+            0,
+            0
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider/FillArea",
+          "order": 101,
+          "pos": [
+            1311,
+            239
+          ],
+          "rect_size": [
+            397,
+            24
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider/FillArea",
+          "order": 106,
+          "pos": [
+            1311,
+            368
+          ],
+          "rect_size": [
+            397,
+            24
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider/FillArea",
+          "order": 111,
+          "pos": [
+            1311,
+            497
+          ],
+          "rect_size": [
+            397,
+            24
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Fill",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider/FillArea",
+          "order": 116,
+          "pos": [
+            1311,
+            626
+          ],
+          "rect_size": [
+            397,
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SliderFrame",
+      "file": "SliderFrame.png",
+      "size": [
+        800,
+        33
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/MessageSpeed/Slider",
+          "order": 13,
+          "pos": [
+            1309,
+            234
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/AutoDelay/Slider",
+          "order": 18,
+          "pos": [
+            1309,
+            364
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/MasterVolume/Slider",
+          "order": 102,
+          "pos": [
+            1309,
+            234
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/BgmVolume/Slider",
+          "order": 107,
+          "pos": [
+            1309,
+            364
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/SfxVolume/Slider",
+          "order": 112,
+          "pos": [
+            1309,
+            492
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Audio/OptionModules/VoiceVolume/Slider",
+          "order": 117,
+          "pos": [
+            1309,
+            622
+          ],
+          "rect_size": [
+            800,
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Audio_Active@Ja",
+      "file": "TabLabel_Audio_Active_Ja.png",
+      "size": [
+        149,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Audio",
+          "order": 9,
+          "pos": [
+            2360,
+            582
+          ],
+          "rect_size": [
+            149,
+            61
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Audio_Inactive@Ja",
+      "file": "TabLabel_Audio_Inactive_Ja.png",
+      "size": [
+        149,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Audio",
+          "order": 8,
+          "pos": [
+            2360,
+            582
+          ],
+          "rect_size": [
+            149,
+            61
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Graphics_Active@Ja",
+      "file": "TabLabel_Graphics_Active_Ja.png",
+      "size": [
+        186,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Graphics",
+          "order": 6,
+          "pos": [
+            2359,
+            444
+          ],
+          "rect_size": [
+            186,
+            61
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Graphics_Inactive@Ja",
+      "file": "TabLabel_Graphics_Inactive_Ja.png",
+      "size": [
+        186,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Graphics",
+          "order": 5,
+          "pos": [
+            2359,
+            444
+          ],
+          "rect_size": [
+            186,
+            61
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Message_Active@Ja",
+      "file": "TabLabel_Message_Active_Ja.png",
+      "size": [
+        176,
+        54
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Message",
+          "order": 3,
+          "pos": [
+            2358,
+            307
+          ],
+          "rect_size": [
+            176,
+            54
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Message_Inactive@Ja",
+      "file": "TabLabel_Message_Inactive_Ja.png",
+      "size": [
+        176,
+        54
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Message",
+          "order": 2,
+          "pos": [
+            2358,
+            307
+          ],
+          "rect_size": [
+            176,
+            54
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ToggleBody_Disabled",
+      "file": "ToggleBody_Disabled.png",
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+          "order": 21,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+          "order": 24,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+          "order": 29,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+          "order": 32,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+          "order": 37,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+          "order": 40,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+          "order": 45,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+          "order": 48,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+          "order": 53,
+          "pos": [
+            1309,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+          "order": 56,
+          "pos": [
+            1709,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+          "order": 69,
+          "pos": [
+            1309,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+          "order": 72,
+          "pos": [
+            1709,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+          "order": 91,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Disabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+          "order": 94,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ToggleBody_Enabled",
+      "file": "ToggleBody_Enabled.png",
+      "size": [
+        400,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_1",
+          "order": 22,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles/OptionItemToggle_2",
+          "order": 25,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_1",
+          "order": 30,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles/OptionItemToggle_2",
+          "order": 33,
+          "pos": [
+            1709,
+            475
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_1",
+          "order": 38,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles/OptionItemToggle_2",
+          "order": 41,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_1",
+          "order": 46,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles/OptionItemToggle_2",
+          "order": 49,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_1",
+          "order": 54,
+          "pos": [
+            1309,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles/OptionItemToggle_2",
+          "order": 57,
+          "pos": [
+            1709,
+            733
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_1",
+          "order": 70,
+          "pos": [
+            1309,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles/OptionItemToggle_2",
+          "order": 73,
+          "pos": [
+            1709,
+            217
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_1",
+          "order": 92,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Enabled",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles/OptionItemToggle_2",
+          "order": 95,
+          "pos": [
+            1709,
+            604
+          ],
+          "rect_size": [
+            400,
+            68
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ToggleOutline",
+      "file": "ToggleOutline.png",
+      "size": [
+        800,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/WaitVoicePlayingOnAutoMode/Toggles",
+          "order": 27,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/SkipMode/Toggles",
+          "order": 35,
+          "pos": [
+            1309,
+            475
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/ToggleSkipMode/Toggles",
+          "order": 43,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/CriticalChoiceHint/Toggles",
+          "order": 51,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Message/OptionModules/FadeToReadMessage/Toggles",
+          "order": 59,
+          "pos": [
+            1309,
+            733
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/ScreenModeToggle/Toggles",
+          "order": 75,
+          "pos": [
+            1309,
+            217
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Frame",
+          "group": "Wrapper/Pages/Page_Graphics/OptionModules/PostProcessingToggle/Toggles",
+          "order": 97,
+          "pos": [
+            1309,
+            604
+          ],
+          "rect_size": [
+            800,
+            68
+          ]
+        }
+      ]
+    }
+  ]
+}

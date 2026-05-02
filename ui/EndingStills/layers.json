@@ -1,0 +1,261 @@
+{
+  "atlas": "EndingStills",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Still_060_001",
+      "file": "Still_060_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_2",
+          "group": "Wrapper/Act2/Stills",
+          "order": 2,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_061_001",
+      "file": "Still_061_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_1",
+          "group": "Wrapper/Act2/Stills",
+          "order": 1,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_062_001",
+      "file": "Still_062_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_8",
+          "group": "Wrapper/Act2/Stills",
+          "order": 8,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_063_001",
+      "file": "Still_063_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_9",
+          "group": "Wrapper/Act2/Stills",
+          "order": 9,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_064_001",
+      "file": "Still_064_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_3",
+          "group": "Wrapper/Act2/Stills",
+          "order": 3,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_065_001",
+      "file": "Still_065_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_6",
+          "group": "Wrapper/Act2/Stills",
+          "order": 6,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_066_001",
+      "file": "Still_066_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_7",
+          "group": "Wrapper/Act2/Stills",
+          "order": 7,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_067_001",
+      "file": "Still_067_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_5",
+          "group": "Wrapper/Act2/Stills",
+          "order": 5,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Still_068_001",
+      "file": "Still_068_001.png",
+      "size": [
+        1347,
+        925
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "CreditsUI",
+          "go": "Still_4",
+          "group": "Wrapper/Act2/Stills",
+          "order": 4,
+          "pos": [
+            1062,
+            258
+          ],
+          "rect_size": [
+            1347,
+            925
+          ]
+        }
+      ]
+    }
+  ]
+}

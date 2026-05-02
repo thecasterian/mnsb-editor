@@ -1,0 +1,30 @@
+{
+  "canvas_size": [
+    767,
+    229
+  ],
+  "name": "ChoiceButton_Trial@Cancel",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Balloon_Cancel",
+      "file": "UI_Trial/Balloon_Cancel.png",
+      "go": "ChoiceButton_Trial@Cancel",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        767,
+        229
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    767,
+    229
+  ]
+}

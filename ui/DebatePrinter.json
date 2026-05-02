@@ -1,0 +1,46 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "DebatePrinter",
+  "source": "naninovel-textprinters_assets_all.bundle",
+  "layers": [],
+  "containers": [
+    {
+      "go": "Content",
+      "group": "Wrapper",
+      "pos": [
+        1280,
+        720
+      ],
+      "size": [
+        0,
+        0
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperLeft",
+        "spacing": 0.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    }
+  ]
+}

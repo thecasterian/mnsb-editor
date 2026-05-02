@@ -1,0 +1,317 @@
+{
+  "atlas": "UI_Title",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Button_Exit_Highlighted",
+      "file": "Button_Exit_Highlighted.png",
+      "size": [
+        277,
+        222
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Buttons/Button_Exit",
+          "order": 9,
+          "pos": [
+            1150,
+            1193
+          ],
+          "rect_size": [
+            277,
+            222
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Button_Gallery_Highlighted",
+      "file": "Button_Gallery_Highlighted.png",
+      "size": [
+        362,
+        267
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Buttons/Button_Gallery",
+          "order": 5,
+          "pos": [
+            647,
+            1170
+          ],
+          "rect_size": [
+            362,
+            267
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Button_LoadGame_Highlighted",
+      "file": "Button_LoadGame_Highlighted.png",
+      "size": [
+        498,
+        339
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Buttons/Button_LoadGame",
+          "order": 1,
+          "pos": [
+            0,
+            1100
+          ],
+          "rect_size": [
+            498,
+            339
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Button_NewGame_Highlighted",
+      "file": "Button_NewGame_Highlighted.png",
+      "size": [
+        437,
+        326
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Buttons/Button_NewGame",
+          "order": 3,
+          "pos": [
+            334,
+            1064
+          ],
+          "rect_size": [
+            437,
+            326
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Button_Options_Highlighted",
+      "file": "Button_Options_Highlighted.png",
+      "size": [
+        338,
+        252
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Highlighted",
+          "group": "Wrapper/Buttons/Button_Options",
+          "order": 7,
+          "pos": [
+            907,
+            1129
+          ],
+          "rect_size": [
+            338,
+            252
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Label_Exit@ZhHans",
+      "file": "Label_Exit_ZhHans.png",
+      "size": [
+        59,
+        28
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Label@ZhHans",
+          "group": "Wrapper/Buttons/Button_Exit/Highlighted",
+          "order": 10,
+          "pos": [
+            1270,
+            1344
+          ],
+          "rect_size": [
+            59,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Label_Gallery@ZhHans",
+      "file": "Label_Gallery_ZhHans.png",
+      "size": [
+        60,
+        30
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Label@ZhHans",
+          "group": "Wrapper/Buttons/Button_Gallery/Highlighted",
+          "order": 6,
+          "pos": [
+            815,
+            1328
+          ],
+          "rect_size": [
+            60,
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Label_LoadGame@ZhHans",
+      "file": "Label_LoadGame_ZhHans.png",
+      "size": [
+        149,
+        35
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Label@ZhHans",
+          "group": "Wrapper/Buttons/Button_LoadGame/Highlighted",
+          "order": 2,
+          "pos": [
+            216,
+            1352
+          ],
+          "rect_size": [
+            149,
+            35
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Label_NewGame@ZhHans",
+      "file": "Label_NewGame_ZhHans.png",
+      "size": [
+        111,
+        34
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Label@ZhHans",
+          "group": "Wrapper/Buttons/Button_NewGame/Highlighted",
+          "order": 4,
+          "pos": [
+            524,
+            1294
+          ],
+          "rect_size": [
+            111,
+            34
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Label_Options@ZhHans",
+      "file": "Label_Options_ZhHans.png",
+      "size": [
+        125,
+        29
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "Label@ZhHans",
+          "group": "Wrapper/Buttons/Button_Options/Highlighted",
+          "order": 8,
+          "pos": [
+            1028,
+            1292
+          ],
+          "rect_size": [
+            125,
+            29
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TitleLogo@Ja",
+      "file": "TitleLogo_Ja.png",
+      "size": [
+        1061,
+        622
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "TitleUI",
+          "go": "TitleLogo",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            1496,
+            28
+          ],
+          "rect_size": [
+            1061,
+            622
+          ]
+        }
+      ]
+    }
+  ]
+}

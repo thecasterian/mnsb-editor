@@ -1,0 +1,133 @@
+{
+  "atlas": "Common",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Icon_ArrowCircle",
+      "file": "Icon_ArrowCircle.png",
+      "size": [
+        199,
+        167
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "SaveLoadSlot",
+          "go": "Loading",
+          "group": "Back",
+          "order": 2,
+          "pos": [
+            170,
+            90
+          ],
+          "rect_size": [
+            199,
+            167
+          ],
+          "color": [
+            0.6705882549285889,
+            0.6196078658103943,
+            0.6039215922355652,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Icon_Arrow_Double",
+      "file": "Icon_Arrow_Double.png",
+      "size": [
+        200,
+        200
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "NormalPrinter",
+          "go": "Image",
+          "group": "Wrapper/Indicators/SkipModeIndicator",
+          "order": 6,
+          "pos": [
+            2014,
+            1238
+          ],
+          "rect_size": [
+            200,
+            200
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Icon_Back",
+      "file": "Icon_Back.png",
+      "size": [
+        178,
+        198
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ChoiceButton_Debug@Cancel",
+          "go": "Icon",
+          "group": "Label",
+          "order": 0,
+          "pos": [
+            -194,
+            -51
+          ],
+          "rect_size": [
+            178,
+            198
+          ],
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            0.8470588326454163
+          ]
+        }
+      ]
+    },
+    {
+      "name": "icon_History",
+      "file": "icon_History.png",
+      "size": [
+        198,
+        200
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "RollbackUI",
+          "go": "Clock",
+          "group": "Wrapper/Back",
+          "order": 0,
+          "pos": [
+            1183,
+            622
+          ],
+          "rect_size": [
+            198,
+            200
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "TitleUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "TitleLogo@Ja",
+      "file": "UI_Title/TitleLogo_Ja.png",
+      "go": "TitleLogo",
+      "atlas": "UI_Title",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        1496,
+        28
+      ],
+      "size": [
+        1061,
+        622
+      ]
+    },
+    {
+      "name": "Button_LoadGame_Highlighted",
+      "file": "UI_Title/Button_LoadGame_Highlighted.png",
+      "go": "Highlighted",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_LoadGame",
+      "order": 1,
+      "pos": [
+        0,
+        1100
+      ],
+      "size": [
+        498,
+        339
+      ]
+    },
+    {
+      "name": "Label_LoadGame@ZhHans",
+      "file": "UI_Title/Label_LoadGame_ZhHans.png",
+      "go": "Label@ZhHans",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_LoadGame/Highlighted",
+      "order": 2,
+      "pos": [
+        216,
+        1352
+      ],
+      "size": [
+        149,
+        35
+      ]
+    },
+    {
+      "name": "Button_NewGame_Highlighted",
+      "file": "UI_Title/Button_NewGame_Highlighted.png",
+      "go": "Highlighted",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_NewGame",
+      "order": 3,
+      "pos": [
+        334,
+        1064
+      ],
+      "size": [
+        437,
+        326
+      ]
+    },
+    {
+      "name": "Label_NewGame@ZhHans",
+      "file": "UI_Title/Label_NewGame_ZhHans.png",
+      "go": "Label@ZhHans",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_NewGame/Highlighted",
+      "order": 4,
+      "pos": [
+        524,
+        1294
+      ],
+      "size": [
+        111,
+        34
+      ]
+    },
+    {
+      "name": "Button_Gallery_Highlighted",
+      "file": "UI_Title/Button_Gallery_Highlighted.png",
+      "go": "Highlighted",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Gallery",
+      "order": 5,
+      "pos": [
+        647,
+        1170
+      ],
+      "size": [
+        362,
+        267
+      ]
+    },
+    {
+      "name": "Label_Gallery@ZhHans",
+      "file": "UI_Title/Label_Gallery_ZhHans.png",
+      "go": "Label@ZhHans",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Gallery/Highlighted",
+      "order": 6,
+      "pos": [
+        815,
+        1328
+      ],
+      "size": [
+        60,
+        30
+      ]
+    },
+    {
+      "name": "Button_Options_Highlighted",
+      "file": "UI_Title/Button_Options_Highlighted.png",
+      "go": "Highlighted",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Options",
+      "order": 7,
+      "pos": [
+        907,
+        1129
+      ],
+      "size": [
+        338,
+        252
+      ]
+    },
+    {
+      "name": "Label_Options@ZhHans",
+      "file": "UI_Title/Label_Options_ZhHans.png",
+      "go": "Label@ZhHans",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Options/Highlighted",
+      "order": 8,
+      "pos": [
+        1028,
+        1292
+      ],
+      "size": [
+        125,
+        29
+      ]
+    },
+    {
+      "name": "Button_Exit_Highlighted",
+      "file": "UI_Title/Button_Exit_Highlighted.png",
+      "go": "Highlighted",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Exit",
+      "order": 9,
+      "pos": [
+        1150,
+        1193
+      ],
+      "size": [
+        277,
+        222
+      ]
+    },
+    {
+      "name": "Label_Exit@ZhHans",
+      "file": "UI_Title/Label_Exit_ZhHans.png",
+      "go": "Label@ZhHans",
+      "atlas": "UI_Title",
+      "group": "Wrapper/Buttons/Button_Exit/Highlighted",
+      "order": 10,
+      "pos": [
+        1270,
+        1344
+      ],
+      "size": [
+        59,
+        28
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "ToastUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Toast_Simple",
+      "file": "UI_Common/Toast_Simple.png",
+      "go": "Simple",
+      "atlas": "UI_Common",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        266
+      ],
+      "size": [
+        539,
+        130
+      ]
+    }
+  ]
+}

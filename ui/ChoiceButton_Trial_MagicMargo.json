@@ -1,0 +1,46 @@
+{
+  "canvas_size": [
+    1099,
+    318
+  ],
+  "name": "ChoiceButton_Trial@MagicMargo",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Balloon_Default",
+      "file": "UI_Trial/Balloon_Default.png",
+      "go": "ChoiceButton_Trial@MagicMargo",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1099,
+        318
+      ]
+    },
+    {
+      "name": "Magic_Purple@Ja",
+      "file": "UI_Trial/Magic_Purple_Ja.png",
+      "go": "Tag",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 1,
+      "pos": [
+        40,
+        -47
+      ],
+      "size": [
+        199,
+        172
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1099,
+    318
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "ExecutionButton",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "SmartphoneBase",
+      "file": "UI_ExecutionButton/SmartphoneBase.png",
+      "go": "Smaptphone",
+      "atlas": "UI_ExecutionButton",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        893,
+        75
+      ],
+      "size": [
+        774,
+        1290
+      ]
+    },
+    {
+      "name": "ExecutionButton_Base",
+      "file": "UI_ExecutionButton/ExecutionButton_Base.png",
+      "go": "Base",
+      "atlas": "UI_ExecutionButton",
+      "group": "Wrapper/Smaptphone/ButtonContainer",
+      "order": 1,
+      "pos": [
+        1074,
+        514
+      ],
+      "size": [
+        412,
+        412
+      ]
+    },
+    {
+      "name": "ExecutionButton_Frame",
+      "file": "UI_ExecutionButton/ExecutionButton_Frame.png",
+      "go": "Frame",
+      "atlas": "UI_ExecutionButton",
+      "group": "Wrapper/Smaptphone/ButtonContainer",
+      "order": 2,
+      "pos": [
+        1074,
+        514
+      ],
+      "size": [
+        412,
+        412
+      ]
+    },
+    {
+      "name": "ExecutionButton_Label@Ja",
+      "file": "UI_ExecutionButton/ExecutionButton_Label_Ja.png",
+      "go": "Label",
+      "atlas": "UI_ExecutionButton",
+      "group": "Wrapper/Smaptphone/ButtonContainer",
+      "order": 3,
+      "pos": [
+        1146,
+        647
+      ],
+      "size": [
+        269,
+        146
+      ]
+    },
+    {
+      "name": "ExecutionButton_CheckIcon",
+      "file": "UI_ExecutionButton/ExecutionButton_CheckIcon.png",
+      "go": "CheckIcon",
+      "atlas": "UI_ExecutionButton",
+      "group": "Wrapper/Smaptphone/ButtonContainer",
+      "order": 4,
+      "pos": [
+        1252,
+        800
+      ],
+      "size": [
+        63,
+        79
+      ]
+    }
+  ]
+}

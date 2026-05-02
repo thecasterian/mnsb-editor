@@ -1,0 +1,779 @@
+{
+  "atlas": "UI_WitchBook_1",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "Background_1",
+      "file": "Background_1.png",
+      "size": [
+        2560,
+        1440
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Background",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            2560,
+            1440
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BookTitle@Ja",
+      "file": "BookTitle_Ja.png",
+      "size": [
+        427,
+        254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Title",
+          "group": "Wrapper",
+          "order": 208,
+          "pos": [
+            0,
+            0
+          ],
+          "rect_size": [
+            427,
+            254
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EvidenceFrame",
+      "file": "EvidenceFrame.png",
+      "size": [
+        814,
+        857
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "PhotoFrame",
+          "group": "Wrapper/Pages/Page_Clues/LeftArea/ItemPanel",
+          "order": 1,
+          "pos": [
+            223,
+            92
+          ],
+          "rect_size": [
+            814,
+            857
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EvidenceNameBase",
+      "file": "EvidenceNameBase.png",
+      "size": [
+        663,
+        196
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Base",
+          "group": "Wrapper/Pages/Page_Clues/RightArea/SubjectPanel",
+          "order": 4,
+          "pos": [
+            1338,
+            97
+          ],
+          "rect_size": [
+            663,
+            196
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemButton_Common_1",
+      "file": "ItemButton_Common_1.png",
+      "size": [
+        193,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookItemButton",
+          "go": "Image_1",
+          "group": "Mask/Backgrounds",
+          "order": 0,
+          "pos": [
+            17,
+            10
+          ],
+          "rect_size": [
+            193,
+            148
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemButton_Common_2",
+      "file": "ItemButton_Common_2.png",
+      "size": [
+        213,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookItemButton",
+          "go": "Image_2",
+          "group": "Mask/Backgrounds",
+          "order": 1,
+          "pos": [
+            6,
+            10
+          ],
+          "rect_size": [
+            213,
+            148
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemButton_Common_3",
+      "file": "ItemButton_Common_3.png",
+      "size": [
+        213,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookItemButton",
+          "go": "Image_3",
+          "group": "Mask/Backgrounds",
+          "order": 2,
+          "pos": [
+            6,
+            10
+          ],
+          "rect_size": [
+            213,
+            148
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ItemSlot",
+      "file": "ItemSlot.png",
+      "size": [
+        2560,
+        412
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "ItemFrame",
+          "group": "Wrapper/ItemList",
+          "order": 205,
+          "pos": [
+            0,
+            1028
+          ],
+          "rect_size": [
+            2560,
+            412
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LoupeButton",
+      "file": "LoupeButton.png",
+      "size": [
+        220,
+        211
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "LoupeButton",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+          "order": 7,
+          "pos": [
+            840,
+            182
+          ],
+          "rect_size": [
+            220,
+            211
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PersonFrame",
+      "file": "PersonFrame.png",
+      "size": [
+        986,
+        1037
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "PhotoFrame",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+          "order": 5,
+          "pos": [
+            129,
+            95
+          ],
+          "rect_size": [
+            986,
+            1037
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PersonOverlay",
+      "file": "PersonOverlay.png",
+      "size": [
+        697,
+        701
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Overlay",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+          "order": 6,
+          "pos": [
+            274,
+            263
+          ],
+          "rect_size": [
+            697,
+            701
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PresentButtonBody@Ja",
+      "file": "PresentButtonBody_Ja.png",
+      "size": [
+        378,
+        200
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image",
+          "group": "Wrapper/Pages/Page_Clues/LeftArea/PresentEvidenceButton/Button",
+          "order": 3,
+          "pos": [
+            397,
+            842
+          ],
+          "rect_size": [
+            378,
+            200
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image",
+          "group": "Wrapper/Pages/Page_Profiles/LeftArea/PresentEvidenceButton/Button",
+          "order": 10,
+          "pos": [
+            752,
+            872
+          ],
+          "rect_size": [
+            378,
+            200
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image",
+          "group": "Wrapper/Pages/Page_Notes/LeftArea/PresentEvidenceButton/Button",
+          "order": 189,
+          "pos": [
+            397,
+            842
+          ],
+          "rect_size": [
+            378,
+            200
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "TabBase_Default.png",
+      "size": [
+        357,
+        144
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "OptionsUI",
+          "go": "Tab_Message",
+          "group": "Wrapper/Tabs",
+          "order": 1,
+          "pos": [
+            2287,
+            264
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Tab_Graphics",
+          "group": "Wrapper/Tabs",
+          "order": 4,
+          "pos": [
+            2287,
+            404
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "OptionsUI",
+          "go": "Tab_Audio",
+          "group": "Wrapper/Tabs",
+          "order": 7,
+          "pos": [
+            2287,
+            544
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Tab_Clues",
+          "group": "Wrapper/Tabs",
+          "order": 190,
+          "pos": [
+            2287,
+            264
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Tab_Profiles",
+          "group": "Wrapper/Tabs",
+          "order": 193,
+          "pos": [
+            2287,
+            404
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Tab_Maps",
+          "group": "Wrapper/Tabs",
+          "order": 196,
+          "pos": [
+            2287,
+            544
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Tab_Rules",
+          "group": "Wrapper/Tabs",
+          "order": 199,
+          "pos": [
+            2287,
+            684
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        },
+        {
+          "prefab": "WitchBookUI",
+          "go": "Tab_Notes",
+          "group": "Wrapper/Tabs",
+          "order": 202,
+          "pos": [
+            2287,
+            824
+          ],
+          "rect_size": [
+            357,
+            144
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Clue_Active@Ja",
+      "file": "TabLabel_Clue_Active_Ja.png",
+      "size": [
+        152,
+        63
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Clues",
+          "order": 192,
+          "pos": [
+            2362,
+            298
+          ],
+          "rect_size": [
+            152,
+            63
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Clue_Inactive@Ja",
+      "file": "TabLabel_Clue_Inactive_Ja.png",
+      "size": [
+        152,
+        63
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Clues",
+          "order": 191,
+          "pos": [
+            2362,
+            298
+          ],
+          "rect_size": [
+            152,
+            63
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Map_Active@Ja",
+      "file": "TabLabel_Map_Active_Ja.png",
+      "size": [
+        128,
+        50
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Maps",
+          "order": 198,
+          "pos": [
+            2363,
+            592
+          ],
+          "rect_size": [
+            128,
+            50
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Map_Inactive@Ja",
+      "file": "TabLabel_Map_Inactive_Ja.png",
+      "size": [
+        128,
+        50
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Maps",
+          "order": 197,
+          "pos": [
+            2363,
+            592
+          ],
+          "rect_size": [
+            128,
+            50
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Note_Active@Ja",
+      "file": "TabLabel_Note_Active_Ja.png",
+      "size": [
+        108,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Notes",
+          "order": 204,
+          "pos": [
+            2360,
+            859
+          ],
+          "rect_size": [
+            108,
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Note_Inactive@Ja",
+      "file": "TabLabel_Note_Inactive_Ja.png",
+      "size": [
+        108,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Notes",
+          "order": 203,
+          "pos": [
+            2360,
+            859
+          ],
+          "rect_size": [
+            108,
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Profile_Active@Ja",
+      "file": "TabLabel_Profile_Active_Ja.png",
+      "size": [
+        107,
+        56
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Profiles",
+          "order": 195,
+          "pos": [
+            2361,
+            443
+          ],
+          "rect_size": [
+            107,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Profile_Inactive@Ja",
+      "file": "TabLabel_Profile_Inactive_Ja.png",
+      "size": [
+        107,
+        56
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Profiles",
+          "order": 194,
+          "pos": [
+            2361,
+            443
+          ],
+          "rect_size": [
+            107,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Rule_Active@Ja",
+      "file": "TabLabel_Rule_Active_Ja.png",
+      "size": [
+        106,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Active",
+          "group": "Wrapper/Tabs/Tab_Rules",
+          "order": 201,
+          "pos": [
+            2360,
+            720
+          ],
+          "rect_size": [
+            106,
+            61
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TabLabel_Rule_Inactive@Ja",
+      "file": "TabLabel_Rule_Inactive_Ja.png",
+      "size": [
+        106,
+        61
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "WitchBookUI",
+          "go": "Image_Inactive",
+          "group": "Wrapper/Tabs/Tab_Rules",
+          "order": 200,
+          "pos": [
+            2360,
+            720
+          ],
+          "rect_size": [
+            106,
+            61
+          ]
+        }
+      ]
+    }
+  ]
+}

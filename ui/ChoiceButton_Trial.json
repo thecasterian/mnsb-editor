@@ -1,0 +1,30 @@
+{
+  "canvas_size": [
+    1099,
+    318
+  ],
+  "name": "ChoiceButton_Trial",
+  "source": "general-choicebuttons_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Balloon_Default",
+      "file": "UI_Trial/Balloon_Default.png",
+      "go": "ChoiceButton_Trial",
+      "atlas": "UI_Trial",
+      "group": "",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        1099,
+        318
+      ]
+    }
+  ],
+  "root_intrinsic_size": [
+    1099,
+    318
+  ]
+}

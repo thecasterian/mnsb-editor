@@ -1,0 +1,4218 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "name": "WitchBookUI",
+  "source": "naninovel-ui_assets_all.bundle",
+  "layers": [
+    {
+      "name": "Background_1",
+      "file": "UI_WitchBook_1/Background_1.png",
+      "go": "Background",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper",
+      "order": 0,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "EvidenceFrame",
+      "file": "UI_WitchBook_1/EvidenceFrame.png",
+      "go": "PhotoFrame",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Clues/LeftArea/ItemPanel",
+      "order": 1,
+      "pos": [
+        223,
+        92
+      ],
+      "size": [
+        814,
+        857
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Button",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Clues/LeftArea/PresentEvidenceButton",
+      "order": 2,
+      "pos": [
+        364,
+        880
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "PresentButtonBody@Ja",
+      "file": "UI_WitchBook_1/PresentButtonBody_Ja.png",
+      "go": "Image",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Clues/LeftArea/PresentEvidenceButton/Button",
+      "order": 3,
+      "pos": [
+        397,
+        842
+      ],
+      "size": [
+        378,
+        200
+      ]
+    },
+    {
+      "name": "EvidenceNameBase",
+      "file": "UI_WitchBook_1/EvidenceNameBase.png",
+      "go": "Base",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Clues/RightArea/SubjectPanel",
+      "order": 4,
+      "pos": [
+        1338,
+        97
+      ],
+      "size": [
+        663,
+        196
+      ]
+    },
+    {
+      "name": "PersonFrame",
+      "file": "UI_WitchBook_1/PersonFrame.png",
+      "go": "PhotoFrame",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+      "order": 5,
+      "pos": [
+        129,
+        95
+      ],
+      "size": [
+        986,
+        1037
+      ]
+    },
+    {
+      "name": "PersonOverlay",
+      "file": "UI_WitchBook_1/PersonOverlay.png",
+      "go": "Overlay",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+      "order": 6,
+      "pos": [
+        274,
+        263
+      ],
+      "size": [
+        697,
+        701
+      ]
+    },
+    {
+      "name": "LoupeButton",
+      "file": "UI_WitchBook_1/LoupeButton.png",
+      "go": "LoupeButton",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea",
+      "order": 7,
+      "pos": [
+        840,
+        182
+      ],
+      "size": [
+        220,
+        211
+      ]
+    },
+    {
+      "name": "NamePlateBase",
+      "file": "UI_Adv/NamePlateBase.png",
+      "go": "AuthorBase",
+      "atlas": "UI_Adv",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea/AuthorPanel",
+      "order": 8,
+      "pos": [
+        130,
+        747
+      ],
+      "size": [
+        601,
+        289
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Button",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea/PresentEvidenceButton",
+      "order": 9,
+      "pos": [
+        720,
+        910
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "PresentButtonBody@Ja",
+      "file": "UI_WitchBook_1/PresentButtonBody_Ja.png",
+      "go": "Image",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Profiles/LeftArea/PresentEvidenceButton/Button",
+      "order": 10,
+      "pos": [
+        752,
+        872
+      ],
+      "size": [
+        378,
+        200
+      ]
+    },
+    {
+      "name": "Layout_F1_1",
+      "file": "UI_WitchBook_2/Layout_F1_1.png",
+      "go": "F1_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps",
+      "order": 11,
+      "pos": [
+        458,
+        106
+      ],
+      "size": [
+        1631,
+        932
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+      "order": 12,
+      "pos": [
+        1209,
+        408
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+      "order": 13,
+      "pos": [
+        1166,
+        404
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+      "order": 14,
+      "pos": [
+        1127,
+        406
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+      "order": 15,
+      "pos": [
+        1052,
+        408
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel/Plates",
+      "order": 16,
+      "pos": [
+        1046,
+        410
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+      "order": 17,
+      "pos": [
+        1209,
+        784
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+      "order": 18,
+      "pos": [
+        1166,
+        780
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+      "order": 19,
+      "pos": [
+        1127,
+        782
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+      "order": 20,
+      "pos": [
+        1052,
+        784
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel/Plates",
+      "order": 21,
+      "pos": [
+        1046,
+        786
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+      "order": 22,
+      "pos": [
+        1507,
+        799
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+      "order": 23,
+      "pos": [
+        1464,
+        795
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+      "order": 24,
+      "pos": [
+        1425,
+        798
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+      "order": 25,
+      "pos": [
+        1350,
+        799
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel/Plates",
+      "order": 26,
+      "pos": [
+        1344,
+        801
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+      "order": 27,
+      "pos": [
+        1574,
+        520
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+      "order": 28,
+      "pos": [
+        1531,
+        516
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+      "order": 29,
+      "pos": [
+        1492,
+        518
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+      "order": 30,
+      "pos": [
+        1417,
+        520
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel/Plates",
+      "order": 31,
+      "pos": [
+        1410,
+        522
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+      "order": 32,
+      "pos": [
+        1574,
+        307
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+      "order": 33,
+      "pos": [
+        1531,
+        303
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+      "order": 34,
+      "pos": [
+        1492,
+        306
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+      "order": 35,
+      "pos": [
+        1417,
+        307
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel/Plates",
+      "order": 36,
+      "pos": [
+        1410,
+        309
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+      "order": 37,
+      "pos": [
+        1810,
+        552
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+      "order": 38,
+      "pos": [
+        1767,
+        548
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+      "order": 39,
+      "pos": [
+        1728,
+        550
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+      "order": 40,
+      "pos": [
+        1653,
+        552
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel/Plates",
+      "order": 41,
+      "pos": [
+        1646,
+        554
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+      "order": 42,
+      "pos": [
+        965,
+        741
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+      "order": 43,
+      "pos": [
+        922,
+        737
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+      "order": 44,
+      "pos": [
+        883,
+        740
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+      "order": 45,
+      "pos": [
+        808,
+        741
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel/Plates",
+      "order": 46,
+      "pos": [
+        802,
+        743
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+      "order": 47,
+      "pos": [
+        655,
+        298
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+      "order": 48,
+      "pos": [
+        612,
+        294
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+      "order": 49,
+      "pos": [
+        573,
+        296
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+      "order": 50,
+      "pos": [
+        498,
+        298
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel/Plates",
+      "order": 51,
+      "pos": [
+        492,
+        300
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+      "order": 52,
+      "pos": [
+        848,
+        298
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+      "order": 53,
+      "pos": [
+        805,
+        294
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+      "order": 54,
+      "pos": [
+        766,
+        296
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+      "order": 55,
+      "pos": [
+        691,
+        298
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel/Plates",
+      "order": 56,
+      "pos": [
+        684,
+        300
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+      "order": 57,
+      "pos": [
+        987,
+        298
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+      "order": 58,
+      "pos": [
+        944,
+        294
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+      "order": 59,
+      "pos": [
+        905,
+        296
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+      "order": 60,
+      "pos": [
+        830,
+        298
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel/Plates",
+      "order": 61,
+      "pos": [
+        824,
+        300
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+      "order": 62,
+      "pos": [
+        922,
+        199
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+      "order": 63,
+      "pos": [
+        879,
+        195
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+      "order": 64,
+      "pos": [
+        840,
+        198
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+      "order": 65,
+      "pos": [
+        765,
+        199
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel/Plates",
+      "order": 66,
+      "pos": [
+        758,
+        201
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+      "order": 67,
+      "pos": [
+        672,
+        552
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+      "order": 68,
+      "pos": [
+        629,
+        548
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+      "order": 69,
+      "pos": [
+        590,
+        550
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+      "order": 70,
+      "pos": [
+        515,
+        552
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel/Plates",
+      "order": 71,
+      "pos": [
+        508,
+        554
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+      "order": 72,
+      "pos": [
+        940,
+        552
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+      "order": 73,
+      "pos": [
+        897,
+        548
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+      "order": 74,
+      "pos": [
+        858,
+        550
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+      "order": 75,
+      "pos": [
+        783,
+        552
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel/Plates",
+      "order": 76,
+      "pos": [
+        776,
+        554
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+      "order": 77,
+      "pos": [
+        811,
+        972
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+      "order": 78,
+      "pos": [
+        768,
+        968
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+      "order": 79,
+      "pos": [
+        729,
+        970
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+      "order": 80,
+      "pos": [
+        654,
+        972
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel/Plates",
+      "order": 81,
+      "pos": [
+        648,
+        974
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+      "order": 82,
+      "pos": [
+        1741,
+        234
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+      "order": 83,
+      "pos": [
+        1698,
+        230
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+      "order": 84,
+      "pos": [
+        1659,
+        232
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+      "order": 85,
+      "pos": [
+        1584,
+        234
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel/Plates",
+      "order": 86,
+      "pos": [
+        1578,
+        236
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+      "order": 87,
+      "pos": [
+        1581,
+        153
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+      "order": 88,
+      "pos": [
+        1538,
+        149
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+      "order": 89,
+      "pos": [
+        1499,
+        152
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+      "order": 90,
+      "pos": [
+        1424,
+        153
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel/Plates",
+      "order": 91,
+      "pos": [
+        1418,
+        155
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+      "order": 92,
+      "pos": [
+        1740,
+        153
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+      "order": 93,
+      "pos": [
+        1697,
+        149
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+      "order": 94,
+      "pos": [
+        1658,
+        152
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+      "order": 95,
+      "pos": [
+        1583,
+        153
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel/Plates",
+      "order": 96,
+      "pos": [
+        1576,
+        155
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+      "order": 97,
+      "pos": [
+        1900,
+        153
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+      "order": 98,
+      "pos": [
+        1857,
+        149
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+      "order": 99,
+      "pos": [
+        1818,
+        152
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+      "order": 100,
+      "pos": [
+        1743,
+        153
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel/Plates",
+      "order": 101,
+      "pos": [
+        1736,
+        155
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+      "order": 102,
+      "pos": [
+        570,
+        150
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+      "order": 103,
+      "pos": [
+        527,
+        146
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+      "order": 104,
+      "pos": [
+        488,
+        148
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+      "order": 105,
+      "pos": [
+        413,
+        150
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel/Plates",
+      "order": 106,
+      "pos": [
+        406,
+        152
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Arrow_TopLeft",
+      "file": "UI_WitchBook_2/Arrow_TopLeft.png",
+      "go": "Arrow",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall",
+      "order": 107,
+      "pos": [
+        270,
+        195
+      ],
+      "size": [
+        141,
+        122
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+      "order": 108,
+      "pos": [
+        277,
+        330
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+      "order": 109,
+      "pos": [
+        234,
+        326
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+      "order": 110,
+      "pos": [
+        195,
+        328
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+      "order": 111,
+      "pos": [
+        120,
+        330
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel/Plates",
+      "order": 112,
+      "pos": [
+        114,
+        332
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "UI_WitchBook_2/Arrow_Left.png",
+      "go": "Arrow",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake",
+      "order": 113,
+      "pos": [
+        254,
+        490
+      ],
+      "size": [
+        171,
+        137
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+      "order": 114,
+      "pos": [
+        277,
+        636
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+      "order": 115,
+      "pos": [
+        234,
+        632
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+      "order": 116,
+      "pos": [
+        195,
+        634
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+      "order": 117,
+      "pos": [
+        120,
+        636
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel/Plates",
+      "order": 118,
+      "pos": [
+        114,
+        638
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Arrow_BottomLeft",
+      "file": "UI_WitchBook_2/Arrow_BottomLeft.png",
+      "go": "Arrow",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields",
+      "order": 119,
+      "pos": [
+        270,
+        811
+      ],
+      "size": [
+        141,
+        122
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+      "order": 120,
+      "pos": [
+        277,
+        944
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+      "order": 121,
+      "pos": [
+        234,
+        940
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+      "order": 122,
+      "pos": [
+        195,
+        942
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+      "order": 123,
+      "pos": [
+        120,
+        944
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel/Plates",
+      "order": 124,
+      "pos": [
+        114,
+        946
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Layout_F2_1",
+      "file": "UI_WitchBook_2/Layout_F2_1.png",
+      "go": "F2_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps",
+      "order": 125,
+      "pos": [
+        458,
+        120
+      ],
+      "size": [
+        1631,
+        831
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+      "order": 126,
+      "pos": [
+        1210,
+        409
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+      "order": 127,
+      "pos": [
+        1167,
+        405
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+      "order": 128,
+      "pos": [
+        1128,
+        408
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+      "order": 129,
+      "pos": [
+        1053,
+        409
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel/Plates",
+      "order": 130,
+      "pos": [
+        1046,
+        411
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+      "order": 131,
+      "pos": [
+        1507,
+        631
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+      "order": 132,
+      "pos": [
+        1464,
+        627
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+      "order": 133,
+      "pos": [
+        1425,
+        630
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+      "order": 134,
+      "pos": [
+        1350,
+        631
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel/Plates",
+      "order": 135,
+      "pos": [
+        1344,
+        633
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+      "order": 136,
+      "pos": [
+        671,
+        481
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+      "order": 137,
+      "pos": [
+        628,
+        477
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+      "order": 138,
+      "pos": [
+        589,
+        480
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+      "order": 139,
+      "pos": [
+        514,
+        481
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel/Plates",
+      "order": 140,
+      "pos": [
+        508,
+        483
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+      "order": 141,
+      "pos": [
+        966,
+        734
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+      "order": 142,
+      "pos": [
+        923,
+        730
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+      "order": 143,
+      "pos": [
+        884,
+        732
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+      "order": 144,
+      "pos": [
+        809,
+        734
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel/Plates",
+      "order": 145,
+      "pos": [
+        802,
+        736
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Layout_F2_1",
+      "file": "UI_WitchBook_2/Layout_F2_1.png",
+      "go": "F2_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps",
+      "order": 146,
+      "pos": [
+        458,
+        120
+      ],
+      "size": [
+        1631,
+        831
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+      "order": 147,
+      "pos": [
+        1210,
+        409
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+      "order": 148,
+      "pos": [
+        1167,
+        405
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+      "order": 149,
+      "pos": [
+        1128,
+        408
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+      "order": 150,
+      "pos": [
+        1053,
+        409
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel/Plates",
+      "order": 151,
+      "pos": [
+        1046,
+        411
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+      "order": 152,
+      "pos": [
+        1507,
+        631
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+      "order": 153,
+      "pos": [
+        1464,
+        627
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+      "order": 154,
+      "pos": [
+        1425,
+        630
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+      "order": 155,
+      "pos": [
+        1350,
+        631
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel/Plates",
+      "order": 156,
+      "pos": [
+        1344,
+        633
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+      "order": 157,
+      "pos": [
+        671,
+        481
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+      "order": 158,
+      "pos": [
+        628,
+        477
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+      "order": 159,
+      "pos": [
+        589,
+        480
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+      "order": 160,
+      "pos": [
+        514,
+        481
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel/Plates",
+      "order": 161,
+      "pos": [
+        508,
+        483
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+      "order": 162,
+      "pos": [
+        966,
+        734
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+      "order": 163,
+      "pos": [
+        923,
+        730
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+      "order": 164,
+      "pos": [
+        884,
+        732
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+      "order": 165,
+      "pos": [
+        809,
+        734
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel/Plates",
+      "order": 166,
+      "pos": [
+        802,
+        736
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Layout_B1_1",
+      "file": "UI_WitchBook_2/Layout_B1_1.png",
+      "go": "B1_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps",
+      "order": 167,
+      "pos": [
+        472,
+        205
+      ],
+      "size": [
+        1381,
+        734
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+      "order": 168,
+      "pos": [
+        900,
+        365
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+      "order": 169,
+      "pos": [
+        857,
+        361
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+      "order": 170,
+      "pos": [
+        818,
+        364
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+      "order": 171,
+      "pos": [
+        743,
+        365
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel/Plates",
+      "order": 172,
+      "pos": [
+        736,
+        367
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+      "order": 173,
+      "pos": [
+        1556,
+        743
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+      "order": 174,
+      "pos": [
+        1513,
+        739
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+      "order": 175,
+      "pos": [
+        1474,
+        742
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+      "order": 176,
+      "pos": [
+        1399,
+        743
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel/Plates",
+      "order": 177,
+      "pos": [
+        1392,
+        745
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_1",
+      "file": "UI_WitchBook_2/AreaLabelPlate_1.png",
+      "go": "Plate_1",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+      "order": 178,
+      "pos": [
+        793,
+        738
+      ],
+      "size": [
+        140,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_2",
+      "file": "UI_WitchBook_2/AreaLabelPlate_2.png",
+      "go": "Plate_2",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+      "order": 179,
+      "pos": [
+        750,
+        734
+      ],
+      "size": [
+        226,
+        64
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_3",
+      "file": "UI_WitchBook_2/AreaLabelPlate_3.png",
+      "go": "Plate_3",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+      "order": 180,
+      "pos": [
+        711,
+        736
+      ],
+      "size": [
+        304,
+        59
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_4",
+      "file": "UI_WitchBook_2/AreaLabelPlate_4.png",
+      "go": "Plate_4",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+      "order": 181,
+      "pos": [
+        636,
+        738
+      ],
+      "size": [
+        454,
+        56
+      ]
+    },
+    {
+      "name": "AreaLabelPlate_5",
+      "file": "UI_WitchBook_2/AreaLabelPlate_5.png",
+      "go": "Plate_5",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel/Plates",
+      "order": 182,
+      "pos": [
+        630,
+        740
+      ],
+      "size": [
+        467,
+        52
+      ]
+    },
+    {
+      "name": "Layout_Blueprint_1",
+      "file": "UI_WitchBook_2/Layout_Blueprint_1.png",
+      "go": "Blueprint",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Maps",
+      "order": 183,
+      "pos": [
+        458,
+        106
+      ],
+      "size": [
+        1631,
+        932
+      ]
+    },
+    {
+      "name": "Background_2",
+      "file": "UI_WitchBook_2/Background_2.png",
+      "go": "Background",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Rules",
+      "order": 184,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        2560,
+        1440
+      ]
+    },
+    {
+      "name": "Rule_TitleBack",
+      "file": "UI_WitchBook_2/Rule_TitleBack.png",
+      "go": "Back",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Rules/LeftArea/Title",
+      "order": 185,
+      "pos": [
+        281,
+        375
+      ],
+      "size": [
+        708,
+        304
+      ]
+    },
+    {
+      "name": "Rule_SubtitleUnderline",
+      "file": "UI_WitchBook_2/Rule_SubtitleUnderline.png",
+      "go": "Underline",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Rules/LeftArea/Subtitle/Label",
+      "order": 186,
+      "pos": [
+        384,
+        757
+      ],
+      "size": [
+        501,
+        109
+      ]
+    },
+    {
+      "name": "Note_TitleUnderline",
+      "file": "UI_WitchBook_2/Note_TitleUnderline.png",
+      "go": "Underline",
+      "atlas": "UI_WitchBook_2",
+      "group": "Wrapper/Pages/Page_Notes/LeftArea/Subtitle/Label",
+      "order": 187,
+      "pos": [
+        376,
+        552
+      ],
+      "size": [
+        519,
+        109
+      ]
+    },
+    {
+      "name": "ButtonBase_Default",
+      "file": "UI_Common/ButtonBase_Default.png",
+      "go": "Button",
+      "atlas": "UI_Common",
+      "group": "Wrapper/Pages/Page_Notes/LeftArea/PresentEvidenceButton",
+      "order": 188,
+      "pos": [
+        364,
+        880
+      ],
+      "size": [
+        505,
+        120
+      ]
+    },
+    {
+      "name": "PresentButtonBody@Ja",
+      "file": "UI_WitchBook_1/PresentButtonBody_Ja.png",
+      "go": "Image",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Pages/Page_Notes/LeftArea/PresentEvidenceButton/Button",
+      "order": 189,
+      "pos": [
+        397,
+        842
+      ],
+      "size": [
+        378,
+        200
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Clues",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 190,
+      "pos": [
+        2287,
+        264
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Clue_Inactive@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Clue_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Clues",
+      "order": 191,
+      "pos": [
+        2362,
+        298
+      ],
+      "size": [
+        152,
+        63
+      ]
+    },
+    {
+      "name": "TabLabel_Clue_Active@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Clue_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Clues",
+      "order": 192,
+      "pos": [
+        2362,
+        298
+      ],
+      "size": [
+        152,
+        63
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Profiles",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 193,
+      "pos": [
+        2287,
+        404
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Profile_Inactive@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Profile_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Profiles",
+      "order": 194,
+      "pos": [
+        2361,
+        443
+      ],
+      "size": [
+        107,
+        56
+      ]
+    },
+    {
+      "name": "TabLabel_Profile_Active@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Profile_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Profiles",
+      "order": 195,
+      "pos": [
+        2361,
+        443
+      ],
+      "size": [
+        107,
+        56
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Maps",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 196,
+      "pos": [
+        2287,
+        544
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Map_Inactive@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Map_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Maps",
+      "order": 197,
+      "pos": [
+        2363,
+        592
+      ],
+      "size": [
+        128,
+        50
+      ]
+    },
+    {
+      "name": "TabLabel_Map_Active@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Map_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Maps",
+      "order": 198,
+      "pos": [
+        2363,
+        592
+      ],
+      "size": [
+        128,
+        50
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Rules",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 199,
+      "pos": [
+        2287,
+        684
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Rule_Inactive@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Rule_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Rules",
+      "order": 200,
+      "pos": [
+        2360,
+        720
+      ],
+      "size": [
+        106,
+        61
+      ]
+    },
+    {
+      "name": "TabLabel_Rule_Active@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Rule_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Rules",
+      "order": 201,
+      "pos": [
+        2360,
+        720
+      ],
+      "size": [
+        106,
+        61
+      ]
+    },
+    {
+      "name": "TabBase_Default",
+      "file": "UI_WitchBook_1/TabBase_Default.png",
+      "go": "Tab_Notes",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs",
+      "order": 202,
+      "pos": [
+        2287,
+        824
+      ],
+      "size": [
+        357,
+        144
+      ]
+    },
+    {
+      "name": "TabLabel_Note_Inactive@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Note_Inactive_Ja.png",
+      "go": "Image_Inactive",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Notes",
+      "order": 203,
+      "pos": [
+        2360,
+        859
+      ],
+      "size": [
+        108,
+        62
+      ]
+    },
+    {
+      "name": "TabLabel_Note_Active@Ja",
+      "file": "UI_WitchBook_1/TabLabel_Note_Active_Ja.png",
+      "go": "Image_Active",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/Tabs/Tab_Notes",
+      "order": 204,
+      "pos": [
+        2360,
+        859
+      ],
+      "size": [
+        108,
+        62
+      ]
+    },
+    {
+      "name": "ItemSlot",
+      "file": "UI_WitchBook_1/ItemSlot.png",
+      "go": "ItemFrame",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper/ItemList",
+      "order": 205,
+      "pos": [
+        0,
+        1028
+      ],
+      "size": [
+        2560,
+        412
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "UI_Common/Arrow_Left.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/ItemList/Pagination/MovingArrows/ButtonPrev",
+      "order": 206,
+      "pos": [
+        37,
+        1193
+      ],
+      "size": [
+        110,
+        142
+      ]
+    },
+    {
+      "name": "Arrow_Left",
+      "file": "UI_Common/Arrow_Left.png",
+      "go": "Icon",
+      "atlas": "UI_Common",
+      "group": "Wrapper/ItemList/Pagination/MovingArrows/ButtonNext",
+      "order": 207,
+      "pos": [
+        2413,
+        1193
+      ],
+      "size": [
+        110,
+        142
+      ]
+    },
+    {
+      "name": "BookTitle@Ja",
+      "file": "UI_WitchBook_1/BookTitle_Ja.png",
+      "go": "Title",
+      "atlas": "UI_WitchBook_1",
+      "group": "Wrapper",
+      "order": 208,
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        427,
+        254
+      ]
+    },
+    {
+      "name": "CloseButton_Default",
+      "file": "UI_Common/CloseButton_Default.png",
+      "go": "CloseButton",
+      "atlas": "UI_Common",
+      "group": "Wrapper",
+      "order": 209,
+      "pos": [
+        2260,
+        0
+      ],
+      "size": [
+        300,
+        238
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Clues/RightArea/Description/Viewport",
+      "pos": [
+        1365,
+        296
+      ],
+      "size": [
+        758,
+        0
+      ],
+      "pivot": [
+        0.5,
+        1.0
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Profiles/RightArea/Description/Viewport",
+      "pos": [
+        1368,
+        192
+      ],
+      "size": [
+        758,
+        76
+      ],
+      "pivot": [
+        0.5,
+        1.0
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lounge/AreaLabel",
+      "pos": [
+        1206,
+        408
+      ],
+      "size": [
+        146,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/EntranceHall/AreaLabel",
+      "pos": [
+        1186,
+        784
+      ],
+      "size": [
+        185,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/CourtroomHallway/AreaLabel",
+      "pos": [
+        1459,
+        799
+      ],
+      "size": [
+        236,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/MessHall/AreaLabel",
+      "pos": [
+        1604,
+        520
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Kitchen/AreaLabel",
+      "pos": [
+        1604,
+        307
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtroom/AreaLabel",
+      "pos": [
+        1821,
+        552
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Parlor/AreaLabel",
+      "pos": [
+        976,
+        741
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Infirmary/AreaLabel",
+      "pos": [
+        666,
+        298
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/StorageRoom/AreaLabel",
+      "pos": [
+        878,
+        298
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Restroom/AreaLabel",
+      "pos": [
+        1000,
+        298
+      ],
+      "size": [
+        114,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Sunroom/AreaLabel",
+      "pos": [
+        906,
+        199
+      ],
+      "size": [
+        172,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Showers/AreaLabel",
+      "pos": [
+        621,
+        552
+      ],
+      "size": [
+        242,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Courtyard/AreaLabel",
+      "pos": [
+        970,
+        552
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/PrisonEntrance/AreaLabel",
+      "pos": [
+        802,
+        972
+      ],
+      "size": [
+        158,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FrontGuesthouse/AreaLabel",
+      "pos": [
+        1688,
+        234
+      ],
+      "size": [
+        247,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberSalamander/AreaLabel",
+      "pos": [
+        1580,
+        153
+      ],
+      "size": [
+        142,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberUndine/AreaLabel",
+      "pos": [
+        1739,
+        153
+      ],
+      "size": [
+        142,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/ChamberGnome/AreaLabel",
+      "pos": [
+        1899,
+        153
+      ],
+      "size": [
+        142,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Warehouse/AreaLabel",
+      "pos": [
+        600,
+        150
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Wall/AreaLabel",
+      "pos": [
+        327,
+        330
+      ],
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/Lake/AreaLabel",
+      "pos": [
+        288,
+        636
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F1_1/FlowerFields/AreaLabel",
+      "pos": [
+        268,
+        944
+      ],
+      "size": [
+        158,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/SecondFloorHallway/AreaLabel",
+      "pos": [
+        1203,
+        409
+      ],
+      "size": [
+        153,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/Library/AreaLabel",
+      "pos": [
+        1518,
+        631
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/RecreationRoom/AreaLabel",
+      "pos": [
+        682,
+        481
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_1/UnknownArea/AreaLabel",
+      "pos": [
+        985,
+        734
+      ],
+      "size": [
+        102,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/SecondFloorHallway/AreaLabel",
+      "pos": [
+        1203,
+        409
+      ],
+      "size": [
+        153,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/Library/AreaLabel",
+      "pos": [
+        1518,
+        631
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/RecreationRoom/AreaLabel",
+      "pos": [
+        682,
+        481
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/F2_2/NoahStudio/AreaLabel",
+      "pos": [
+        916,
+        734
+      ],
+      "size": [
+        240,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/BasementHallway/AreaLabel",
+      "pos": [
+        930,
+        365
+      ],
+      "size": [
+        79,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/SolitaryConfinement/AreaLabel",
+      "pos": [
+        1567,
+        743
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Maps/B1_1/Incinerator/AreaLabel",
+      "pos": [
+        804,
+        738
+      ],
+      "size": [
+        118,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Rules/LeftArea/Subtitle",
+      "pos": [
+        504,
+        720
+      ],
+      "size": [
+        261,
+        75
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Rules/RightArea/Description/Viewport",
+      "pos": [
+        1368,
+        192
+      ],
+      "size": [
+        758,
+        76
+      ],
+      "pivot": [
+        0.5,
+        1.0
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Notes/LeftArea/Subtitle",
+      "pos": [
+        496,
+        510
+      ],
+      "size": [
+        279,
+        80
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Label",
+      "group": "Wrapper/Pages/Page_Notes/RightArea/Description/Viewport",
+      "pos": [
+        1368,
+        192
+      ],
+      "size": [
+        758,
+        76
+      ],
+      "pivot": [
+        0.5,
+        1.0
+      ],
+      "size_fitter": {
+        "horizontal_fit": "Unconstrained",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Tabs",
+      "group": "Wrapper",
+      "pos": [
+        2287,
+        264
+      ],
+      "size": [
+        357,
+        704
+      ],
+      "pivot": [
+        1.0,
+        1.0
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "child_alignment": "UpperRight",
+        "spacing": -4.0,
+        "child_control_width": true,
+        "child_control_height": true,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      },
+      "size_fitter": {
+        "horizontal_fit": "PreferredSize",
+        "vertical_fit": "PreferredSize"
+      }
+    },
+    {
+      "go": "Content",
+      "group": "Wrapper/ItemList",
+      "pos": [
+        0,
+        1440
+      ],
+      "size": [
+        0,
+        0
+      ],
+      "pivot": [
+        0.0,
+        0.0
+      ],
+      "layout_group": {
+        "kind": "HorizontalOrVerticalLayoutGroup",
+        "padding": [
+          90,
+          0,
+          0,
+          96
+        ],
+        "child_alignment": "LowerLeft",
+        "spacing": 14.5,
+        "child_control_width": false,
+        "child_control_height": false,
+        "child_force_expand_width": false,
+        "child_force_expand_height": false
+      }
+    }
+  ]
+}

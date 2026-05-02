@@ -1,0 +1,261 @@
+{
+  "atlas": "UI_Menu",
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "sprites": [
+    {
+      "name": "MenuButton_Load_Normal@Ja",
+      "file": "MenuButton_Load_Normal_Ja.png",
+      "size": [
+        293,
+        276
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Normal",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Load",
+          "order": 5,
+          "pos": [
+            2110,
+            238
+          ],
+          "rect_size": [
+            293,
+            276
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuButton_Log_Normal@Ja",
+      "file": "MenuButton_Log_Normal_Ja.png",
+      "size": [
+        293,
+        276
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Normal",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Log",
+          "order": 6,
+          "pos": [
+            1806,
+            475
+          ],
+          "rect_size": [
+            293,
+            276
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuButton_Options_Normal@Ja",
+      "file": "MenuButton_Options_Normal_Ja.png",
+      "size": [
+        293,
+        276
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Normal",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Options",
+          "order": 7,
+          "pos": [
+            2110,
+            475
+          ],
+          "rect_size": [
+            293,
+            276
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuButton_Save_Normal@Ja",
+      "file": "MenuButton_Save_Normal_Ja.png",
+      "size": [
+        293,
+        276
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Normal",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Save",
+          "order": 4,
+          "pos": [
+            1806,
+            238
+          ],
+          "rect_size": [
+            293,
+            276
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuButton_Title_Normal@Ja",
+      "file": "MenuButton_Title_Normal_Ja.png",
+      "size": [
+        293,
+        276
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Normal",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent/MenuButtons/Button_Title",
+          "order": 8,
+          "pos": [
+            1806,
+            712
+          ],
+          "rect_size": [
+            293,
+            276
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuCloseIcon",
+      "file": "MenuCloseIcon.png",
+      "size": [
+        67,
+        65
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "CloseButton",
+          "group": "Wrapper/Menu/SmartPhone/HomeContent",
+          "order": 9,
+          "pos": [
+            2332,
+            153
+          ],
+          "rect_size": [
+            67,
+            65
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MenuFrame",
+      "file": "MenuFrame.png",
+      "size": [
+        882,
+        1398
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Back",
+          "group": "Wrapper/Menu/SmartPhone/Base",
+          "order": 1,
+          "pos": [
+            1645,
+            36
+          ],
+          "rect_size": [
+            882,
+            1398
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pager_Decolation",
+      "file": "Pager_Decolation.png",
+      "size": [
+        54,
+        12
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "Pager",
+          "group": "Wrapper/Menu/SmartPhone/Base",
+          "order": 3,
+          "pos": [
+            2067,
+            991
+          ],
+          "rect_size": [
+            54,
+            12
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WiFi_Notice",
+      "file": "WiFi_Notice.png",
+      "size": [
+        45,
+        34
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "usages": [
+        {
+          "prefab": "ControlPanel",
+          "go": "WiFi",
+          "group": "Wrapper/Menu/SmartPhone/Base",
+          "order": 2,
+          "pos": [
+            1800,
+            199
+          ],
+          "rect_size": [
+            45,
+            34
+          ]
+        }
+      ]
+    }
+  ]
+}
