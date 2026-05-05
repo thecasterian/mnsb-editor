@@ -427,6 +427,76 @@ body {
   color: var(--text-muted);
 }
 
+/* Pairs a .section-label with the control immediately below it inside the
+   panel. Without this wrapper the panel's flex `gap: 20px` *adds* to the
+   label's `margin-bottom: 6px`, leaving ~26 px between label and control —
+   visually disconnected. As a block wrapper, the inner spacing collapses
+   back to just the 6 px margin, while the panel gap still applies between
+   adjacent .field blocks. */
+.field { display: block; }
+/* When a .field stacks multiple .switch toggles (e.g. the Overlays group),
+   give them a small inter-switch gap so they don't sit flush against each
+   other. The first switch keeps the section-label's existing 6px margin. */
+.field .switch + .switch { margin-top: 6px; }
+
+/* Cross-page switcher between Character and Scene editors. Lives in the
+   panel header so both pages can host it without altering the rest of the
+   layout. The non-link half stays as a plain <span> with .active. */
+.editor-switch {
+  display: flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+.editor-switch-btn {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: center;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.editor-switch-btn:hover { color: var(--text); }
+.editor-switch-btn.active {
+  background: var(--accent);
+  color: #fff;
+  cursor: default;
+}
+
+/* Multi-line text input for the message label. Mirrors .char-select styling
+   so the panel reads as a uniform card stack. */
+.text-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 72px;
+}
+.text-input:focus {
+  outline: none;
+  border-color: var(--active);
+}
+
+/* Pre-render placeholder shown inside the preview before the first composite
+   completes. Plain text — replaced by the canvas via replaceChildren. */
+.loading-msg {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 32px;
+}
+
 /* Scrollbar */
 .panel::-webkit-scrollbar { width: 12px; }
 .panel::-webkit-scrollbar-track { background: transparent; }

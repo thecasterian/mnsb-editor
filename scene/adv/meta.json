@@ -1,0 +1,305 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "prefabs": [
+    {
+      "name": "NormalPrinter",
+      "toggle": null,
+      "items_toggle": {
+        "Wrapper/AuthorPanel": "showAuthorPlate"
+      },
+      "layers": [
+        {
+          "name": "NormalPrinter_Frame_Top",
+          "file": "NormalPrinter_Frame_Top.png",
+          "go": "Frame_Top",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/Default-Stream",
+          "order": 0,
+          "pos": [
+            2273,
+            0
+          ],
+          "size": [
+            287,
+            470
+          ]
+        },
+        {
+          "name": "NormalPrinter_Frame_Bottom",
+          "file": "NormalPrinter_Frame_Bottom.png",
+          "go": "Frame_Bottom",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/Default-Stream",
+          "order": 1,
+          "pos": [
+            0,
+            643
+          ],
+          "size": [
+            2560,
+            797
+          ]
+        },
+        {
+          "name": "NormalPrinter_Screen",
+          "file": "NormalPrinter_Screen.png",
+          "go": "Screen",
+          "atlas": "UI_Adv",
+          "group": "Wrapper",
+          "order": 2,
+          "pos": [
+            0,
+            588
+          ],
+          "size": [
+            2560,
+            852
+          ]
+        },
+        {
+          "name": "NormalPrinter_Grass_1",
+          "file": "NormalPrinter_Grass_1.png",
+          "go": "Grass_1",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/Default-Stream",
+          "order": 3,
+          "pos": [
+            2195,
+            0
+          ],
+          "size": [
+            365,
+            371
+          ]
+        },
+        {
+          "name": "NormalPrinter_Grass_2",
+          "file": "NormalPrinter_Grass_2.png",
+          "go": "Grass_2",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/Default-Stream",
+          "order": 4,
+          "pos": [
+            0,
+            1011
+          ],
+          "size": [
+            371,
+            429
+          ]
+        },
+        {
+          "name": "NamePlateBase",
+          "file": "NamePlateBase.png",
+          "go": "AuthorBase",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/AuthorPanel",
+          "order": 5,
+          "pos": [
+            340,
+            902
+          ],
+          "size": [
+            601,
+            289
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "AuthorLabel",
+          "group": "Wrapper/AuthorPanel",
+          "order": 6,
+          "pos": [
+            428,
+            952
+          ],
+          "size": [
+            1000,
+            160
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Author",
+          "font_asset_pptr": [
+            2,
+            -4585659588899376959
+          ],
+          "font_size": 136.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Left",
+          "v_align": "Capline",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow"
+        },
+        {
+          "go": "MessageLabel",
+          "group": "Wrapper",
+          "order": 7,
+          "pos": [
+            573,
+            1163
+          ],
+          "size": [
+            1414,
+            200
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Message",
+          "font_asset_pptr": [
+            2,
+            -4585659588899376959
+          ],
+          "font_size": 48.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Left",
+          "v_align": "Top",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "Normal",
+          "overflow": "Overflow",
+          "ruby": {
+            "vertical_offset": "0.875em",
+            "size_scale": 0.4000000059604645,
+            "add_line_height": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "AutoToggle",
+      "toggle": "showAutoToggle",
+      "layers": [
+        {
+          "name": "AutoToggle_Off",
+          "file": "AutoToggle_Off.png",
+          "go": "Background",
+          "atlas": "UI_Adv",
+          "group": "Wrapper/AutoToggle/Off",
+          "order": 2,
+          "pos": [
+            4,
+            1273
+          ],
+          "size": [
+            253,
+            169
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "Wrapper/AutoToggle/Off",
+          "order": 3,
+          "pos": [
+            4,
+            1272
+          ],
+          "size": [
+            253,
+            169
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Auto",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 36.90999984741211,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Left",
+          "v_align": "Geometry",
+          "margin": [
+            125.79946899414062,
+            50.01731872558594,
+            34.2191162109375,
+            64.37823486328125
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.9960784912109375,
+            0.9960784912109375,
+            0.9960784912109375,
+            1.0
+          ],
+          "spacing": {
+            "character": 0.30000001192092896,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ControlPanel",
+      "toggle": "showMenuButton",
+      "layers": [
+        {
+          "name": "MenuButton",
+          "file": "MenuButton.png",
+          "go": "Icon",
+          "atlas": "UI_Common",
+          "group": "Wrapper/OpenButton",
+          "order": 0,
+          "pos": [
+            2302,
+            2
+          ],
+          "size": [
+            235,
+            237
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WitchBookButtonUI",
+      "toggle": "showBookButton",
+      "layers": [
+        {
+          "name": "BookButton",
+          "file": "BookButton.png",
+          "go": "Icon",
+          "atlas": "UI_Common",
+          "group": "Wrapper/Button",
+          "order": 0,
+          "pos": [
+            24,
+            12
+          ],
+          "size": [
+            241,
+            212
+          ]
+        }
+      ]
+    }
+  ]
+}

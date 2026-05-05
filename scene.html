@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MNSB Character Editor</title>
-<link rel="stylesheet" href="styles.css?v=20260503a">
+<title>MNSB Scene Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260506b">
 </head>
 <body>
 
@@ -13,34 +16,67 @@
     <span class="drawer-handle"></span>
     <button class="drawer-close" id="drawerClose" aria-label="Close panel">&times;</button>
   </div>
-  <h1>MNSB Character Editor</h1>
+  <h1>MNSB Scene Editor</h1>
 
   <div class="editor-switch" role="tablist" aria-label="Editor">
-    <span class="editor-switch-btn active" role="tab" aria-selected="true">Character</span>
-    <a class="editor-switch-btn" href="scene.html" role="tab">Scene</a>
+    <a class="editor-switch-btn" href="index.html" role="tab">Character</a>
+    <span class="editor-switch-btn active" role="tab" aria-selected="true">Scene</span>
   </div>
 
-  <label class="switch">
-    <span>Spoilers</span>
-    <input type="checkbox" id="spoilerToggle">
-    <span class="switch-track"><span class="switch-knob"></span></span>
-  </label>
-
-  <select class="char-select" id="charSelect"></select>
-
-  <button class="advanced-toggle" id="advancedToggle">Advanced</button>
-
-  <div id="headSelectorSection" style="display:none">
-    <div class="section-label">Head</div>
-    <div class="presets" id="headSelector"></div>
+  <div class="field">
+    <div class="section-label">Scene type</div>
+    <select class="char-select" id="sceneTypeSelect">
+      <option value="adv" selected>Adv</option>
+      <option value="trial" disabled>Trial (coming soon)</option>
+    </select>
   </div>
 
-  <div id="expressionSection">
-    <div class="section-label">Expression</div>
-    <div class="presets" id="presets"></div>
+  <div class="field">
+    <div class="section-label">Language</div>
+    <div class="presets" id="localeSelector">
+      <button class="preset-btn active" data-locale="ko">Korean</button>
+      <button class="preset-btn" data-locale="ja">Japanese</button>
+    </div>
   </div>
 
-  <div id="groups"></div>
+  <div class="field">
+    <div class="section-label">Background</div>
+    <select class="char-select" id="bgSelect"></select>
+  </div>
+
+  <div class="field">
+    <div class="section-label">Author</div>
+    <select class="char-select" id="authorSelect"></select>
+  </div>
+
+  <div class="field">
+    <div class="section-label">Message</div>
+    <textarea class="text-input" id="messageInput" rows="3" placeholder="Message"></textarea>
+  </div>
+
+  <div class="field">
+    <div class="section-label">Overlays</div>
+    <label class="switch">
+      <span>Author</span>
+      <input type="checkbox" id="toggleAuthorPlate" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Auto-toggle</span>
+      <input type="checkbox" id="toggleAutoToggle" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Menu</span>
+      <input type="checkbox" id="toggleMenuButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Witch Book</span>
+      <input type="checkbox" id="toggleBookButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+  </div>
 
   <div class="actions">
     <button class="action-btn reset-btn" id="resetBtn">Reset</button>
@@ -60,9 +96,10 @@
 </div>
 
 <div class="preview" id="previewArea">
-  <div class="preview-container" id="previewContainer"></div>
+  <div class="preview-container" id="previewContainer">
+    <div class="loading-msg" id="loadingMsg">Loading…</div>
+  </div>
   <div class="zoom-controls">
-    <button class="zoom-btn" id="bgToggle" style="font-size:14px" title="Toggle preview background">BG</button>
     <button class="zoom-btn" id="zoomIn">+</button>
     <button class="zoom-btn" id="zoomOut">&minus;</button>
     <button class="zoom-btn" id="zoomReset" style="font-size:14px">1:1</button>
@@ -85,7 +122,7 @@
   </div>
 </div>
 
-<!-- styles.css?v= and app.js?v= must be bumped together with BUILD_VERSION in app.js -->
-<script src="app.js?v=20260503a"></script>
+<!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
+<script src="scene.js?v=20260506b"></script>
 </body>
 </html>

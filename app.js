@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and app.js in index.html.
-const BUILD_VERSION = '20260502d';
+const BUILD_VERSION = '20260503a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 const CHARACTERS = [

@@ -1,0 +1,364 @@
+{
+  "characters": [
+    {
+      "id": "Ema",
+      "nameColor_hex": "#FF92B4",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>桜</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=7><voffset=-16><size=118>エ</size></voffset><space=-11><voffset=-7><size=75>マ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Hiro",
+      "nameColor_hex": "#F25054",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><voffset=-16><size=136>二</size></voffset></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=-2><voffset=-8><size=108>ヒ</size></voffset><space=-20><voffset=-9><size=75>ロ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>니</size></color><space=4><voffset=-2><size=73>카이도</size></voffset><space=4><size=118>히</size><space=4><voffset=-2><size=75>로</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>二</size></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=4><size=118>希</size><space=4><voffset=-2><size=75>羅</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Meruru",
+      "nameColor_hex": "#E6BCB4",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>氷</size></color><space=4><voffset=-4><size=73>上</size></voffset><space=10><voffset=-8><size=118>メ</size></voffset><space=-18><voffset=-10><size=75>ルル</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>히</size></color><space=4><voffset=-2><size=73>카미</size></voffset><space=4><size=118>메</size><space=4><voffset=-2><size=75>루루</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>冰</size></color><space=4><voffset=-2><size=73>上</size></voffset><space=4><size=118>梅</size><space=4><voffset=-2><size=75>露露</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Hanna",
+      "nameColor_hex": "#AACA1F",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=10><voffset=-16><size=124>ハ</size></voffset><space=-11><voffset=-7><size=75>ンナ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>토</size></color><space=4><voffset=-2><size=73>노</size></voffset><space=4><size=118>한</size><space=4><voffset=-2><size=75>나</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=4><size=118>漢</size><space=4><voffset=-2><size=75>娜</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Sherry",
+      "nameColor_hex": "#8AB4FF",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>橘</size></color><space=12><voffset=-12><size=118>シ</size></voffset><space=-16><voffset=-12><size=85>ェ</size></voffset><space=-16><voffset=-6><size=82>リ</size></voffset><space=-14><voffset=-10><size=76>ー</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>타</size></color><space=4><voffset=-2><size=73>치바나</size></voffset><space=4><size=118>셰</size><space=4><voffset=-2><size=75>리</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>橘</size></color><space=4><size=118>雪</size><space=4><voffset=-2><size=75>莉</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "AnAn",
+      "nameColor_hex": "#A193FC",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-6><size=73>目</size></voffset><space=7><cspace=-4><voffset=-2><size=118>ア</size></voffset><space=-31><voffset=-7><size=75>ンアン</size></voffset></cspace>",
+        "ko": "<color=%COLOR%><size=136>나</size></color><space=4><voffset=-2><size=73>츠메</size></voffset><space=4><size=118>안</size><space=4><voffset=-2><size=75>안</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-2><size=73>目</size></voffset><space=4><size=118>安</size><space=4><voffset=-2><size=75>安</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Leia",
+      "nameColor_hex": "#FFB458",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><voffset=-16><size=128>レ</size></voffset><space=-11><voffset=-7><size=72>イ</size></voffset><space=-8><voffset=-5><size=78>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>하</size></color><space=4><voffset=-2><size=73>스미</size></voffset><space=4><size=118>레</size><space=4><voffset=-2><size=75>이아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><size=118>蕾</size><space=4><voffset=-2><size=75>雅</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Coco",
+      "nameColor_hex": "#FD7350",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>沢</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=7><voffset=-16><size=118>コ</size></voffset><space=-11><voffset=-7><size=75>コ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>와타리</size></voffset><space=4><size=118>코</size><space=4><voffset=-2><size=75>코</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>澤</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=4><size=118>可</size><space=4><voffset=-2><size=75>可</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Miria",
+      "nameColor_hex": "#ECD28F",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><voffset=-6><size=118>ミ</size></voffset><space=-21><voffset=-2><size=75>リ<space=-8>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>에키</size></voffset><space=4><size=118>미</size><space=4><voffset=-2><size=75>리아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><size=118>米</size><space=4><voffset=-2><size=75>莉亞</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Margo",
+      "nameColor_hex": "#BC7DEF",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>宝</size></color><space=4><size=73>生</size><space=7><voffset=-12><size=118>マ</size></voffset><space=-18><voffset=-10><size=70>ー</size></voffset><space=-8><voffset=-10><size=75>ゴ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>호</size></color><space=4><voffset=-2><size=73>쇼</size></voffset><space=4><size=118>마</size><space=4><voffset=-2><size=75>고</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>寶</size></color><space=4><voffset=-2><size=73>生</size></voffset><space=4><size=118>瑪</size><space=4><voffset=-2><size=75>格</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Noah",
+      "nameColor_hex": "#68E3EB",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-4><size=73>ケ崎</size></voffset><space=7><voffset=-8><size=118>ノ</size></voffset><space=-11><voffset=-4><size=75>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>죠</size></color><space=4><voffset=-2><size=73>가사키</size></voffset><space=4><size=118>노</size><space=4><voffset=-2><size=75>아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-2><size=73>崎</size></voffset><space=4><size=118>諾</size><space=4><voffset=-2><size=75>亞</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Nanoka",
+      "nameColor_hex": "#85919A",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>黒</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=12><voffset=-4><size=118>ナ</size></voffset><space=-11><voffset=-7><size=75>ノ<space=-8>カ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>쿠</size></color><space=4><voffset=-2><size=73>로베</size></voffset><space=4><size=118>나</size><space=4><voffset=-2><size=75>노카</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>黑</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=4><size=118>奈</size><space=4><voffset=-2><size=75>葉香</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Alisa",
+      "nameColor_hex": "#ED4C3D",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=9><voffset=-2><size=118>ア</size></voffset><space=-24><voffset=-4><size=75>リ<space=-6>サ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>시</size></color><space=4><voffset=-2><size=73>토</size></voffset><space=4><size=118>아</size><space=4><voffset=-2><size=75>리사</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=4><size=118>亞</size><space=4><voffset=-2><size=75>里沙</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Yuki",
+      "nameColor_hex": "#C5D4EB",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>月</size></color><space=4><voffset=-2><size=73>代</size></voffset><space=7><voffset=-16><size=118>ユ</size></voffset><space=-11><voffset=-7><size=75>キ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>츠</size></color><space=4><voffset=-2><size=73>키시로</size></voffset><space=4><size=118>유</size><space=4><voffset=-2><size=75>키</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>月</size></color><space=4><voffset=-2><size=73>代</size></voffset><space=4><size=118>雪</size>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Warden",
+      "nameColor_hex": "#B4B1C6",
+      "tagged_name": {
+        "ja": "<cspace=-8><space=-12><voffset=-10><color=%COLOR%><size=156>ゴ</size></color></voffset><space=-4><voffset=2><size=83>クチ</size></voffset><space=-8><voffset=-5><size=78>ョ</size></voffset><voffset=-8><size=70>ー</size></voffset></cspace>",
+        "ko": "<color=%COLOR%><size=136>교</size></color><space=4><voffset=-2><size=73>도소장</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>典</size></color><space=4><voffset=-2><size=73>獄長</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Jailer",
+      "nameColor_hex": "#B4B1C6",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>看</size></color><space=4><voffset=-2><size=73>守</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>간</size></color><space=4><voffset=-2><size=73>수</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>看</size></color><space=4><voffset=-2><size=73>守</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "JailerB",
+      "nameColor_hex": "#B4B1C6",
+      "tagged_name": {}
+    },
+    {
+      "id": "JailerC",
+      "nameColor_hex": "#B4B1C6",
+      "tagged_name": {}
+    },
+    {
+      "id": "CreatureEma",
+      "nameColor_hex": "#FF92B4",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>桜</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=7><voffset=-16><size=118>エ</size></voffset><space=-11><voffset=-7><size=75>マ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureHiro",
+      "nameColor_hex": "#F25054",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><voffset=-16><size=136>二</size></voffset></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=-2><voffset=-8><size=108>ヒ</size></voffset><space=-20><voffset=-9><size=75>ロ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>니</size></color><space=4><voffset=-2><size=73>카이도</size></voffset><space=4><size=118>히</size><space=4><voffset=-2><size=75>로</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>二</size></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=4><size=118>希</size><space=4><voffset=-2><size=75>羅</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureMeruru",
+      "nameColor_hex": "#E6BCB4",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>氷</size></color><space=4><voffset=-4><size=73>上</size></voffset><space=10><voffset=-8><size=118>メ</size></voffset><space=-18><voffset=-10><size=75>ルル</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>히</size></color><space=4><voffset=-2><size=73>카미</size></voffset><space=4><size=118>메</size><space=4><voffset=-2><size=75>루루</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>冰</size></color><space=4><voffset=-2><size=73>上</size></voffset><space=4><size=118>梅</size><space=4><voffset=-2><size=75>露露</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureHanna",
+      "nameColor_hex": "#AACA1F",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=10><voffset=-16><size=124>ハ</size></voffset><space=-11><voffset=-7><size=75>ンナ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>토</size></color><space=4><voffset=-2><size=73>노</size></voffset><space=4><size=118>한</size><space=4><voffset=-2><size=75>나</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=4><size=118>漢</size><space=4><voffset=-2><size=75>娜</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureSherry",
+      "nameColor_hex": "#8AB4FF",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>橘</size></color><space=12><voffset=-12><size=118>シ</size></voffset><space=-16><voffset=-12><size=85>ェ</size></voffset><space=-16><voffset=-6><size=82>リ</size></voffset><space=-14><voffset=-10><size=76>ー</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>타</size></color><space=4><voffset=-2><size=73>치바나</size></voffset><space=4><size=118>셰</size><space=4><voffset=-2><size=75>리</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>橘</size></color><space=4><size=118>雪</size><space=4><voffset=-2><size=75>莉</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureAnAn",
+      "nameColor_hex": "#A193FC",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-6><size=73>目</size></voffset><space=7><cspace=-4><voffset=-2><size=118>ア</size></voffset><space=-31><voffset=-7><size=75>ンアン</size></voffset></cspace>",
+        "ko": "<color=%COLOR%><size=136>나</size></color><space=4><voffset=-2><size=73>츠메</size></voffset><space=4><size=118>안</size><space=4><voffset=-2><size=75>안</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-2><size=73>目</size></voffset><space=4><size=118>安</size><space=4><voffset=-2><size=75>安</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureLeia",
+      "nameColor_hex": "#FFB458",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><voffset=-16><size=128>レ</size></voffset><space=-11><voffset=-7><size=72>イ</size></voffset><space=-8><voffset=-5><size=78>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>하</size></color><space=4><voffset=-2><size=73>스미</size></voffset><space=4><size=118>레</size><space=4><voffset=-2><size=75>이아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><size=118>蕾</size><space=4><voffset=-2><size=75>雅</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureCoco",
+      "nameColor_hex": "#FD7350",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>沢</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=7><voffset=-16><size=118>コ</size></voffset><space=-11><voffset=-7><size=75>コ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>와타리</size></voffset><space=4><size=118>코</size><space=4><voffset=-2><size=75>코</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>澤</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=4><size=118>可</size><space=4><voffset=-2><size=75>可</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureMiria",
+      "nameColor_hex": "#ECD28F",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><voffset=-6><size=118>ミ</size></voffset><space=-21><voffset=-2><size=75>リ<space=-8>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>에키</size></voffset><space=4><size=118>미</size><space=4><voffset=-2><size=75>리아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><size=118>米</size><space=4><voffset=-2><size=75>莉亞</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureMargo",
+      "nameColor_hex": "#BC7DEF",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>宝</size></color><space=4><size=73>生</size><space=7><voffset=-12><size=118>マ</size></voffset><space=-18><voffset=-10><size=70>ー</size></voffset><space=-8><voffset=-10><size=75>ゴ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>호</size></color><space=4><voffset=-2><size=73>쇼</size></voffset><space=4><size=118>마</size><space=4><voffset=-2><size=75>고</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>寶</size></color><space=4><voffset=-2><size=73>生</size></voffset><space=4><size=118>瑪</size><space=4><voffset=-2><size=75>格</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureNoah",
+      "nameColor_hex": "#68E3EB",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-4><size=73>ケ崎</size></voffset><space=7><voffset=-8><size=118>ノ</size></voffset><space=-11><voffset=-4><size=75>ア</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>죠</size></color><space=4><voffset=-2><size=73>가사키</size></voffset><space=4><size=118>노</size><space=4><voffset=-2><size=75>아</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-2><size=73>崎</size></voffset><space=4><size=118>諾</size><space=4><voffset=-2><size=75>亞</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureNanoka",
+      "nameColor_hex": "#85919A",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>黒</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=12><voffset=-4><size=118>ナ</size></voffset><space=-11><voffset=-7><size=75>ノ<space=-8>カ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>쿠</size></color><space=4><voffset=-2><size=73>로베</size></voffset><space=4><size=118>나</size><space=4><voffset=-2><size=75>노카</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>黑</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=4><size=118>奈</size><space=4><voffset=-2><size=75>葉香</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "CreatureAlisa",
+      "nameColor_hex": "#ED4C3D",
+      "tagged_name": {
+        "ja": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=9><voffset=-2><size=118>ア</size></voffset><space=-24><voffset=-4><size=75>リ<space=-6>サ</size></voffset>",
+        "ko": "<color=%COLOR%><size=136>시</size></color><space=4><voffset=-2><size=73>토</size></voffset><space=4><size=118>아</size><space=4><voffset=-2><size=75>리사</size></voffset>",
+        "zh-Hans": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=4><size=118>亞</size><space=4><voffset=-2><size=75>里沙</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "Unknown",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {
+        "ja": "<size=136>？</size><space=-22><voffset=-2><size=73>？？</size></voffset>",
+        "ko": "<cspace=-1><space=44><size=136>？</size><space=-40><voffset=-2><size=73>？？</size></voffset></cspace>",
+        "zh-Hans": "<size=136>？</size><space=-22><voffset=-2><size=73>？？</size></voffset></cspace>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "EmaFake",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {
+        "ja": "<size=136>桜</size><space=4><voffset=-2><size=73>羽</size></voffset><space=7><voffset=-16><size=118>エ</size></voffset><space=-11><voffset=-7><size=75>マ</size></voffset><space=-10><voffset=-4><size=85>？</size></voffset>",
+        "ko": "<size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마？</size></voffset>",
+        "zh-Hans": "<size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪？</size></voffset>",
+        "en-US": ""
+      }
+    },
+    {
+      "id": "StrayNarehate",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "WitchCandidate1",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "WitchCandidate2",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "WitchCandidate3",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "Narehate",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "Rabbit",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "Girl",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    },
+    {
+      "id": "BigWitch",
+      "nameColor_hex": "#FFFFFF",
+      "tagged_name": {}
+    }
+  ]
+}
