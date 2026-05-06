@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260506h';
+const BUILD_VERSION = '20260506k';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -81,9 +81,9 @@ const TOGGLE_FLAGS = {
 //
 // `snapshots`  — id → snapshot record (the localStorage payload). Refreshed
 //   from localStorage on init and on 'storage' events.
-// `placements` — array of { slug, x, y, scale, flip, inFront } in placement
-//   order. One placement per snapshot slug (duplicates collapse to selecting
-//   the existing entry, per the v1 design).
+// `placements` — array of { slug, x, y, scale } in placement order. One
+//   placement per snapshot slug (duplicates collapse to selecting the
+//   existing entry, per the v1 design).
 // `selectedSlug` — currently-selected placement, or null. Drives the
 //   inspector and the on-canvas selection outline.
 let snapshots    = new Map();
@@ -156,6 +156,88 @@ let _pendingReload  = false;
 // another tab's edits don't reset what *this* user has open in the inspector.
 // preserveSelection=false (init load): adopt whatever the saved state had,
 // so reopening the editor restores the previous session's selection.
+// --- Scene config persistence ---
+//
+// Locale / background / author / message / scene type — non-placement scene
+// state. Stored under a separate localStorage key from placements so that a
+// drag in one tab (writing the placements key every ~200 ms) doesn't echo
+// into another tab and clobber its in-progress text typing or selection
+// changes. Each key has its own debounce + storage listener.
+
+const SCENE_CONFIG_KEY     = 'manosaba.scene.config';
+const SCENE_CONFIG_VERSION = 1;
+
+function saveSceneConfig() {
+  try {
+    localStorage.setItem(SCENE_CONFIG_KEY, JSON.stringify({
+      version:   SCENE_CONFIG_VERSION,
+      sceneType: 'adv',  // only 'adv' is implemented; placeholder for future
+      locale,
+      bgPath,
+      authorId,
+      messageText,
+    }));
+  } catch (e) {
+    console.error('Failed to save scene config:', e);
+  }
+}
+
+let _configSaveTimer = null;
+function scheduleSceneConfigSave() {
+  if (_configSaveTimer) clearTimeout(_configSaveTimer);
+  _configSaveTimer = setTimeout(() => { _configSaveTimer = null; saveSceneConfig(); }, 200);
+}
+
+// Apply a saved-config record to the in-memory state and corresponding DOM
+// controls. `render=true` (the default) schedules a re-render; init passes
+// false because it does its own initial render after this returns.
+function loadSceneConfig({ render = true } = {}) {
+  let data;
+  try {
+    const raw = localStorage.getItem(SCENE_CONFIG_KEY);
+    if (!raw) return;
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse saved scene config:', e);
+    return;
+  }
+  if (!data || data.version !== SCENE_CONFIG_VERSION) return;
+
+  if (data.locale === 'ko' || data.locale === 'ja') {
+    if (data.locale !== locale) {
+      locale = data.locale;
+      for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
+        b.classList.toggle('active', b.dataset.locale === locale);
+      }
+      populateAuthorSelect();
+    }
+  }
+
+  if (typeof data.bgPath === 'string' || data.bgPath === null) {
+    bgPath = data.bgPath || null;
+    document.getElementById('bgSelect').value = bgPath || '';
+  }
+
+  if (typeof data.authorId === 'string') {
+    const sel = document.getElementById('authorSelect');
+    if ([...sel.options].some(o => o.value === data.authorId)) {
+      authorId = data.authorId;
+      sel.value = authorId;
+    }
+  }
+
+  // Skip the messageText sync when the user is actively typing in the
+  // textarea — otherwise a save fired by another tab (for an unrelated
+  // change) would reset the in-progress typing on every keystroke window.
+  const msgEl = document.getElementById('messageInput');
+  if (typeof data.messageText === 'string' && document.activeElement !== msgEl) {
+    messageText = data.messageText;
+    msgEl.value = messageText;
+  }
+
+  if (render) scheduleRender();
+}
+
 function loadPlacements({ preserveSelection = false } = {}) {
   let data;
   try {
@@ -328,12 +410,12 @@ async function spriteAtSize(filePath, w, h) {
 //
 // Snapshots come in as PNG data URLs. Cache them by slug so HTMLImageElement
 // is reused across renders. The linear-space resampled buffer is keyed by
-// (slug, width, height, flip) — placement scale changes invalidate that
-// dimension key naturally, so dragging the scale slider doesn't accumulate
-// stale buffers for the same slug indefinitely (only per-step variants).
+// (slug, width, height) — placement scale changes invalidate that dimension
+// key naturally, so dragging the scale slider doesn't accumulate stale
+// buffers for the same slug indefinitely (only per-step variants).
 
 const _snapshotImageCache    = new Map();   // slug -> Promise<HTMLImageElement>
-const _placementSpriteCache  = new Map();   // `${slug}@${w}x${h}@${flip}` -> Float32Array
+const _placementSpriteCache  = new Map();   // `${slug}@${w}x${h}` -> Float32Array
 
 function loadSnapshotImage(snap) {
   let p = _snapshotImageCache.get(snap.slug);
@@ -348,18 +430,14 @@ function loadSnapshotImage(snap) {
   return p;
 }
 
-async function placementSprite(snap, w, h, flip) {
-  const key = `${snap.slug}@${w}x${h}@${flip ? 1 : 0}`;
+async function placementSprite(snap, w, h) {
+  const key = `${snap.slug}@${w}x${h}`;
   let lin = _placementSpriteCache.get(key);
   if (lin) return lin;
   const img = await loadSnapshotImage(snap);
   const tmp = document.createElement('canvas');
   tmp.width = w; tmp.height = h;
   const ctx = tmp.getContext('2d');
-  if (flip) {
-    ctx.translate(w, 0);
-    ctx.scale(-1, 1);
-  }
   ctx.drawImage(img, 0, 0, w, h);
   lin = imageDataToLinear(ctx.getImageData(0, 0, w, h));
   _placementSpriteCache.set(key, lin);
@@ -378,7 +456,7 @@ async function renderPlacement(placement, dst) {
   if (!snap) return;
   const w = Math.max(1, Math.round(snap.width  * placement.scale));
   const h = Math.max(1, Math.round(snap.height * placement.scale));
-  const sprite = await placementSprite(snap, w, h, placement.flip);
+  const sprite = await placementSprite(snap, w, h);
   compositeLinear(dst, sprite, w, h,
                   Math.round(placement.x), Math.round(placement.y));
 }
@@ -886,10 +964,8 @@ async function renderScene() {
     for (let i = 3; i < dst.length; i += 4) dst[i] = 1;
   }
 
-  // Placements behind the dialog frame, in placement order (later = on top).
-  for (const p of placements) {
-    if (!p.inFront) await renderPlacement(p, dst);
-  }
+  // Placements sit behind the dialog frame, in array order (later = on top).
+  for (const p of placements) await renderPlacement(p, dst);
 
   for (const prefab of sceneMeta.prefabs) {
     if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
@@ -897,11 +973,6 @@ async function renderScene() {
       if (kind === 'layer') await renderLayer(item, dst);
       else                  await renderTextLeaf(item, dst);
     }
-  }
-
-  // Placements in front of the dialog frame.
-  for (const p of placements) {
-    if (p.inFront) await renderPlacement(p, dst);
   }
 
   const out = document.createElement('canvas');
@@ -1016,11 +1087,9 @@ function defaultPlacementFor(snap) {
   const rh = snap.height * scale;
   return {
     slug: snap.slug,
-    x:       Math.round((CANVAS_W - rw) / 2),
-    y:       Math.round(CANVAS_H - rh),
+    x:    Math.round((CANVAS_W - rw) / 2),
+    y:    Math.round(CANVAS_H - rh),
     scale,
-    flip:    false,
-    inFront: false,  // behind dialog frame by default — VN convention
   };
 }
 
@@ -1059,26 +1128,14 @@ function removePlacement(slug) {
   }
 }
 
-// Z-order within a bucket. The render iterates back-bucket then front-bucket,
-// each in array order, so the *last* same-bucket entry in `placements` is the
-// topmost. To bring `slug` forward, we splice it out and re-insert it just
-// after the last same-bucket entry. To send back, just before the first.
-// Cross-bucket movement is handled by the inFront toggle, not these helpers.
+// Z-order. Render iterates `placements` in array order — last is topmost.
+// "Bring to front" moves the target to the end of the array; "send to back"
+// moves it to the start.
 function bringPlacementToFront(slug) {
   const i = placements.findIndex(p => p.slug === slug);
-  if (i < 0) return false;
-  const target = placements[i];
-  let lastSame = -1;
-  for (let j = placements.length - 1; j >= 0; j--) {
-    if (j === i) continue;
-    if (placements[j].inFront === target.inFront) { lastSame = j; break; }
-  }
-  if (lastSame < 0 || lastSame < i) return false;  // already at top of bucket
-  placements.splice(i, 1);
-  // After the splice, indices shifted left by 1 for j > i. lastSame > i was
-  // true, so the post-splice index is `lastSame - 1`. We want to insert
-  // *after* that → at `lastSame`.
-  placements.splice(lastSame, 0, target);
+  if (i < 0 || i === placements.length - 1) return false;
+  const [target] = placements.splice(i, 1);
+  placements.push(target);
   refreshPlacementOverlays();
   scheduleRender();
   schedulePlacementsSave();
@@ -1087,37 +1144,19 @@ function bringPlacementToFront(slug) {
 
 function sendPlacementToBack(slug) {
   const i = placements.findIndex(p => p.slug === slug);
-  if (i < 0) return false;
-  const target = placements[i];
-  let firstSame = -1;
-  for (let j = 0; j < placements.length; j++) {
-    if (j === i) continue;
-    if (placements[j].inFront === target.inFront) { firstSame = j; break; }
-  }
-  if (firstSame < 0 || firstSame > i) return false;  // already at back of bucket
-  placements.splice(i, 1);
-  // i > firstSame means firstSame's index is unchanged after the splice.
-  placements.splice(firstSame, 0, target);
+  if (i <= 0) return false;
+  const [target] = placements.splice(i, 1);
+  placements.unshift(target);
   refreshPlacementOverlays();
   scheduleRender();
   schedulePlacementsSave();
   return true;
 }
 
-// Used by the inspector to disable buttons when the selected placement is
-// already at the extreme. Same scan logic as the splice helpers, just no
-// mutation.
 function placementZPosition(slug) {
   const i = placements.findIndex(p => p.slug === slug);
   if (i < 0) return { canFront: false, canBack: false };
-  const inFront = placements[i].inFront;
-  let canFront = false, canBack = false;
-  for (let j = 0; j < placements.length; j++) {
-    if (j === i || placements[j].inFront !== inFront) continue;
-    if (j > i) canFront = true;
-    if (j < i) canBack  = true;
-  }
-  return { canFront, canBack };
+  return { canFront: i < placements.length - 1, canBack: i > 0 };
 }
 
 async function deleteSnapshot(slug) {
@@ -1203,8 +1242,6 @@ function refreshInspector() {
   document.getElementById('inspectorY').value = placement.y;
   document.getElementById('inspectorScale').value = placement.scale;
   document.getElementById('inspectorScaleValue').textContent = placement.scale.toFixed(2);
-  document.getElementById('inspectorFlip').checked  = placement.flip;
-  document.getElementById('inspectorFront').checked = placement.inFront;
   const z = placementZPosition(placement.slug);
   document.getElementById('placementToFront').disabled = !z.canFront;
   document.getElementById('placementToBack').disabled  = !z.canBack;
@@ -1255,13 +1292,9 @@ function refreshPlacementOverlays() {
   for (const el of previewContainer.querySelectorAll('.placement-overlay')) {
     old.set(el.dataset.slug, el);
   }
-  // Render z-order: back placements first, then front. Mirror that DOM order
-  // so visual stacking of selection outlines matches the rasterized canvas.
-  const ordered = [
-    ...placements.filter(p => !p.inFront),
-    ...placements.filter(p => p.inFront),
-  ];
-  for (const p of ordered) {
+  // Render z-order: array order — last is topmost. Mirror in DOM stacking so
+  // selection outlines stack the same way as the rasterized canvas.
+  for (const p of placements) {
     const snap = snapshots.get(p.slug);
     if (!snap) continue;
     let el = old.get(p.slug);
@@ -1331,11 +1364,14 @@ function attachPlacementOverlayHandlers(el) {
     placement.y = Math.round(drag.startPlaceY + dy);
     refreshInspector();
     refreshPlacementOverlays();
-    scheduleRender();
     schedulePlacementsSave();
+    // No scheduleRender during drag — canvas re-renders take ~100 ms and
+    // produce visible lag. The CSS overlay tracks the cursor live; the
+    // rasterized character snaps to the new spot on dragend.
   });
   function endDrag(e) {
-    if (drag && e.pointerId === drag.pointerId) drag = null;
+    const wasDragging = drag && e.pointerId === drag.pointerId;
+    if (wasDragging) drag = null;
     _dragInProgress = false;
     if (_pendingReload) {
       _pendingReload = false;
@@ -1344,6 +1380,7 @@ function attachPlacementOverlayHandlers(el) {
       // both tabs converge a moment later.
       loadPlacements({ preserveSelection: true });
     }
+    if (wasDragging) scheduleRender();  // commit the moved character to pixels
   }
   el.addEventListener('pointerup', endDrag);
   el.addEventListener('pointercancel', endDrag);
@@ -1352,12 +1389,17 @@ function attachPlacementOverlayHandlers(el) {
 // --- Preview pipeline (debounced render) ---
 
 let renderTimer = null;
-function scheduleRender() {
+// `delay` is configurable so high-frequency text inputs can use a longer
+// settle window than discrete clicks. The render path is ~150–300 ms (a 14 M
+// linear-space float roundtrip dominates), so coalescing successive
+// keystrokes into a single render after the user pauses is a real win over
+// rendering every 30 ms during a typing burst.
+function scheduleRender(delay = 30) {
   if (renderTimer) clearTimeout(renderTimer);
   renderTimer = setTimeout(() => {
     renderTimer = null;
     drawPreview();
-  }, 30);
+  }, delay);
 }
 
 async function drawPreview() {
@@ -1449,17 +1491,29 @@ function showModal(message) {
   document.getElementById('bgSelect').onchange = (e) => {
     bgPath = e.target.value || null;
     scheduleRender();
+    scheduleSceneConfigSave();
   };
   document.getElementById('authorSelect').onchange = (e) => {
     authorId = e.target.value;
     scheduleRender();
+    scheduleSceneConfigSave();
   };
-  document.getElementById('messageInput').oninput = (e) => {
+  const messageInput = document.getElementById('messageInput');
+  messageInput.oninput = (e) => {
     messageText = e.target.value;
-    scheduleRender();
+    // Render only after a typing pause; mid-burst keystrokes coalesce.
+    scheduleRender(400);
+    scheduleSceneConfigSave();
   };
+  // Blur (and Enter for single-line inputs, but textarea is multi-line) flushes
+  // the pending render at the default short delay so the canvas commits as
+  // soon as the user moves focus away.
+  messageInput.onchange = () => scheduleRender();
   for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
-    b.addEventListener('click', () => setLocale(b.dataset.locale));
+    b.addEventListener('click', () => {
+      setLocale(b.dataset.locale);
+      scheduleSceneConfigSave();
+    });
   }
 
   // Overlay toggles. Each writes its module-level flag and re-renders.
@@ -1500,6 +1554,7 @@ function showModal(message) {
     refreshPlacementOverlays();
     scheduleRender();
     schedulePlacementsSave();
+    scheduleSceneConfigSave();
   };
   document.getElementById('exportBtn').onclick = exportPng;
 
@@ -1511,45 +1566,52 @@ function showModal(message) {
   // Restore placements after the snapshot Map is populated so loadPlacements
   // can filter out orphaned slugs against live IDB state.
   loadPlacements();
+  // Restore non-placement scene state (locale / bg / author / message / scene
+  // type) — render=false because the init's await drawPreview() below will
+  // produce the first render anyway, and we want a single render not two.
+  loadSceneConfig({ render: false });
   snapshotChannel.addEventListener('message', () => { reloadSnapshots(); });
-  // Cross-tab placement sync. The `storage` event fires in *other* same-origin
-  // tabs when localStorage changes here — sender doesn't see its own write,
-  // so no echo loop. Defer reloads while a local drag is active so the user's
-  // in-flight motion isn't clobbered; the deferred reload fires on dragend.
+  // Cross-tab sync. The `storage` event fires in *other* same-origin tabs
+  // when localStorage changes here — sender doesn't see its own write, so no
+  // echo loop. Placement reloads defer while a local drag is active to avoid
+  // clobbering in-flight motion; config reloads fire immediately (rare,
+  // discrete events).
   window.addEventListener('storage', (e) => {
-    if (e.key !== PLACEMENTS_KEY) return;
-    if (_dragInProgress) { _pendingReload = true; return; }
-    loadPlacements({ preserveSelection: true });
+    if (e.key === PLACEMENTS_KEY) {
+      if (_dragInProgress) { _pendingReload = true; return; }
+      loadPlacements({ preserveSelection: true });
+    } else if (e.key === SCENE_CONFIG_KEY) {
+      loadSceneConfig();
+    }
   });
 
   // Inspector controls. Each writes to the selected placement, refreshes the
-  // displayed value (for slider live-feedback), and re-renders. We also
-  // refresh the on-canvas overlays synchronously so the selection outline
-  // tracks the new geometry before the (debounced) canvas re-render lands.
-  // refreshInspector() picks up disabled-state changes for the z-order
-  // buttons when the inFront toggle moves the placement between buckets.
-  function withSelected(fn) {
+  // overlay (selection outline tracks geometry live), and saves. Whether we
+  // re-render the canvas depends on the input: continuous controls (X/Y
+  // typing or arrow-hold, scale slider drag) defer rendering until commit
+  // (input blur / slider release) because each render takes ~100 ms.
+  function withSelected(fn, { render = true } = {}) {
     const p = selectedSlug ? placementBySlug(selectedSlug) : null;
     if (!p) return;
     fn(p);
     refreshPlacementOverlays();
     refreshInspector();
-    scheduleRender();
+    if (render) scheduleRender();
     schedulePlacementsSave();
   }
-  document.getElementById('inspectorX').oninput = (e) =>
-    withSelected(p => { p.x = Number(e.target.value) || 0; });
-  document.getElementById('inspectorY').oninput = (e) =>
-    withSelected(p => { p.y = Number(e.target.value) || 0; });
-  document.getElementById('inspectorScale').oninput = (e) => {
+  const inspectorX = document.getElementById('inspectorX');
+  const inspectorY = document.getElementById('inspectorY');
+  const inspectorScale = document.getElementById('inspectorScale');
+  inspectorX.oninput  = (e) => withSelected(p => { p.x = Number(e.target.value) || 0; }, { render: false });
+  inspectorY.oninput  = (e) => withSelected(p => { p.y = Number(e.target.value) || 0; }, { render: false });
+  inspectorX.onchange = () => scheduleRender();
+  inspectorY.onchange = () => scheduleRender();
+  inspectorScale.oninput = (e) => {
     const v = Number(e.target.value) || 1;
     document.getElementById('inspectorScaleValue').textContent = v.toFixed(2);
-    withSelected(p => { p.scale = v; });
+    withSelected(p => { p.scale = v; }, { render: false });
   };
-  document.getElementById('inspectorFlip').onchange = (e) =>
-    withSelected(p => { p.flip = e.target.checked; });
-  document.getElementById('inspectorFront').onchange = (e) =>
-    withSelected(p => { p.inFront = e.target.checked; });
+  inspectorScale.onchange = () => scheduleRender();
   document.getElementById('placementRemove').onclick = () => {
     if (selectedSlug) removePlacement(selectedSlug);
   };
@@ -1558,13 +1620,6 @@ function showModal(message) {
   };
   document.getElementById('placementToBack').onclick = () => {
     if (selectedSlug && sendPlacementToBack(selectedSlug)) refreshInspector();
-  };
-  document.getElementById('inspectorClose').onclick = () => {
-    selectedSlug = null;
-    refreshSnapshotList();
-    refreshInspector();
-    scheduleRender();
-    schedulePlacementsSave();
   };
 
   await drawPreview();
@@ -1612,6 +1667,17 @@ const pointerMid  = () => { const [a, b] = pointerArr(); return { x: (a.x + b.x)
 
 previewArea.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
+  // Background-click deselect: any pointerdown reaching previewArea is by
+  // definition outside a placement overlay (overlay handlers stopPropagation).
+  // Clear the selection before pan/pinch logic so the selection outline
+  // disappears immediately even on a quick click-without-drag.
+  if (selectedSlug !== null) {
+    selectedSlug = null;
+    refreshSnapshotList();
+    refreshInspector();
+    refreshPlacementOverlays();
+    schedulePlacementsSave();
+  }
   previewArea.setPointerCapture(e.pointerId);
   activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (activePointers.size === 1) {
