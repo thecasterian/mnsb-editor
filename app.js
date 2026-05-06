@@ -1,7 +1,13 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and app.js in index.html.
-const BUILD_VERSION = '20260503a';
+const BUILD_VERSION = '20260506e';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
+
+// IndexedDB-backed snapshot store shared with the scene editor. Dynamic
+// import so the BUILD_VERSION query string busts module-script caches the
+// same way the static asset URLs do.
+const { snapshotPut, snapshotChannel } =
+  await import(`./snapshot_store.js?v=${BUILD_VERSION}`);
 
 const CHARACTERS = [
   // Layered main cast
@@ -1205,44 +1211,128 @@ function tightCrop(srcCanvas, margin = 10) {
   return out;
 }
 
-document.getElementById('exportBtn').onclick = async () => {
-  let canvas;
-  let downloadName;
+// Shared composite path for both Export PNG and Send to Scene. Returns the
+// bbox-cropped canvas plus a `variant` label (preset name for layered, pose
+// name for diced) — null when there's nothing to render.
+async function makeSnapshotCanvas() {
   if (charType === 'diced') {
     const img = await loadLayerImage(currentChar, activePose);
-    if (!img) return;
+    if (!img) return null;
     const full = document.createElement('canvas');
     full.width = img.width;
     full.height = img.height;
     full.getContext('2d').drawImage(img, 0, 0);
-    canvas = tightCrop(full);
-    downloadName = `${currentChar}_${activePose}_${Date.now()}.png`;
-  } else {
-    const activeLayers = layersInfo
-      .filter(l => activeState[l.name])
-      .sort((a, b) => a.order - b.order);
-    if (activeLayers.length === 0) return;
-    const canvasW = layersInfo[0]._canvasW || 2500;
-    const canvasH = layersInfo[0]._canvasH || 5000;
-    const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
-    canvas = tightCrop(full);
-    downloadName = `${currentChar}_${Date.now()}.png`;
+    return { canvas: tightCrop(full), variant: activePose };
   }
+  const activeLayers = layersInfo
+    .filter(l => activeState[l.name])
+    .sort((a, b) => a.order - b.order);
+  if (activeLayers.length === 0) return null;
+  const canvasW = layersInfo[0]._canvasW || 2500;
+  const canvasH = layersInfo[0]._canvasH || 5000;
+  const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
+  return { canvas: tightCrop(full), variant: detectActivePreset() };
+}
 
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download = downloadName;
-  a.click();
+// Mirror of updateUI()'s preset-active rule, returning the preset name (or
+// null when no preset matches the current facial layer set). Used to label
+// snapshots — keeps the dropdown highlight and snapshot label in sync.
+function detectActivePreset() {
+  if (!compositions || Object.keys(compositions).length === 0) return null;
+  const facialKeywords = ['Eyes', 'Mouth', 'Cheeks', 'Pale', 'Sweat', 'Mask'];
+  const isFacial = l => facialKeywords.some(k =>
+    l.name.includes(k) || l.group.includes(k));
+  const isControllable = l => !isStencilReader(l);
+  const facialOnNames = new Set(
+    layersInfo
+      .filter(l => isFacial(l)
+        && (!activeHead || l.group.includes(activeHead))
+        && isControllable(l)
+        && activeState[l.name])
+      .map(l => l.name)
+  );
+  for (const [name, enabled] of Object.entries(compositions)) {
+    if (!enabled || enabled.length === 0) continue;
+    const enabledSet = new Set(enabled);
+    if (enabled.every(n => activeState[n])
+        && [...facialOnNames].every(n => enabledSet.has(n))) {
+      return name;
+    }
+  }
+  return null;
+}
 
-  // Feedback
-  const btn = document.getElementById('exportBtn');
+function flashButton(id, text) {
+  const btn = document.getElementById(id);
   const orig = btn.textContent;
-  btn.textContent = 'Exported!';
+  btn.textContent = text;
   btn.classList.add('exported');
   setTimeout(() => {
     btn.textContent = orig;
     btn.classList.remove('exported');
   }, 1200);
+}
+
+function canvasToBlob(canvas, type = 'image/png') {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), type);
+  });
+}
+
+document.getElementById('exportBtn').onclick = async () => {
+  const snap = await makeSnapshotCanvas();
+  if (!snap) return;
+  const downloadName = snap.variant
+    ? `${currentChar}_${snap.variant}_${Date.now()}.png`
+    : `${currentChar}_${Date.now()}.png`;
+  const a = document.createElement('a');
+  a.href = snap.canvas.toDataURL('image/png');
+  a.download = downloadName;
+  a.click();
+  flashButton('exportBtn', 'Exported!');
+};
+
+document.getElementById('sendBtn').onclick = async () => {
+  const snap = await makeSnapshotCanvas();
+  if (!snap) return;
+  const variant = snap.variant || 'Custom';
+  // Timestamp suffix keeps repeated sends of the same (character, variant)
+  // independent — user can curate the library in the scene editor instead of
+  // overwriting silently. The scene editor reloads on the BroadcastChannel
+  // message we post below.
+  const slug = `${currentChar}_${variant}_${Date.now()}`;
+  let blob;
+  try {
+    blob = await canvasToBlob(snap.canvas, 'image/png');
+  } catch (e) {
+    console.error('Snapshot encode failed:', e);
+    await showModal('Failed to encode snapshot. See console for details.');
+    return;
+  }
+  const record = {
+    slug,
+    name: `${currentChar} (${variant})`,
+    character: currentChar,
+    variant,
+    charType,
+    width:  snap.canvas.width,
+    height: snap.canvas.height,
+    blob,
+    createdAt: new Date().toISOString(),
+  };
+  try {
+    await snapshotPut(record);
+  } catch (e) {
+    console.error('Failed to save snapshot:', e);
+    if (e && e.name === 'QuotaExceededError') {
+      await showModal('Storage full. Delete unused snapshots in the scene editor and try again.');
+    } else {
+      await showModal('Failed to save snapshot. See console for details.');
+    }
+    return;
+  }
+  snapshotChannel.postMessage({ type: 'updated', slug });
+  flashButton('sendBtn', 'Sent!');
 };
 
 // --- Reset ---

@@ -411,12 +411,15 @@ body {
 }
 .reset-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
 .reset-btn:hover { background: #333338; color: var(--text); }
-.export-btn { background: var(--accent); color: #fff; transition: all 0.2s; }
-.export-btn:hover { background: #ff8266; }
+.send-btn { background: var(--active); color: #fff; transition: all 0.2s; }
+.send-btn:hover { background: #b9a3ff; }
+.send-btn.exported,
 .export-btn.exported {
   background: #27ae60;
   pointer-events: none;
 }
+.export-btn { background: var(--accent); color: #fff; transition: all 0.2s; }
+.export-btn:hover { background: #ff8266; }
 
 .disclaimer {
   margin-top: 12px;
@@ -495,6 +498,183 @@ body {
   color: var(--text-muted);
   font-size: 14px;
   padding: 32px;
+}
+
+/* --- Snapshot library (scene editor only) --------------------------------
+   Shows character snapshots written to localStorage by the character editor.
+   Each row is a click-target that places the snapshot in the scene; rows for
+   already-placed snapshots get a coloured side-bar so the user can spot them
+   without scanning the canvas. */
+.section-hint {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-left: 8px;
+}
+.snapshot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.snapshot-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.snapshot-item:hover { border-color: #555; }
+.snapshot-item.is-placed { border-left: 3px solid var(--active); padding-left: 6px; }
+.snapshot-item.is-selected {
+  background: var(--active-bg);
+  border-color: var(--active);
+}
+.snapshot-thumb {
+  width: 40px;
+  height: 60px;
+  object-fit: contain;
+  background: #00000044;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.snapshot-meta {
+  flex: 1;
+  min-width: 0;
+}
+.snapshot-name {
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.snapshot-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.snapshot-delete {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.snapshot-delete:hover { background: #ff6b4a44; color: #ff6b4a; }
+
+/* --- Placement inspector (scene editor only) -----------------------------
+   Visible only when a placement is selected. Same .field wrapper as the
+   other side-panel sections; uses a tighter row layout for the X/Y/Scale
+   numeric controls. */
+.placement-inspector .section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.inspector-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.inspector-close:hover { color: var(--text); }
+.inspector-name {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.inspector-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.inspector-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  width: 36px;
+}
+.inspector-num {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.inspector-num:focus { outline: none; border-color: var(--active); }
+.inspector-range { flex: 1; }
+.inspector-value {
+  font-size: 13px;
+  color: var(--text-muted);
+  width: 40px;
+  text-align: right;
+}
+.inspector-zorder {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.zorder-btn {
+  flex: 1;
+  padding: 7px 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.zorder-btn:hover:not(:disabled) { border-color: var(--active); background: #2c2c34; }
+.zorder-btn:disabled { color: var(--text-muted); cursor: default; opacity: 0.5; }
+.placement-remove {
+  background: transparent;
+  color: #ff6b4a;
+  border: 1px solid #ff6b4a55;
+  margin-top: 4px;
+  font-size: 14px;
+  padding: 8px;
+}
+.placement-remove:hover { background: #ff6b4a22; }
+
+/* --- On-canvas selection / drag overlay (scene editor only) --------------
+   One absolutely-positioned div per placement, anchored to the canvas inside
+   .preview-container. Invisible by default — only the selected one shows an
+   outline. All overlays capture pointer events so click-and-drag works
+   regardless of the hidden state. */
+.placement-overlay {
+  position: absolute;
+  cursor: move;
+  touch-action: none;
+  /* No outline by default — but the rect still hit-tests for clicks. */
+  border: 2px solid transparent;
+  box-sizing: border-box;
+}
+.placement-overlay.is-selected {
+  border-color: var(--active);
+  box-shadow: 0 0 0 1px #00000088, inset 0 0 0 1px #00000088;
 }
 
 /* Scrollbar */

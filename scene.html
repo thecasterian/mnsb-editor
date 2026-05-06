@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260506b">
+<link rel="stylesheet" href="styles.css?v=20260506h">
 </head>
 <body>
 
@@ -78,6 +78,48 @@
     </label>
   </div>
 
+  <div class="field">
+    <div class="section-label">
+      Characters
+      <span class="section-hint" id="snapshotHint">Send from the character editor</span>
+    </div>
+    <div class="snapshot-list" id="snapshotList"></div>
+  </div>
+
+  <div class="field placement-inspector" id="placementInspector" hidden>
+    <div class="section-label">
+      Placement
+      <button class="inspector-close" id="inspectorClose" aria-label="Deselect">&times;</button>
+    </div>
+    <div class="inspector-name" id="inspectorName"></div>
+    <div class="inspector-row">
+      <label class="inspector-label">X</label>
+      <input class="inspector-num" type="number" id="inspectorX" step="1">
+      <label class="inspector-label">Y</label>
+      <input class="inspector-num" type="number" id="inspectorY" step="1">
+    </div>
+    <div class="inspector-row">
+      <label class="inspector-label">Scale</label>
+      <input class="inspector-range" type="range" id="inspectorScale" min="0.1" max="3" step="0.01">
+      <span class="inspector-value" id="inspectorScaleValue">1.00</span>
+    </div>
+    <label class="switch">
+      <span>Flip horizontal</span>
+      <input type="checkbox" id="inspectorFlip">
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>In front of dialog</span>
+      <input type="checkbox" id="inspectorFront">
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <div class="inspector-zorder">
+      <button class="zorder-btn" id="placementToBack" title="Send to back of its layer">Send to back</button>
+      <button class="zorder-btn" id="placementToFront" title="Bring to front of its layer">Bring to front</button>
+    </div>
+    <button class="action-btn placement-remove" id="placementRemove">Remove</button>
+  </div>
+
   <div class="actions">
     <button class="action-btn reset-btn" id="resetBtn">Reset</button>
     <button class="action-btn export-btn" id="exportBtn">Export PNG</button>
@@ -123,6 +165,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script src="scene.js?v=20260506b"></script>
+<script type="module" src="scene.js?v=20260506h"></script>
 </body>
 </html>

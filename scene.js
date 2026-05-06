@@ -1,7 +1,15 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260506b';
+const BUILD_VERSION = '20260506h';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
+
+// IndexedDB-backed snapshot store shared with the character editor. Records:
+//   { slug, name, character, variant, charType, width, height, blob, createdAt }
+// In memory we add a `blobUrl` per record (object-URL over the blob) and
+// reuse it for thumbnails + the placement render path; revoked on reload
+// and on delete.
+const { snapshotGetAll, snapshotDelete, snapshotChannel } =
+  await import(`./snapshot_store.js?v=${BUILD_VERSION}`);
 
 const CANVAS_W = 2560;
 const CANVAS_H = 1440;
@@ -68,6 +76,116 @@ const TOGGLE_FLAGS = {
   showBookButton:  () => showBookButton,
   showAuthorPlate: () => showAuthorPlate,
 };
+
+// --- Character snapshots (handed off from the character editor) ---
+//
+// `snapshots`  — id → snapshot record (the localStorage payload). Refreshed
+//   from localStorage on init and on 'storage' events.
+// `placements` — array of { slug, x, y, scale, flip, inFront } in placement
+//   order. One placement per snapshot slug (duplicates collapse to selecting
+//   the existing entry, per the v1 design).
+// `selectedSlug` — currently-selected placement, or null. Drives the
+//   inspector and the on-canvas selection outline.
+let snapshots    = new Map();
+let placements   = [];
+let selectedSlug = null;
+
+async function readSnapshotsFromIDB() {
+  const out = new Map();
+  let records;
+  try {
+    records = await snapshotGetAll();
+  } catch (e) {
+    console.error('Failed to read snapshots from IDB:', e);
+    return out;
+  }
+  for (const rec of records) {
+    if (!rec || !rec.slug || !rec.blob) continue;
+    out.set(rec.slug, { ...rec, blobUrl: URL.createObjectURL(rec.blob) });
+  }
+  return out;
+}
+
+function placementBySlug(slug) {
+  return placements.find(p => p.slug === slug) || null;
+}
+
+// --- Placement persistence ---
+//
+// Snapshots live in IDB; placement geometry lives in localStorage. The two
+// stores have different lifetimes and consumers: snapshots are heavy binary
+// shared across tabs (cross-tab broadcast); placements are light JSON owned
+// by *this* scene editor instance only — switching tabs gets you the same
+// snapshot library but each tab maintains its own scene composition.
+
+const PLACEMENTS_KEY     = 'manosaba.scene.placements';
+const PLACEMENTS_VERSION = 1;
+
+function savePlacements() {
+  try {
+    localStorage.setItem(PLACEMENTS_KEY, JSON.stringify({
+      version:      PLACEMENTS_VERSION,
+      placements,
+      selectedSlug,
+    }));
+  } catch (e) {
+    console.error('Failed to save placements:', e);
+  }
+}
+
+// Coalesces the high-frequency mutations during drag (one save per ~200 ms
+// idle) into a single localStorage write. Debounce trailing-edge: the last
+// pointermove event of a drag fires this; the timer expires after the user
+// stops moving and writes once. Tab close between writes loses at most the
+// last 200 ms of motion — acceptable.
+let _saveTimer = null;
+function schedulePlacementsSave() {
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => { _saveTimer = null; savePlacements(); }, 200);
+}
+
+// Drag lock: while the user is dragging in *this* tab, ignore incoming
+// `storage` events. Reloading mid-drag would clobber the in-progress geometry
+// with whatever the other tab last saved. Pending reloads coalesce into a
+// single deferred load on dragend.
+let _dragInProgress = false;
+let _pendingReload  = false;
+
+// preserveSelection=true: keep this tab's `selectedSlug` if it still resolves
+// to a placement we just loaded. Used by the cross-tab `storage` listener so
+// another tab's edits don't reset what *this* user has open in the inspector.
+// preserveSelection=false (init load): adopt whatever the saved state had,
+// so reopening the editor restores the previous session's selection.
+function loadPlacements({ preserveSelection = false } = {}) {
+  let data;
+  try {
+    const raw = localStorage.getItem(PLACEMENTS_KEY);
+    if (!raw) return;
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse saved placements:', e);
+    return;
+  }
+  if (!data || data.version !== PLACEMENTS_VERSION) return;
+  // Drop orphans whose snapshot no longer exists in IDB. `snapshots` must be
+  // populated before this runs — the init flow calls reloadSnapshots() first.
+  placements = Array.isArray(data.placements)
+    ? data.placements.filter(p => p && snapshots.has(p.slug))
+    : [];
+  const savedSel = (data.selectedSlug && snapshots.has(data.selectedSlug))
+    ? data.selectedSlug : null;
+  if (preserveSelection
+      && selectedSlug
+      && placements.some(p => p.slug === selectedSlug)) {
+    // keep this tab's selection
+  } else {
+    selectedSlug = savedSel;
+  }
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  if (placements.length > 0) scheduleRender();
+}
 
 // --- Static data load ---
 
@@ -204,6 +322,65 @@ async function spriteAtSize(filePath, w, h) {
   lin = imageDataToLinear(ctx.getImageData(0, 0, w, h));
   _spriteCache.set(key, lin);
   return lin;
+}
+
+// --- Placement sprites (character snapshots from localStorage) ---
+//
+// Snapshots come in as PNG data URLs. Cache them by slug so HTMLImageElement
+// is reused across renders. The linear-space resampled buffer is keyed by
+// (slug, width, height, flip) — placement scale changes invalidate that
+// dimension key naturally, so dragging the scale slider doesn't accumulate
+// stale buffers for the same slug indefinitely (only per-step variants).
+
+const _snapshotImageCache    = new Map();   // slug -> Promise<HTMLImageElement>
+const _placementSpriteCache  = new Map();   // `${slug}@${w}x${h}@${flip}` -> Float32Array
+
+function loadSnapshotImage(snap) {
+  let p = _snapshotImageCache.get(snap.slug);
+  if (p) return p;
+  p = new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = () => reject(new Error('Failed to decode snapshot ' + snap.slug));
+    img.src = snap.blobUrl;  // object-URL over the IDB-stored Blob
+  });
+  _snapshotImageCache.set(snap.slug, p);
+  return p;
+}
+
+async function placementSprite(snap, w, h, flip) {
+  const key = `${snap.slug}@${w}x${h}@${flip ? 1 : 0}`;
+  let lin = _placementSpriteCache.get(key);
+  if (lin) return lin;
+  const img = await loadSnapshotImage(snap);
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const ctx = tmp.getContext('2d');
+  if (flip) {
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(img, 0, 0, w, h);
+  lin = imageDataToLinear(ctx.getImageData(0, 0, w, h));
+  _placementSpriteCache.set(key, lin);
+  return lin;
+}
+
+function dropSnapshotCache(slug) {
+  _snapshotImageCache.delete(slug);
+  for (const key of _placementSpriteCache.keys()) {
+    if (key.startsWith(slug + '@')) _placementSpriteCache.delete(key);
+  }
+}
+
+async function renderPlacement(placement, dst) {
+  const snap = snapshots.get(placement.slug);
+  if (!snap) return;
+  const w = Math.max(1, Math.round(snap.width  * placement.scale));
+  const h = Math.max(1, Math.round(snap.height * placement.scale));
+  const sprite = await placementSprite(snap, w, h, placement.flip);
+  compositeLinear(dst, sprite, w, h,
+                  Math.round(placement.x), Math.round(placement.y));
 }
 
 // --- Background ---
@@ -709,12 +886,22 @@ async function renderScene() {
     for (let i = 3; i < dst.length; i += 4) dst[i] = 1;
   }
 
+  // Placements behind the dialog frame, in placement order (later = on top).
+  for (const p of placements) {
+    if (!p.inFront) await renderPlacement(p, dst);
+  }
+
   for (const prefab of sceneMeta.prefabs) {
     if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
     for (const [, kind, item] of selectPrefabItems(prefab)) {
       if (kind === 'layer') await renderLayer(item, dst);
       else                  await renderTextLeaf(item, dst);
     }
+  }
+
+  // Placements in front of the dialog frame.
+  for (const p of placements) {
+    if (p.inFront) await renderPlacement(p, dst);
   }
 
   const out = document.createElement('canvas');
@@ -806,6 +993,362 @@ function setLocale(next) {
   scheduleRender();
 }
 
+// --- Snapshot library + placements ---
+
+function relativeTime(iso) {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '';
+  const dt = (Date.now() - t) / 1000;
+  if (dt < 60)         return 'just now';
+  if (dt < 3600)       return `${Math.floor(dt / 60)} min ago`;
+  if (dt < 86400)      return `${Math.floor(dt / 3600)} hr ago`;
+  if (dt < 86400 * 30) return `${Math.floor(dt / 86400)} d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+// Default position/scale for a freshly-placed snapshot. Anchors the character
+// to the canvas bottom, horizontally centered, scaled to fit ~90% of canvas
+// height — characters are typically taller than 1440 px at native scale, so
+// fitting on add saves the user a scale-down on every placement.
+function defaultPlacementFor(snap) {
+  const scale = Math.min(1.0, (CANVAS_H * 0.9) / snap.height);
+  const rw = snap.width  * scale;
+  const rh = snap.height * scale;
+  return {
+    slug: snap.slug,
+    x:       Math.round((CANVAS_W - rw) / 2),
+    y:       Math.round(CANVAS_H - rh),
+    scale,
+    flip:    false,
+    inFront: false,  // behind dialog frame by default — VN convention
+  };
+}
+
+// Add a placement for `slug` (or select the existing one — per the v1 rule
+// that disallows the same snapshot being placed twice). Returns true if a new
+// placement was added, false if an existing one was selected.
+function addOrSelectPlacement(slug) {
+  const snap = snapshots.get(slug);
+  if (!snap) return false;
+  let placement = placementBySlug(slug);
+  let added = false;
+  if (!placement) {
+    placement = defaultPlacementFor(snap);
+    placements.push(placement);
+    added = true;
+  }
+  selectedSlug = slug;
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  return added;
+}
+
+function removePlacement(slug) {
+  const before = placements.length;
+  placements = placements.filter(p => p.slug !== slug);
+  if (selectedSlug === slug) selectedSlug = null;
+  if (placements.length !== before) {
+    refreshSnapshotList();
+    refreshInspector();
+    refreshPlacementOverlays();
+    scheduleRender();
+    schedulePlacementsSave();
+  }
+}
+
+// Z-order within a bucket. The render iterates back-bucket then front-bucket,
+// each in array order, so the *last* same-bucket entry in `placements` is the
+// topmost. To bring `slug` forward, we splice it out and re-insert it just
+// after the last same-bucket entry. To send back, just before the first.
+// Cross-bucket movement is handled by the inFront toggle, not these helpers.
+function bringPlacementToFront(slug) {
+  const i = placements.findIndex(p => p.slug === slug);
+  if (i < 0) return false;
+  const target = placements[i];
+  let lastSame = -1;
+  for (let j = placements.length - 1; j >= 0; j--) {
+    if (j === i) continue;
+    if (placements[j].inFront === target.inFront) { lastSame = j; break; }
+  }
+  if (lastSame < 0 || lastSame < i) return false;  // already at top of bucket
+  placements.splice(i, 1);
+  // After the splice, indices shifted left by 1 for j > i. lastSame > i was
+  // true, so the post-splice index is `lastSame - 1`. We want to insert
+  // *after* that → at `lastSame`.
+  placements.splice(lastSame, 0, target);
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  return true;
+}
+
+function sendPlacementToBack(slug) {
+  const i = placements.findIndex(p => p.slug === slug);
+  if (i < 0) return false;
+  const target = placements[i];
+  let firstSame = -1;
+  for (let j = 0; j < placements.length; j++) {
+    if (j === i) continue;
+    if (placements[j].inFront === target.inFront) { firstSame = j; break; }
+  }
+  if (firstSame < 0 || firstSame > i) return false;  // already at back of bucket
+  placements.splice(i, 1);
+  // i > firstSame means firstSame's index is unchanged after the splice.
+  placements.splice(firstSame, 0, target);
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  return true;
+}
+
+// Used by the inspector to disable buttons when the selected placement is
+// already at the extreme. Same scan logic as the splice helpers, just no
+// mutation.
+function placementZPosition(slug) {
+  const i = placements.findIndex(p => p.slug === slug);
+  if (i < 0) return { canFront: false, canBack: false };
+  const inFront = placements[i].inFront;
+  let canFront = false, canBack = false;
+  for (let j = 0; j < placements.length; j++) {
+    if (j === i || placements[j].inFront !== inFront) continue;
+    if (j > i) canFront = true;
+    if (j < i) canBack  = true;
+  }
+  return { canFront, canBack };
+}
+
+async function deleteSnapshot(slug) {
+  const snap = snapshots.get(slug);
+  if (!snap) return;
+  if (!await showModal(`Delete snapshot "${snap.name}"?`)) return;
+  try {
+    await snapshotDelete(slug);
+  } catch (e) {
+    console.error('Failed to delete snapshot:', e);
+    return;
+  }
+  if (snap.blobUrl) URL.revokeObjectURL(snap.blobUrl);
+  snapshots.delete(slug);
+  dropSnapshotCache(slug);
+  removePlacement(slug);  // also drops any placement using it
+  refreshSnapshotList();
+  snapshotChannel.postMessage({ type: 'deleted', slug });
+}
+
+function refreshSnapshotList() {
+  const list = document.getElementById('snapshotList');
+  const hint = document.getElementById('snapshotHint');
+  list.innerHTML = '';
+  const sorted = [...snapshots.values()]
+    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  if (sorted.length === 0) {
+    hint.textContent = 'Send from the character editor';
+    return;
+  }
+  hint.textContent = `${sorted.length} snapshot${sorted.length === 1 ? '' : 's'}`;
+  for (const snap of sorted) {
+    const placed = !!placementBySlug(snap.slug);
+    const selected = placed && selectedSlug === snap.slug;
+    const row = document.createElement('div');
+    row.className = 'snapshot-item'
+      + (placed ? ' is-placed' : '')
+      + (selected ? ' is-selected' : '');
+    row.dataset.slug = snap.slug;
+    row.tabIndex = 0;
+    row.innerHTML = `
+      <img class="snapshot-thumb" alt="">
+      <div class="snapshot-meta">
+        <div class="snapshot-name"></div>
+        <div class="snapshot-time"></div>
+      </div>
+      <button class="snapshot-delete" type="button" aria-label="Delete">&times;</button>
+    `;
+    row.querySelector('.snapshot-thumb').src = snap.blobUrl;
+    row.querySelector('.snapshot-name').textContent = snap.name || snap.slug;
+    row.querySelector('.snapshot-time').textContent = relativeTime(snap.createdAt);
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.snapshot-delete')) return;
+      addOrSelectPlacement(snap.slug);
+    });
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        addOrSelectPlacement(snap.slug);
+      }
+    });
+    row.querySelector('.snapshot-delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteSnapshot(snap.slug);
+    });
+    list.appendChild(row);
+  }
+}
+
+// Inspector is hidden when no placement is selected (or the selection points
+// at a slug that no longer exists, e.g. snapshot was deleted in another tab).
+function refreshInspector() {
+  const panel = document.getElementById('placementInspector');
+  const placement = selectedSlug ? placementBySlug(selectedSlug) : null;
+  if (!placement) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const snap = snapshots.get(placement.slug);
+  document.getElementById('inspectorName').textContent = snap ? snap.name : placement.slug;
+  document.getElementById('inspectorX').value = placement.x;
+  document.getElementById('inspectorY').value = placement.y;
+  document.getElementById('inspectorScale').value = placement.scale;
+  document.getElementById('inspectorScaleValue').textContent = placement.scale.toFixed(2);
+  document.getElementById('inspectorFlip').checked  = placement.flip;
+  document.getElementById('inspectorFront').checked = placement.inFront;
+  const z = placementZPosition(placement.slug);
+  document.getElementById('placementToFront').disabled = !z.canFront;
+  document.getElementById('placementToBack').disabled  = !z.canBack;
+}
+
+async function reloadSnapshots() {
+  // Revoke old object URLs and clear image caches before the swap. Cached
+  // HTMLImageElements that already finished decoding stay valid for their
+  // lifetime even after revoke — but the next load through the cache must
+  // not reuse a stale entry that points at the now-revoked URL.
+  for (const snap of snapshots.values()) {
+    if (snap.blobUrl) URL.revokeObjectURL(snap.blobUrl);
+  }
+  _snapshotImageCache.clear();
+  _placementSpriteCache.clear();
+
+  snapshots = await readSnapshotsFromIDB();
+  // Drop placements pointing at slugs that no longer exist (deleted in another
+  // tab). Keep the rest — the user shouldn't lose scene state because of an
+  // unrelated character-editor action.
+  const before = placements.length;
+  const beforeSelected = selectedSlug;
+  placements = placements.filter(p => snapshots.has(p.slug));
+  if (selectedSlug && !snapshots.has(selectedSlug)) selectedSlug = null;
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  if (placements.length !== before) scheduleRender();
+  else if (snapshots.size > 0)      scheduleRender();  // freshly-loaded blob URLs need a re-decode
+  if (placements.length !== before || selectedSlug !== beforeSelected) {
+    schedulePlacementsSave();
+  }
+}
+
+// On-canvas overlay layer. One absolutely-positioned div per placement,
+// sized to match the rendered sprite rect in display coordinates. Selection
+// outline + click/drag handles live here; the actual character pixels are
+// inside the canvas below. Overlays survive canvas swaps in drawPreview, so
+// pointer capture during a drag is preserved across re-renders.
+function refreshPlacementOverlays() {
+  const previewContainer = document.getElementById('previewContainer');
+  const canvas = previewContainer && previewContainer.querySelector('canvas');
+  if (!canvas) return;
+  const displayRatio = canvas.clientHeight / CANVAS_H;
+  if (!Number.isFinite(displayRatio) || displayRatio <= 0) return;
+
+  const old = new Map();
+  for (const el of previewContainer.querySelectorAll('.placement-overlay')) {
+    old.set(el.dataset.slug, el);
+  }
+  // Render z-order: back placements first, then front. Mirror that DOM order
+  // so visual stacking of selection outlines matches the rasterized canvas.
+  const ordered = [
+    ...placements.filter(p => !p.inFront),
+    ...placements.filter(p => p.inFront),
+  ];
+  for (const p of ordered) {
+    const snap = snapshots.get(p.slug);
+    if (!snap) continue;
+    let el = old.get(p.slug);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'placement-overlay';
+      el.dataset.slug = p.slug;
+      attachPlacementOverlayHandlers(el);
+      previewContainer.appendChild(el);
+    } else {
+      old.delete(p.slug);
+      // Move to end so DOM stacking matches render order (last = topmost).
+      previewContainer.appendChild(el);
+    }
+    const w = snap.width  * p.scale * displayRatio;
+    const h = snap.height * p.scale * displayRatio;
+    el.style.left   = `${p.x * displayRatio}px`;
+    el.style.top    = `${p.y * displayRatio}px`;
+    el.style.width  = `${w}px`;
+    el.style.height = `${h}px`;
+    el.classList.toggle('is-selected', p.slug === selectedSlug);
+  }
+  for (const el of old.values()) el.remove();
+}
+
+// Attach pointer handlers once per overlay element. Drag uses pointer capture
+// so events keep arriving at this overlay even if the cursor leaves the rect
+// or a canvas re-render replaces the canvas DOM node beneath it.
+function attachPlacementOverlayHandlers(el) {
+  let drag = null;
+
+  function selectAndStartDrag(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.stopPropagation();
+    el.setPointerCapture(e.pointerId);
+    selectedSlug = el.dataset.slug;
+    refreshSnapshotList();
+    refreshInspector();
+    refreshPlacementOverlays();
+    const placement = placementBySlug(selectedSlug);
+    if (!placement) return;
+    const canvas = document.getElementById('previewContainer').querySelector('canvas');
+    const displayRatio = canvas ? canvas.clientHeight / CANVAS_H : 1;
+    drag = {
+      pointerId:    e.pointerId,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startPlaceX:  placement.x,
+      startPlaceY:  placement.y,
+      displayRatio,
+    };
+    _dragInProgress = true;
+  }
+
+  el.addEventListener('pointerdown', selectAndStartDrag);
+  el.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const placement = placementBySlug(selectedSlug);
+    if (!placement) return;
+    // Display ratio includes the user's display-time zoom. The transform is
+    // applied to previewContainer (a parent), so client-px deltas already
+    // include zoomLevel — we only need to undo displayRatio to reach canvas
+    // px. (zoomLevel doesn't enter the math here for that reason.)
+    const dx = (e.clientX - drag.startClientX) / drag.displayRatio / zoomLevel;
+    const dy = (e.clientY - drag.startClientY) / drag.displayRatio / zoomLevel;
+    placement.x = Math.round(drag.startPlaceX + dx);
+    placement.y = Math.round(drag.startPlaceY + dy);
+    refreshInspector();
+    refreshPlacementOverlays();
+    scheduleRender();
+    schedulePlacementsSave();
+  });
+  function endDrag(e) {
+    if (drag && e.pointerId === drag.pointerId) drag = null;
+    _dragInProgress = false;
+    if (_pendingReload) {
+      _pendingReload = false;
+      // Apply whatever cross-tab updates piled up while we were dragging.
+      // Our own last save will broadcast outward via storage events too, so
+      // both tabs converge a moment later.
+      loadPlacements({ preserveSelection: true });
+    }
+  }
+  el.addEventListener('pointerup', endDrag);
+  el.addEventListener('pointercancel', endDrag);
+}
+
 // --- Preview pipeline (debounced render) ---
 
 let renderTimer = null;
@@ -830,7 +1373,18 @@ async function drawPreview() {
   if (seq !== renderSeq) return;
   canvas.style.height = '720px';
   canvas.style.width = 'auto';
-  document.getElementById('previewContainer').replaceChildren(canvas);
+  // Swap the canvas in place rather than replaceChildren so placement overlay
+  // divs (and any captured pointer for an in-flight drag) survive the render.
+  const previewContainer = document.getElementById('previewContainer');
+  const oldCanvas = previewContainer.querySelector('canvas');
+  if (oldCanvas) {
+    previewContainer.replaceChild(canvas, oldCanvas);
+  } else {
+    const loadingMsg = document.getElementById('loadingMsg');
+    if (loadingMsg) loadingMsg.remove();
+    previewContainer.insertBefore(canvas, previewContainer.firstChild);
+  }
+  refreshPlacementOverlays();
 }
 
 // --- Export ---
@@ -936,9 +1490,82 @@ function showModal(message) {
     for (const [id] of overlayBindings) document.getElementById(id).checked = true;
     document.getElementById('bgSelect').value = bgPath || '';
     document.getElementById('messageInput').value = messageText;
+    // Reset clears placements but never deletes snapshots — those persist
+    // across sessions and may be expensive to recreate. Clearing the snapshot
+    // library belongs in each row's delete button.
+    placements = [];
+    selectedSlug = null;
+    refreshSnapshotList();
+    refreshInspector();
+    refreshPlacementOverlays();
     scheduleRender();
+    schedulePlacementsSave();
   };
   document.getElementById('exportBtn').onclick = exportPng;
+
+  // Snapshot library: initial scan + listen for cross-tab updates. The
+  // BroadcastChannel does not deliver back to the sender, so the writer page
+  // (currently always the character editor) doesn't double-handle its own
+  // writes — we only get messages originating in another tab.
+  await reloadSnapshots();
+  // Restore placements after the snapshot Map is populated so loadPlacements
+  // can filter out orphaned slugs against live IDB state.
+  loadPlacements();
+  snapshotChannel.addEventListener('message', () => { reloadSnapshots(); });
+  // Cross-tab placement sync. The `storage` event fires in *other* same-origin
+  // tabs when localStorage changes here — sender doesn't see its own write,
+  // so no echo loop. Defer reloads while a local drag is active so the user's
+  // in-flight motion isn't clobbered; the deferred reload fires on dragend.
+  window.addEventListener('storage', (e) => {
+    if (e.key !== PLACEMENTS_KEY) return;
+    if (_dragInProgress) { _pendingReload = true; return; }
+    loadPlacements({ preserveSelection: true });
+  });
+
+  // Inspector controls. Each writes to the selected placement, refreshes the
+  // displayed value (for slider live-feedback), and re-renders. We also
+  // refresh the on-canvas overlays synchronously so the selection outline
+  // tracks the new geometry before the (debounced) canvas re-render lands.
+  // refreshInspector() picks up disabled-state changes for the z-order
+  // buttons when the inFront toggle moves the placement between buckets.
+  function withSelected(fn) {
+    const p = selectedSlug ? placementBySlug(selectedSlug) : null;
+    if (!p) return;
+    fn(p);
+    refreshPlacementOverlays();
+    refreshInspector();
+    scheduleRender();
+    schedulePlacementsSave();
+  }
+  document.getElementById('inspectorX').oninput = (e) =>
+    withSelected(p => { p.x = Number(e.target.value) || 0; });
+  document.getElementById('inspectorY').oninput = (e) =>
+    withSelected(p => { p.y = Number(e.target.value) || 0; });
+  document.getElementById('inspectorScale').oninput = (e) => {
+    const v = Number(e.target.value) || 1;
+    document.getElementById('inspectorScaleValue').textContent = v.toFixed(2);
+    withSelected(p => { p.scale = v; });
+  };
+  document.getElementById('inspectorFlip').onchange = (e) =>
+    withSelected(p => { p.flip = e.target.checked; });
+  document.getElementById('inspectorFront').onchange = (e) =>
+    withSelected(p => { p.inFront = e.target.checked; });
+  document.getElementById('placementRemove').onclick = () => {
+    if (selectedSlug) removePlacement(selectedSlug);
+  };
+  document.getElementById('placementToFront').onclick = () => {
+    if (selectedSlug && bringPlacementToFront(selectedSlug)) refreshInspector();
+  };
+  document.getElementById('placementToBack').onclick = () => {
+    if (selectedSlug && sendPlacementToBack(selectedSlug)) refreshInspector();
+  };
+  document.getElementById('inspectorClose').onclick = () => {
+    selectedSlug = null;
+    refreshSnapshotList();
+    refreshInspector();
+    scheduleRender();
+    schedulePlacementsSave();
+  };
 
   await drawPreview();
 })();
