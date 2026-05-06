@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260506k';
+const BUILD_VERSION = '20260507c';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -89,6 +89,9 @@ const TOGGLE_FLAGS = {
 let snapshots    = new Map();
 let placements   = [];
 let selectedSlug = null;
+// Lower-cased query for the snapshot library filter. Empty = no filter.
+// Matches against name + character + variant. Updated by the search input.
+let snapshotSearchQuery = '';
 
 async function readSnapshotsFromIDB() {
   const out = new Map();
@@ -1177,18 +1180,144 @@ async function deleteSnapshot(slug) {
   snapshotChannel.postMessage({ type: 'deleted', slug });
 }
 
+// Rename only changes the IDB record's `name` field. Slug is the join key
+// for placements + cross-tab messages, so renaming never invalidates either.
+// In-memory record gets the new name to keep the UI in sync without a full
+// reload; we still broadcast 'updated' so other tabs reload through their
+// listener path (which also updates *their* in-memory caches).
+async function renameSnapshot(slug) {
+  const snap = snapshots.get(slug);
+  if (!snap) return;
+  const newName = await showRenameModal(snap.name);
+  if (newName === null) return;            // cancelled
+  const trimmed = newName.trim();
+  if (!trimmed || trimmed === snap.name) return;
+  // Build a clean record (without the in-memory-only blobUrl field) for IDB.
+  const record = {
+    slug:      snap.slug,
+    name:      trimmed,
+    character: snap.character,
+    variant:   snap.variant,
+    charType:  snap.charType,
+    width:     snap.width,
+    height:    snap.height,
+    blob:      snap.blob,
+    createdAt: snap.createdAt,
+  };
+  try {
+    await snapshotPut(record);
+  } catch (e) {
+    console.error('Failed to rename snapshot:', e);
+    await showModal('Failed to rename snapshot. See console for details.');
+    return;
+  }
+  snap.name = trimmed;
+  refreshSnapshotList();
+  snapshotChannel.postMessage({ type: 'updated', slug });
+}
+
+// Bulk-delete every snapshot whose slug is not currently placed in this
+// tab's scene. "Unused" is a per-tab concept: another tab might still have
+// a placement for the same slug, but we only see this tab's view of
+// placements. After the deletes, post a single bulk-changed message so peers
+// reload once instead of N times.
+async function deleteUnusedSnapshots() {
+  const placedSlugs = new Set(placements.map(p => p.slug));
+  const unused = [...snapshots.values()].filter(s => !placedSlugs.has(s.slug));
+  if (unused.length === 0) {
+    await showModal('No unused snapshots to delete.');
+    return;
+  }
+  if (!await showModal(`Delete ${unused.length} unused snapshot${unused.length === 1 ? '' : 's'}?`)) return;
+  for (const snap of unused) {
+    try {
+      await snapshotDelete(snap.slug);
+    } catch (e) {
+      console.error('Failed to delete snapshot:', e);
+      continue;
+    }
+    if (snap.blobUrl) URL.revokeObjectURL(snap.blobUrl);
+    snapshots.delete(snap.slug);
+    dropSnapshotCache(snap.slug);
+  }
+  refreshSnapshotList();
+  snapshotChannel.postMessage({ type: 'bulk-changed' });
+}
+
+// Wipes the entire library — both IDB and any placements that referenced
+// those snapshots. The placements wipe is unavoidable: every placement's
+// slug becomes orphaned, so a partial delete-then-leave-stragglers state
+// would be inconsistent.
+async function deleteAllSnapshots() {
+  const all = [...snapshots.values()];
+  if (all.length === 0) {
+    await showModal('Library is already empty.');
+    return;
+  }
+  const msg = `Delete all ${all.length} snapshot${all.length === 1 ? '' : 's'}? `
+            + (placements.length > 0 ? `This will also clear ${placements.length} placement${placements.length === 1 ? '' : 's'}.` : '');
+  if (!await showModal(msg)) return;
+  for (const snap of all) {
+    try {
+      await snapshotDelete(snap.slug);
+    } catch (e) {
+      console.error('Failed to delete snapshot:', e);
+      continue;
+    }
+    if (snap.blobUrl) URL.revokeObjectURL(snap.blobUrl);
+    dropSnapshotCache(snap.slug);
+  }
+  snapshots.clear();
+  placements = [];
+  selectedSlug = null;
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  snapshotChannel.postMessage({ type: 'bulk-changed' });
+}
+
+function snapshotMatches(snap, query) {
+  if (!query) return true;
+  return `${snap.name} ${snap.character} ${snap.variant}`
+    .toLowerCase()
+    .includes(query);
+}
+
 function refreshSnapshotList() {
   const list = document.getElementById('snapshotList');
   const hint = document.getElementById('snapshotHint');
   list.innerHTML = '';
   const sorted = [...snapshots.values()]
     .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
   if (sorted.length === 0) {
-    hint.textContent = 'Send from the character editor';
+    hint.textContent = 'Empty';
+    const empty = document.createElement('div');
+    empty.className = 'snapshot-empty';
+    empty.innerHTML = `
+      <p>No snapshots yet.</p>
+      <a class="snapshot-empty-link" href="index.html">Open character editor →</a>
+    `;
+    list.appendChild(empty);
     return;
   }
-  hint.textContent = `${sorted.length} snapshot${sorted.length === 1 ? '' : 's'}`;
-  for (const snap of sorted) {
+
+  const filtered = sorted.filter(s => snapshotMatches(s, snapshotSearchQuery));
+  hint.textContent = snapshotSearchQuery
+    ? `${filtered.length}/${sorted.length}`
+    : `${sorted.length} snapshot${sorted.length === 1 ? '' : 's'}`;
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'snapshot-empty';
+    empty.innerHTML = `<p>No matches.</p>`;
+    list.appendChild(empty);
+    return;
+  }
+
+  for (const snap of filtered) {
     const placed = !!placementBySlug(snap.slug);
     const selected = placed && selectedSlug === snap.slug;
     const row = document.createElement('div');
@@ -1203,13 +1332,15 @@ function refreshSnapshotList() {
         <div class="snapshot-name"></div>
         <div class="snapshot-time"></div>
       </div>
-      <button class="snapshot-delete" type="button" aria-label="Delete">&times;</button>
+      <button class="snapshot-rename" type="button">Rename</button>
+      <button class="snapshot-delete" type="button" aria-label="Delete" title="Delete">&times;</button>
     `;
     row.querySelector('.snapshot-thumb').src = snap.blobUrl;
     row.querySelector('.snapshot-name').textContent = snap.name || snap.slug;
     row.querySelector('.snapshot-time').textContent = relativeTime(snap.createdAt);
     row.addEventListener('click', (e) => {
       if (e.target.closest('.snapshot-delete')) return;
+      if (e.target.closest('.snapshot-rename')) return;
       addOrSelectPlacement(snap.slug);
     });
     row.addEventListener('keydown', (e) => {
@@ -1217,6 +1348,10 @@ function refreshSnapshotList() {
         e.preventDefault();
         addOrSelectPlacement(snap.slug);
       }
+    });
+    row.querySelector('.snapshot-rename').addEventListener('click', (e) => {
+      e.stopPropagation();
+      renameSnapshot(snap.slug);
     });
     row.querySelector('.snapshot-delete').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1226,25 +1361,44 @@ function refreshSnapshotList() {
   }
 }
 
-// Inspector is hidden when no placement is selected (or the selection points
-// at a slug that no longer exists, e.g. snapshot was deleted in another tab).
+// Inspector is always visible. When no placement is selected, controls show
+// neutral defaults (X=0, Y=0, scale=1) and are disabled — useful as a quiet
+// reminder of the inspector's existence and the value layout. When a slug
+// no longer resolves (snapshot deleted in another tab), we fall through to
+// the same "no selection" state.
 function refreshInspector() {
-  const panel = document.getElementById('placementInspector');
   const placement = selectedSlug ? placementBySlug(selectedSlug) : null;
+  const xEl       = document.getElementById('inspectorX');
+  const yEl       = document.getElementById('inspectorY');
+  const scaleEl   = document.getElementById('inspectorScale');
+  const scaleVal  = document.getElementById('inspectorScaleValue');
+  const nameEl    = document.getElementById('inspectorName');
+  const toFrontEl = document.getElementById('placementToFront');
+  const toBackEl  = document.getElementById('placementToBack');
+  const removeEl  = document.getElementById('placementRemove');
+
   if (!placement) {
-    panel.hidden = true;
+    nameEl.textContent     = '(no selection)';
+    xEl.value              = 0;
+    yEl.value              = 0;
+    scaleEl.value          = 1;
+    scaleVal.textContent   = '1.00';
+    xEl.disabled = yEl.disabled = scaleEl.disabled = true;
+    toFrontEl.disabled = toBackEl.disabled = removeEl.disabled = true;
     return;
   }
-  panel.hidden = false;
+
+  xEl.disabled = yEl.disabled = scaleEl.disabled = false;
+  removeEl.disabled = false;
   const snap = snapshots.get(placement.slug);
-  document.getElementById('inspectorName').textContent = snap ? snap.name : placement.slug;
-  document.getElementById('inspectorX').value = placement.x;
-  document.getElementById('inspectorY').value = placement.y;
-  document.getElementById('inspectorScale').value = placement.scale;
-  document.getElementById('inspectorScaleValue').textContent = placement.scale.toFixed(2);
+  nameEl.textContent  = snap ? snap.name : placement.slug;
+  xEl.value           = placement.x;
+  yEl.value           = placement.y;
+  scaleEl.value       = placement.scale;
+  scaleVal.textContent = placement.scale.toFixed(2);
   const z = placementZPosition(placement.slug);
-  document.getElementById('placementToFront').disabled = !z.canFront;
-  document.getElementById('placementToBack').disabled  = !z.canBack;
+  toFrontEl.disabled = !z.canFront;
+  toBackEl.disabled  = !z.canBack;
 }
 
 async function reloadSnapshots() {
@@ -1445,7 +1599,42 @@ async function exportPng() {
   setTimeout(() => { btn.textContent = orig; btn.classList.remove('exported'); }, 1200);
 }
 
-// --- Modal (themed confirm) ---
+// --- Modals ---
+
+// Resolves to the user-entered string (trimmed by caller), or `null` on
+// Cancel / Esc / click-outside. Pre-fills the input with `currentName` and
+// auto-selects so user can immediately type a replacement. Enter commits.
+function showRenameModal(currentName) {
+  return new Promise((resolve) => {
+    const overlay     = document.getElementById('renameOverlay');
+    const input       = document.getElementById('renameInput');
+    const confirmBtn  = document.getElementById('renameConfirm');
+    const cancelBtn   = document.getElementById('renameCancel');
+    document.getElementById('renameCurrent').textContent = `Current: ${currentName}`;
+    input.value = currentName;
+    overlay.classList.add('active');
+    // Defer focus to next frame so the modal's display:flex transition
+    // doesn't suppress the autofocus + select.
+    requestAnimationFrame(() => { input.focus(); input.select(); });
+    function close(result) {
+      overlay.classList.remove('active');
+      confirmBtn.onclick = cancelBtn.onclick = overlay.onclick = null;
+      input.onkeydown = null;
+      document.removeEventListener('keydown', onKey);
+      resolve(result);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close(null);
+    }
+    confirmBtn.onclick = () => close(input.value);
+    cancelBtn.onclick  = () => close(null);
+    overlay.onclick = (e) => { if (e.target === overlay) close(null); };
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); close(input.value); }
+    };
+    document.addEventListener('keydown', onKey);
+  });
+}
 
 function showModal(message) {
   return new Promise((resolve) => {
@@ -1557,6 +1746,25 @@ function showModal(message) {
     scheduleSceneConfigSave();
   };
   document.getElementById('exportBtn').onclick = exportPng;
+
+  // Snapshot library controls: search filter + bulk delete buttons.
+  const snapshotSearch = document.getElementById('snapshotSearch');
+  snapshotSearch.oninput = (e) => {
+    snapshotSearchQuery = e.target.value.trim().toLowerCase();
+    refreshSnapshotList();
+  };
+  document.getElementById('deleteUnusedBtn').onclick = deleteUnusedSnapshots;
+  document.getElementById('deleteAllBtn').onclick    = deleteAllSnapshots;
+  // Closing the Manage accordion clears any active search query — otherwise
+  // the list would stay silently filtered with no visible reason once the
+  // search input is hidden inside the collapsed accordion.
+  document.getElementById('snapshotManage').addEventListener('toggle', (e) => {
+    if (!e.target.open && snapshotSearchQuery) {
+      snapshotSearchQuery = '';
+      snapshotSearch.value = '';
+      refreshSnapshotList();
+    }
+  });
 
   // Snapshot library: initial scan + listen for cross-tab updates. The
   // BroadcastChannel does not deliver back to the sender, so the writer page
