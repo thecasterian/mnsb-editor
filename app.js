@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and app.js in index.html.
-const BUILD_VERSION = '20260506e';
+const BUILD_VERSION = '20260508a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the scene editor. Dynamic
@@ -1480,6 +1480,11 @@ document.getElementById('zoomIn').onclick = () => { zoom(0.3, 0, 0); };
 document.getElementById('zoomOut').onclick = () => { zoom(-0.3, 0, 0); };
 document.getElementById('zoomReset').onclick = () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); };
 document.getElementById('bgToggle').onclick = () => { previewArea.classList.toggle('bg-white'); };
+
+// Stop pointerdown from bubbling out of the zoom controls. Without this, the
+// previewArea pointerdown handler below calls setPointerCapture, which steals
+// the pointerup + synthesized click from the button — so onclick never fires.
+document.querySelector('.zoom-controls').addEventListener('pointerdown', e => e.stopPropagation());
 
 // Pointer-based pan + pinch-to-zoom. Pointer Events unify mouse, touch, and
 // pen — one handler set covers desktop drag, mobile single-finger pan, and
