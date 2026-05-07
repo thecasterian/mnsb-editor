@@ -806,6 +806,9 @@ body {
 }
 .preview-container.dragging { cursor: grabbing; transition: none; }
 
+/* Scene editor has no pan/zoom on the preview — the grab cursor would mislead. */
+body.scene-editor .preview-container { cursor: default; }
+
 /* Canvas size is set by JS (height anchored, width derived from aspect);
    container shrink-wraps around it. */
 .preview-container img,

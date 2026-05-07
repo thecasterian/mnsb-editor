@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260507c';
+const BUILD_VERSION = '20260507d';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -1508,12 +1508,8 @@ function attachPlacementOverlayHandlers(el) {
     if (!drag || e.pointerId !== drag.pointerId) return;
     const placement = placementBySlug(selectedSlug);
     if (!placement) return;
-    // Display ratio includes the user's display-time zoom. The transform is
-    // applied to previewContainer (a parent), so client-px deltas already
-    // include zoomLevel — we only need to undo displayRatio to reach canvas
-    // px. (zoomLevel doesn't enter the math here for that reason.)
-    const dx = (e.clientX - drag.startClientX) / drag.displayRatio / zoomLevel;
-    const dy = (e.clientY - drag.startClientY) / drag.displayRatio / zoomLevel;
+    const dx = (e.clientX - drag.startClientX) / drag.displayRatio;
+    const dy = (e.clientY - drag.startClientY) / drag.displayRatio;
     placement.x = Math.round(drag.startPlaceX + dx);
     placement.y = Math.round(drag.startPlaceY + dy);
     refreshInspector();
@@ -1833,52 +1829,11 @@ function showModal(message) {
   await drawPreview();
 })();
 
-// --- Zoom & Pan ---
-
-let zoomLevel = 1;
-let panX = 0, panY = 0;
-let isDragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
-const container   = document.getElementById('previewContainer');
-const previewArea = document.getElementById('previewArea');
-
-function applyTransform() {
-  container.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
-}
-
-function zoom(delta, cx, cy) {
-  const oldZoom = zoomLevel;
-  zoomLevel = Math.min(8, Math.max(0.25, zoomLevel * (1 + delta)));
-  const ratio = zoomLevel / oldZoom;
-  panX = cx - ratio * (cx - panX);
-  panY = cy - ratio * (cy - panY);
-  applyTransform();
-}
-
-previewArea.addEventListener('wheel', e => {
-  e.preventDefault();
-  const r = previewArea.getBoundingClientRect();
-  zoom(e.deltaY > 0 ? -0.15 : 0.15,
-       e.clientX - r.left - r.width  / 2,
-       e.clientY - r.top  - r.height / 2);
-}, { passive: false });
-
-document.getElementById('zoomIn').onclick    = () => zoom( 0.3, 0, 0);
-document.getElementById('zoomOut').onclick   = () => zoom(-0.3, 0, 0);
-document.getElementById('zoomReset').onclick = () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); };
-
-const activePointers = new Map();
-let pinchStartDist = 0;
-let pinchStartZoom = 1;
-const pointerArr  = () => [...activePointers.values()];
-const pointerDist = () => { const [a, b] = pointerArr(); return Math.hypot(a.x - b.x, a.y - b.y); };
-const pointerMid  = () => { const [a, b] = pointerArr(); return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
-
-previewArea.addEventListener('pointerdown', e => {
+// --- Background-click deselect ---
+// Any pointerdown reaching previewArea is by definition outside a placement
+// overlay (overlay handlers stopPropagation), so use it to clear selection.
+document.getElementById('previewArea').addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
-  // Background-click deselect: any pointerdown reaching previewArea is by
-  // definition outside a placement overlay (overlay handlers stopPropagation).
-  // Clear the selection before pan/pinch logic so the selection outline
-  // disappears immediately even on a quick click-without-drag.
   if (selectedSlug !== null) {
     selectedSlug = null;
     refreshSnapshotList();
@@ -1886,59 +1841,7 @@ previewArea.addEventListener('pointerdown', e => {
     refreshPlacementOverlays();
     schedulePlacementsSave();
   }
-  previewArea.setPointerCapture(e.pointerId);
-  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (activePointers.size === 1) {
-    isDragging = true;
-    dragStartX = e.clientX; dragStartY = e.clientY;
-    panStartX  = panX;       panStartY  = panY;
-    container.classList.add('dragging');
-  } else if (activePointers.size === 2) {
-    isDragging = false;
-    container.classList.remove('dragging');
-    pinchStartDist = pointerDist();
-    pinchStartZoom = zoomLevel;
-  }
 });
-
-previewArea.addEventListener('pointermove', e => {
-  if (!activePointers.has(e.pointerId)) return;
-  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (activePointers.size === 2) {
-    if (pinchStartDist === 0) return;
-    const r = previewArea.getBoundingClientRect();
-    const mid = pointerMid();
-    const cx = mid.x - r.left - r.width  / 2;
-    const cy = mid.y - r.top  - r.height / 2;
-    const oldZoom = zoomLevel;
-    zoomLevel = Math.min(8, Math.max(0.25, pinchStartZoom * pointerDist() / pinchStartDist));
-    const ratio = zoomLevel / oldZoom;
-    panX = cx - ratio * (cx - panX);
-    panY = cy - ratio * (cy - panY);
-    applyTransform();
-  } else if (isDragging && activePointers.size === 1) {
-    panX = panStartX + (e.clientX - dragStartX);
-    panY = panStartY + (e.clientY - dragStartY);
-    applyTransform();
-  }
-});
-
-function endPointer(e) {
-  if (!activePointers.has(e.pointerId)) return;
-  activePointers.delete(e.pointerId);
-  pinchStartDist = 0;
-  if (activePointers.size === 0) {
-    isDragging = false;
-    container.classList.remove('dragging');
-  } else if (activePointers.size === 1) {
-    const r = pointerArr()[0];
-    dragStartX = r.x; dragStartY = r.y;
-    panStartX = panX; panStartY = panY;
-    isDragging = true;
-  }
-}
-previewArea.addEventListener('pointerup', endPointer);
-previewArea.addEventListener('pointercancel', endPointer);
 
 // --- Drawer (mobile bottom sheet) ---
 document.getElementById('drawerToggle').onclick   = () => document.body.classList.add('drawer-open');

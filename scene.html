@@ -7,9 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260507c">
+<link rel="stylesheet" href="styles.css?v=20260507d">
 </head>
-<body>
+<body class="scene-editor">
 
 <div class="panel">
   <div class="drawer-handle-row" aria-hidden="true">
@@ -136,11 +136,6 @@
   <div class="preview-container" id="previewContainer">
     <div class="loading-msg" id="loadingMsg">Loading…</div>
   </div>
-  <div class="zoom-controls">
-    <button class="zoom-btn" id="zoomIn">+</button>
-    <button class="zoom-btn" id="zoomOut">&minus;</button>
-    <button class="zoom-btn" id="zoomReset" style="font-size:14px">1:1</button>
-  </div>
 </div>
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -172,6 +167,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260507c"></script>
+<script type="module" src="scene.js?v=20260507d"></script>
 </body>
 </html>
