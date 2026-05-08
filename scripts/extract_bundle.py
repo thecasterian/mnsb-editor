@@ -3,10 +3,15 @@
 
 Produces the bbox+pos schema used by the renderer in index.html:
   out_dir/{name}.png      — bbox-cropped sprite from the atlas
-  out_dir/layers.json     — { canvas_size, layers: [{name, group, order, pos, empty}] }
+  out_dir/layers.json     — { canvas_size, intrinsic_scale, layers: [{name, group, order, pos, empty}] }
 
 Canvas-size policy: auto-grow (option C). The canvas is sized to fit the bbox
 of every leaf sprite's footprint. Y is flipped from Unity (Y-up) to PIL (Y-down).
+
+`intrinsic_scale` is the prefab's pre-baked uniform Transform scale (per-character
+height equalizer; e.g. Ema=0.60, Hanna=0.54, Leia=0.75). The runtime treats
+`script_scale = 1.0` as already including this factor, so leaf `pos` values stay
+in raw pixel space; any consumer that wants the on-stage size multiplies by it.
 
 If out_dir/layers.json already exists, per-layer curation fields
 (`requires`, `excludes_groups`, `requires_groups`, `auto_enable`, and any user
@@ -116,6 +121,33 @@ def _parse_render(shader_name: str, mat_floats: dict) -> dict:
     return {"blend": blend, "stencil": stencil}
 
 
+def _find_intrinsic_scale(by_type: dict) -> float:
+    """Return the prefab's first non-identity Transform.m_LocalScale.x.
+
+    Each character prefab carries a non-identity child Transform that pre-
+    scales the rig — a per-character height equalizer baked at build time
+    (e.g. Ema/Sherry=0.60, Hanna=0.54, Leia/Hiro/Meruru/Nanoka=0.75). The
+    runtime treats `script_scale = 1.0` as already including this factor,
+    so we record it as metadata alongside `canvas_size` rather than fold
+    it into leaf positions — leaves stay in raw pixel space, and any
+    consumer that needs on-stage size multiplies by intrinsic_scale.
+
+    Returns 1.0 when no non-identity scale is present, or when the
+    candidate is asymmetric (x != y) — neither shape matches the
+    uniform-pre-scale convention used on this game's layered rigs.
+    """
+    for _pid, d in (by_type.get("Transform", []) + by_type.get("RectTransform", [])):
+        ls = getattr(d, "m_LocalScale", None)
+        if ls is None:
+            continue
+        if abs(ls.x - 1.0) <= 1e-3:
+            continue
+        if abs(ls.x - ls.y) > 1e-2:
+            continue
+        return round(float(ls.x), 6)
+    return 1.0
+
+
 def _read(env):
     """Resolve every object once; return per-type dicts keyed by path_id."""
     by_pathid: dict[int, object] = {}
@@ -137,6 +169,7 @@ def extract(bundle_path: str, out_dir: str) -> None:
 
     env = UnityPy.load(bundle_path)
     by_pathid, by_type = _read(env)
+    intrinsic_scale = _find_intrinsic_scale(by_type)
 
     # --- Index GameObjects, Transforms, SpriteRenderers, Sprites -----------
     go_name: dict[int, str] = {pid: d.m_Name for pid, d in by_type.get("GameObject", [])}
@@ -326,6 +359,7 @@ def extract(bundle_path: str, out_dir: str) -> None:
 
     out_data = {
         "canvas_size": [canvas_w, canvas_h],
+        "intrinsic_scale": intrinsic_scale,
         "layers": layer_entries,
     }
     layers_json_path.write_text(json.dumps(out_data, indent=2, ensure_ascii=False))
@@ -334,6 +368,7 @@ def extract(bundle_path: str, out_dir: str) -> None:
     print(f"# Extracted {len(leaves)} sprites from {bundle_path}")
     print(f"  root: {root_name}")
     print(f"  canvas_size: [{canvas_w}, {canvas_h}]")
+    print(f"  intrinsic_scale: {intrinsic_scale}")
     print(f"  out_dir: {out}")
 
 

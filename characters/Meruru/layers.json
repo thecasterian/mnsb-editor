@@ -3,6 +3,7 @@
     1258,
     3128
   ],
+  "intrinsic_scale": 0.75,
   "layers": [
     {
       "name": "ClippingMask_Angle01_01",

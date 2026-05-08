@@ -3,6 +3,7 @@
     2416,
     3508
   ],
+  "intrinsic_scale": 0.6,
   "layers": [
     {
       "name": "ClippingMask_Root_Overlay",

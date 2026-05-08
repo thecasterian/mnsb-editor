@@ -3,6 +3,7 @@
     1797,
     3948
   ],
+  "intrinsic_scale": 0.6,
   "layers": [
     {
       "name": "RootBlendingOverlay",

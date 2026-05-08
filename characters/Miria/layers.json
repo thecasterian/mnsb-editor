@@ -3,6 +3,7 @@
     1610,
     3919
   ],
+  "intrinsic_scale": 0.66,
   "layers": [
     {
       "name": "ClippingMask_Effect_Root_01",

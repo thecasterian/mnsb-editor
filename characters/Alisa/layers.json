@@ -3,6 +3,7 @@
     1500,
     3838
   ],
+  "intrinsic_scale": 0.6,
   "layers": [
     {
       "name": "ClippingMask_Root_01",

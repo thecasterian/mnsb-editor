@@ -3,6 +3,7 @@
     1482,
     3170
   ],
+  "intrinsic_scale": 0.75,
   "layers": [
     {
       "name": "Blending01",
