@@ -720,14 +720,71 @@ body {
 }
 .inspector-num:focus { outline: none; border-color: var(--active); }
 .inspector-num:disabled { color: var(--text-muted); cursor: default; opacity: 0.6; }
-.inspector-range { flex: 1; }
+.inspector-range { flex: 1; width: 100%; }
 .inspector-range:disabled { cursor: default; opacity: 0.5; }
-.inspector-value {
-  font-size: 13px;
-  color: var(--text-muted);
-  width: 40px;
+/* Hide the up/down spin buttons so the right side of the box is clear text.
+   The slider next to it already covers the "step up/down" use case. */
+.inspector-scale-num {
+  flex: 0 0 88px;
+  min-width: 0;
   text-align: right;
+  -moz-appearance: textfield;        /* Firefox */
+  appearance: textfield;
 }
+.inspector-scale-num::-webkit-inner-spin-button,
+.inspector-scale-num::-webkit-outer-spin-button {
+  -webkit-appearance: none;          /* Chrome / Safari */
+  appearance: none;
+  margin: 0;
+}
+/* Vertical stack so the tick rail sits flush under the slider, both flexed
+   to fill the row's middle column. */
+.scale-control {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Tick rail: clickable shortcuts at the same percentage offsets as the
+   slider's [0.5, 3.0] range. Position math:
+     pct(v) = (v - 0.5) / 2.5
+     0.5  → 0%      0.75 → 10%   1    → 20%   1.25 → 30%
+     1.5  → 40%     1.75 → 50%   2    → 60%   3    → 100%
+   The slider thumb's center can only travel from `r` to `width - r` of the
+   input element (where `r` ≈ thumb-half-width, ~8px in browser defaults), so
+   the rail is inset by `--tick-inset` on each side to keep the labels under
+   the actual thumb travel range. The 0.5 and 3 endpoints render flush with
+   the inset edges; interior ticks center on their position. */
+.inspector-tickrail {
+  --tick-inset: 8px;
+  position: relative;
+  height: 14px;
+  margin: 0 var(--tick-inset);
+}
+/* Decorative labels — not interactive. All centered on their tick position
+   via translateX(-50%); endpoints (0.5 and 3) sit at the rail's inset edges
+   so their visual centers land where the slider thumb's center actually
+   reaches at min/max. */
+.tick-label {
+  position: absolute;
+  top: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+.tick-label[data-v="0.5"]  { left: 0%;   }
+.tick-label[data-v="0.75"] { left: 10%;  }
+.tick-label[data-v="1"]    { left: 20%;  }
+.tick-label[data-v="1.25"] { left: 30%;  }
+.tick-label[data-v="1.5"]  { left: 40%;  }
+.tick-label[data-v="1.75"] { left: 50%;  }
+.tick-label[data-v="2"]    { left: 60%;  }
+.tick-label[data-v="3"]    { left: 100%; }
 .inspector-zorder {
   display: flex;
   gap: 6px;

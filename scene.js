@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260507d';
+const BUILD_VERSION = '20260509i';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -89,6 +89,12 @@ const TOGGLE_FLAGS = {
 let snapshots    = new Map();
 let placements   = [];
 let selectedSlug = null;
+// character id → intrinsic_scale (the prefab's pre-baked uniform Transform
+// scale: e.g. Ema=0.6, Hanna=0.54, Hiro/Leia/Meruru/Nanoka=0.75). Built once
+// from scene/authors.json's per-character entries. Diced NPCs (Warden, Yuki)
+// have no prefab Transform → 1.0. Used to compose with placement.scale so
+// placement.scale=1.0 means "as the game renders at script_scale=1.0".
+let intrinsicScales = new Map();
 // Lower-cased query for the snapshot library filter. Empty = no filter.
 // Matches against name + character + variant. Updated by the search input.
 let snapshotSearchQuery = '';
@@ -111,6 +117,17 @@ async function readSnapshotsFromIDB() {
 
 function placementBySlug(slug) {
   return placements.find(p => p.slug === slug) || null;
+}
+
+// On-stage size = snap.size × intrinsic_scale × placement.scale. The snapshot
+// PNG is the raw bundle render (no Transform applied), so the prefab's
+// per-character intrinsic scale composes with the user's placement.scale to
+// match what the game would render at script_scale = placement.scale.
+// Falls back to 1.0 for snapshots whose character lookup fails (diced NPCs
+// without a layered layers.json, or characters missing from authors.json).
+function intrinsicScaleFor(snap) {
+  if (!snap) return 1;
+  return intrinsicScales.get(snap.character) ?? 1;
 }
 
 // --- Placement persistence ---
@@ -283,6 +300,12 @@ async function loadStaticData() {
   charsConfig = await charRes.json();
   bgMeta      = await bgRes.json();
   sceneMeta   = await sceneRes.json();
+
+  intrinsicScales = new Map();
+  for (const c of (charsConfig.characters || [])) {
+    const s = Number(c.intrinsic_scale);
+    intrinsicScales.set(c.id, Number.isFinite(s) && s > 0 ? s : 1);
+  }
 
   // Fail-loud validator: every toggle key referenced by the metadata must
   // resolve in TOGGLE_FLAGS. Catches script ↔ data drift at load time
@@ -457,8 +480,9 @@ function dropSnapshotCache(slug) {
 async function renderPlacement(placement, dst) {
   const snap = snapshots.get(placement.slug);
   if (!snap) return;
-  const w = Math.max(1, Math.round(snap.width  * placement.scale));
-  const h = Math.max(1, Math.round(snap.height * placement.scale));
+  const s = intrinsicScaleFor(snap) * placement.scale;
+  const w = Math.max(1, Math.round(snap.width  * s));
+  const h = Math.max(1, Math.round(snap.height * s));
   const sprite = await placementSprite(snap, w, h);
   compositeLinear(dst, sprite, w, h,
                   Math.round(placement.x), Math.round(placement.y));
@@ -1080,19 +1104,20 @@ function relativeTime(iso) {
   return new Date(iso).toLocaleDateString();
 }
 
-// Default position/scale for a freshly-placed snapshot. Anchors the character
-// to the canvas bottom, horizontally centered, scaled to fit ~90% of canvas
-// height — characters are typically taller than 1440 px at native scale, so
-// fitting on add saves the user a scale-down on every placement.
+// Default position/scale for a freshly-placed snapshot. Always lands at
+// placement.scale=1.0 (i.e. "as the game would render at script_scale=1.0",
+// since intrinsic_scale composes in at render time), horizontally centered
+// at on-stage width, with the sprite's top edge at 20% of the canvas height
+// — matches the game's typical VN framing where the head sits in the upper
+// quarter and the body fills the rest.
 function defaultPlacementFor(snap) {
-  const scale = Math.min(1.0, (CANVAS_H * 0.9) / snap.height);
-  const rw = snap.width  * scale;
-  const rh = snap.height * scale;
+  const intrinsic = intrinsicScaleFor(snap);
+  const rw = snap.width * intrinsic;
   return {
-    slug: snap.slug,
-    x:    Math.round((CANVAS_W - rw) / 2),
-    y:    Math.round(CANVAS_H - rh),
-    scale,
+    slug:  snap.slug,
+    x:     Math.round((CANVAS_W - rw) / 2),
+    y:     Math.round(CANVAS_H * 0.2),
+    scale: 1.0,
   };
 }
 
@@ -1366,12 +1391,24 @@ function refreshSnapshotList() {
 // reminder of the inspector's existence and the value layout. When a slug
 // no longer resolves (snapshot deleted in another tab), we fall through to
 // the same "no selection" state.
+// Clamp a number to the slider's [SCALE_MIN, SCALE_MAX] band. Used in two
+// places: when the user types a value into the number input, and when a
+// tick-rail button is clicked. Out-of-band values would still render correctly
+// but would push the slider thumb to its rail end and detach the two controls'
+// displayed values, so we clamp at the input boundary.
+const SCALE_MIN = 0.5;
+const SCALE_MAX = 3.0;
+function clampScale(v) {
+  if (!Number.isFinite(v)) return 1;
+  return Math.min(SCALE_MAX, Math.max(SCALE_MIN, v));
+}
+
 function refreshInspector() {
   const placement = selectedSlug ? placementBySlug(selectedSlug) : null;
   const xEl       = document.getElementById('inspectorX');
   const yEl       = document.getElementById('inspectorY');
   const scaleEl   = document.getElementById('inspectorScale');
-  const scaleVal  = document.getElementById('inspectorScaleValue');
+  const scaleNumEl= document.getElementById('inspectorScaleValue');
   const nameEl    = document.getElementById('inspectorName');
   const toFrontEl = document.getElementById('placementToFront');
   const toBackEl  = document.getElementById('placementToBack');
@@ -1382,20 +1419,20 @@ function refreshInspector() {
     xEl.value              = 0;
     yEl.value              = 0;
     scaleEl.value          = 1;
-    scaleVal.textContent   = '1.00';
-    xEl.disabled = yEl.disabled = scaleEl.disabled = true;
+    scaleNumEl.value       = '1.00';
+    xEl.disabled = yEl.disabled = scaleEl.disabled = scaleNumEl.disabled = true;
     toFrontEl.disabled = toBackEl.disabled = removeEl.disabled = true;
     return;
   }
 
-  xEl.disabled = yEl.disabled = scaleEl.disabled = false;
+  xEl.disabled = yEl.disabled = scaleEl.disabled = scaleNumEl.disabled = false;
   removeEl.disabled = false;
   const snap = snapshots.get(placement.slug);
   nameEl.textContent  = snap ? snap.name : placement.slug;
   xEl.value           = placement.x;
   yEl.value           = placement.y;
   scaleEl.value       = placement.scale;
-  scaleVal.textContent = placement.scale.toFixed(2);
+  scaleNumEl.value    = placement.scale.toFixed(2);
   const z = placementZPosition(placement.slug);
   toFrontEl.disabled = !z.canFront;
   toBackEl.disabled  = !z.canBack;
@@ -1463,8 +1500,9 @@ function refreshPlacementOverlays() {
       // Move to end so DOM stacking matches render order (last = topmost).
       previewContainer.appendChild(el);
     }
-    const w = snap.width  * p.scale * displayRatio;
-    const h = snap.height * p.scale * displayRatio;
+    const s = intrinsicScaleFor(snap) * p.scale;
+    const w = snap.width  * s * displayRatio;
+    const h = snap.height * s * displayRatio;
     el.style.left   = `${p.x * displayRatio}px`;
     el.style.top    = `${p.y * displayRatio}px`;
     el.style.width  = `${w}px`;
@@ -1810,12 +1848,31 @@ function showModal(message) {
   inspectorY.oninput  = (e) => withSelected(p => { p.y = Number(e.target.value) || 0; }, { render: false });
   inspectorX.onchange = () => scheduleRender();
   inspectorY.onchange = () => scheduleRender();
+  const inspectorScaleNum = document.getElementById('inspectorScaleValue');
+  // Slider drag → number input mirrors. Render is deferred until pointer-up
+  // (onchange) so the scale slider stays fluid during continuous drags.
   inspectorScale.oninput = (e) => {
-    const v = Number(e.target.value) || 1;
-    document.getElementById('inspectorScaleValue').textContent = v.toFixed(2);
+    const v = clampScale(Number(e.target.value));
+    inspectorScaleNum.value = v.toFixed(2);
     withSelected(p => { p.scale = v; }, { render: false });
   };
   inspectorScale.onchange = () => scheduleRender();
+  // Number input direct entry. `oninput` updates the slider live as the user
+  // types (so dragging-from-the-spinner feels parallel to the slider drag);
+  // `onchange` clamps and snaps the displayed string on commit (Enter / blur)
+  // and triggers the actual scene render.
+  inspectorScaleNum.oninput = (e) => {
+    const v = clampScale(Number(e.target.value));
+    inspectorScale.value = v;
+    withSelected(p => { p.scale = v; }, { render: false });
+  };
+  inspectorScaleNum.onchange = (e) => {
+    const v = clampScale(Number(e.target.value));
+    e.target.value = v.toFixed(2);
+    inspectorScale.value = v;
+    withSelected(p => { p.scale = v; }, { render: false });
+    scheduleRender();
+  };
   document.getElementById('placementRemove').onclick = () => {
     if (selectedSlug) removePlacement(selectedSlug);
   };

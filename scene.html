@@ -103,11 +103,35 @@
       <label class="inspector-label">Y</label>
       <input class="inspector-num" type="number" id="inspectorY" step="1">
     </div>
-    <div class="inspector-row">
+    <div class="inspector-row inspector-row-scale">
       <label class="inspector-label">Scale</label>
-      <input class="inspector-range" type="range" id="inspectorScale" min="0.1" max="3" step="0.01">
-      <span class="inspector-value" id="inspectorScaleValue">1.00</span>
+      <div class="scale-control">
+        <input class="inspector-range" type="range" id="inspectorScale"
+               min="0.5" max="3" step="0.01" list="scaleTickList">
+        <div class="inspector-tickrail">
+          <span class="tick-label" data-v="0.5">0.5</span>
+          <span class="tick-label" data-v="0.75">0.75</span>
+          <span class="tick-label" data-v="1">1</span>
+          <span class="tick-label" data-v="1.25">1.25</span>
+          <span class="tick-label" data-v="1.5">1.5</span>
+          <span class="tick-label" data-v="1.75">1.75</span>
+          <span class="tick-label" data-v="2">2</span>
+          <span class="tick-label" data-v="3">3</span>
+        </div>
+      </div>
+      <input class="inspector-num inspector-scale-num" type="number"
+             id="inspectorScaleValue" min="0.5" max="3" step="0.01">
     </div>
+    <datalist id="scaleTickList">
+      <option value="0.5"></option>
+      <option value="0.75"></option>
+      <option value="1"></option>
+      <option value="1.25"></option>
+      <option value="1.5"></option>
+      <option value="1.75"></option>
+      <option value="2"></option>
+      <option value="3"></option>
+    </datalist>
     <div class="inspector-zorder">
       <button class="zorder-btn" id="placementToBack" title="Move below other characters">Send to back</button>
       <button class="zorder-btn" id="placementToFront" title="Move above other characters">Bring to front</button>
