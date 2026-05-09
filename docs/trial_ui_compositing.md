@@ -171,9 +171,11 @@ python3 scripts/compose_ui_panel.py TrialChoicePanel_Hiro \
 
 The same compositor handles `AdvChoicePanel` (vertical layout, negative spacing, `UpperLeft` align with `ChildForceExpandWidth=true`) and `DebugChoicePanel` (3-col grid in a scroll view) by following the same `placement` formulas — only `LayoutGroup.kind` switches the math.
 
+`MANOSABA_LOCALE=ko|ja` selects the substitute font face (Noto Serif CJK KR/JP). `MANOSABA_AUTHOR` doesn't apply here — trial buttons don't carry an `AuthorLabel` leaf — but the env-var stack is shared with the AdvMode renderer, see [`adv_ui_compositing.md`](./adv_ui_compositing.md).
+
 ## Things this composite does *not* model
 
-- **Button text** (the choice text inside `Label`) — TextMeshPro at runtime; not a sprite.
+- **Real game font** — the choice text inside `Label` *is* a TextMeshPro leaf and *is* rendered by `compose_ui_panel.py` (using the placeholder string "Choice Text" plus a system Noto Serif CJK stand-in — KR face for the Korean build's Noto Serif KR, JP face as a Mincho stand-in for the Japanese build's Tsukushi Mincho). The real font asset lives outside the UI bundles. At runtime Naninovel replaces the placeholder with the script-supplied label.
 - **Hover / pressed states** — the button prefab carries one Image (`Balloon_Default`); other states (`Balloon_Selected`, `Balloon_Cancel` for the focus ring) are swapped at runtime by the choice handler script.
 - **Scripted choice ordering or filtering** — the Naninovel `@trial` command picks the buttons; we just need a list.
 - **Camera post-processing** — color grading, bloom, exposure compensation; not in any AssetBundle.

@@ -142,11 +142,40 @@ Per-prefab `<PrefabName>.json` schema (drop-in compositing input — mirrors `ch
       }
     }
   ],
-  "root_intrinsic_size": [1099, 318]                   // optional; set when root has non-zero size_delta.
+  "root_intrinsic_size": [1099, 318],                  // optional; set when root has non-zero size_delta.
                                                        // Indicates a *widget* prefab (e.g. ChoiceButton_Trial)
                                                        // whose natural size is what gets laid out under a
                                                        // parent layout group. Screen prefabs (NormalPrinter)
                                                        // omit this — their static layout fills the canvas.
+  "texts": [                                           // optional; TextMeshProUGUI leaves
+    {
+      "go":          "MessageLabel",
+      "group":       "Wrapper",
+      "order":       7,                                // shared counter with `layers` for global z-order
+      "pos":         [573, 1163],                      // top-left on canvas (PIL Y-down)
+      "size":        [1414, 200],                      // RectTransform-resolved rect
+      "pivot":       [0.5, 0.5],                       // Unity Y-up
+
+      "text":        "Message",                        // placeholder; Naninovel overrides at runtime
+      "font_asset_pptr": [2, -4585659588899376959],    // [file_id, path_id] — font lives outside our bundles
+      "font_size":   48.0,
+      "font_weight": 400,                              // TMP FontWeight: 400=Regular, 700=Bold
+      "font_style":  "Normal",                         // FontStyles bitmask, '|'-joined ("Bold|Italic")
+      "h_align":     "Left",                           // 1/2/4/8/16/32 -> Left/Center/Right/Justified/Flush/Geometry
+      "v_align":     "Top",                            // 256/512/1024/2048/4096/8192 ->
+                                                       //   Top/Middle/Bottom/Baseline/Geometry/Capline
+      "margin":      [0, 0, 0, 0],                     // [L, T, R, B]
+      "wrapping":    "Normal",                         // 0..3 -> NoWrap/Normal/PreserveWhitespace/PreserveWhitespaceNoWrap
+      "overflow":    "Overflow",                       // 0..6 -> Overflow/Ellipsis/Masking/Truncate/ScrollRect/Page/Linked
+      "color":       [1, 1, 1, 1],                     // optional; omitted when default white
+      "spacing":     {"character": 0, "word": 0,
+                      "line": 0, "paragraph": 0},      // optional; omitted when all zero
+      "auto_size":   {"min": 16.0, "max": 64.0},       // optional; only when m_enableAutoSizing is set
+      "ruby":        {"vertical_offset": "0.875em",    // optional; only on Naninovel RubyTextPrinter
+                      "size_scale": 0.4,
+                      "add_line_height": false}
+    }
+  ]
 }
 ```
 
@@ -161,6 +190,8 @@ The `placement` field on each `containers[i]` (when the layout kind is unambiguo
 `HorizontalOrVerticalLayoutGroup` (kind that couldn't be specialized to H or V) gets no `placement` field — orientation must be inferred elsewhere or the layout simulated manually.
 
 `HorizontalOrVerticalLayoutGroup` is the parent class of `HorizontalLayoutGroup` and `VerticalLayoutGroup` — the two are byte-identical in serialized typetree form (only the `m_Script` PPtr differs, which references an external Unity assembly we don't load). The script tries to specialize the label using the sibling `ContentSizeFitter` direction (e.g. `vertical_fit=PreferredSize` → `VerticalLayoutGroup`); when that's ambiguous (both axes constrained, or no fitter present), it stays as the parent-class label.
+
+The `texts` array captures every `TextMeshProUGUI` leaf — same `pos` / `size` / `pivot` semantics as `layers` (top-left on canvas in PIL Y-down, RectTransform-resolved rect, Unity Y-up pivot). The `order` field shares its counter with `layers`, so a text-aware compositor can merge `layers + texts` and sort by `order` for true z-order. The placeholder string in `text` is overwritten at runtime by Naninovel — most labels render dynamic content (dialog text, author name, choice labels, credits roll). The `font_asset_pptr` points to a TMP font asset that lives outside the prefab bundle (a `(file_id, path_id)` reference into one of the bundle's externals); to actually rasterize, the renderer needs to either resolve that asset from the game's main data or substitute a TTF/OTF (the game ships Noto Serif KR for the Korean build and Tsukushi Mincho for the Japanese build; see `compose_ui_panel.py` for the open Noto Serif CJK stand-ins). Optional fields (`color`, `spacing`, `auto_size`, `ruby`) are omitted when at default values.
 
 Per-atlas `<AtlasName>/layers.json` schema (sprite-centric — best for browsing or "where is this sprite used"):
 
@@ -188,18 +219,54 @@ Per-atlas `<AtlasName>/layers.json` schema (sprite-centric — best for browsing
 Optional fields, omitted when default: `color: [r,g,b,a]` if `Image.m_Color != (1,1,1,1)`, `material: "<name>"` if `Image.m_Material != null`. These appear on per-prefab layer entries and per-atlas usage entries.
 
 Extraction-time invariants baked into the static tree:
-- **Empty prefabs** (templates with no Image-bearing leaves — e.g. `DebatePrinter`, `AdvChoicePanel`, `ClickThroughPanel`) were skipped, so no JSON exists for them. The static prefab carries no positions for them; their content is filled at runtime.
+- **Empty prefabs** (templates with no Image leaves, no text leaves, *and* no layout-bearing containers — e.g. `ClickThroughPanel`) were skipped, so no JSON exists for them. Prefabs with text-only content (`DebatePrinter`, `SoundTestUI`) or runtime layout containers (`AdvChoicePanel`) were kept — their `layers` array may be empty but `texts` and/or `containers` carry actionable data.
 - **CanvasGroup gating**: any subtree under a GameObject with `CanvasGroup.m_Alpha == 0` is absent (handles NormalPrinter's hidden `Stream` template, etc.).
 - **Root rect convention**: prefab roots' RectTransform fields were treated as canvas-sized regardless of serialized stubs (because at runtime the prefab is parented under a Canvas); children measure against the full canvas.
 - **Sprite deduplication**: each unique sprite appears once in its atlas folder; per-prefab JSONs and per-atlas usage lists both reference the single PNG.
 - **Atlas filtering**: only atlases that at least one extracted prefab references have a folder.
 
-### `scripts/build_backgrounds_meta.py`
+### `scripts/extract_character_meta.py`
 
-Scans `backgrounds/main/` and `backgrounds/stills/` and emits `backgrounds/meta.json` — a project-wide index for the scene editor.
+Extracts per-character metadata into `characters/configuration.json`. Combines two sources:
+
+1. **`AuthorData`** (typetree-readable) from `general-data_assets_all.bundle` — TMP rich-text per character per locale (with `<color=%COLOR%>` placeholder), e.g. `<color=%COLOR%><size=136>桜</size></color><space=4><voffset=-2><size=73>羽</size></voffset>...`.
+2. **`CharactersConfiguration`** (typetree stripped, byte-signature parsed) from `resources.assets` — per-character `nameColor` (RGBA), Japanese `displayName`, asset GUID. The parser anchors on the literal byte sequence `\x0a\x00\x00\x00Characters\x00\x00\x02\x00\x00\x00` (the `Loader.ResourcesPath="Characters"` followed by `providerTypes` count = 2), which appears exactly once per `CharacterMetadata` record.
 
 ```bash
-python3 scripts/build_backgrounds_meta.py [<root>]   # default root: ./backgrounds
+python3 scripts/extract_character_meta.py <resources.assets> <general-data.bundle> [<out.json>]
+```
+
+Output schema:
+```json
+{
+  "source": "...",
+  "locales": {"0": "ja", "1": "en-US", "2": "ko", "3": "zh-Hans", "4": "zh-Hant"},
+  "characters": [
+    {
+      "id":             "Ema",
+      "displayName_ja": "桜羽エマ",
+      "nameColor":      [1.0, 0.572549, 0.705882, 1.0],
+      "nameColor_hex":  "#FF92B4",
+      "asset_guid":     "f5c651f0-c6e7-42b4-bdf0-61d6a24aa585",
+      "tagged_name": {
+        "ja":      "<color=%COLOR%><size=136>桜</size></color><space=4>...",
+        "ko":      "<color=%COLOR%><size=136>사</size></color><space=4>...",
+        "zh-Hans": "<color=%COLOR%><size=136>櫻</size></color>...",
+        "en-US":   ""
+      }
+    }, ...
+  ]
+}
+```
+
+41 characters total: 14 main cast + 13 `Creature*` doppelgangers (each reuses its human form's `nameColor`) + 14 mob/narrator entries (default white).
+
+### `scripts/build_backgrounds_meta.py`
+
+Scans `scene/backgrounds/main/` and `scene/backgrounds/stills/` and emits `scene/backgrounds/meta.json` — the index the scene editor reads to populate its picker.
+
+```bash
+python3 scripts/build_backgrounds_meta.py [<root>]   # default root: ./scene/backgrounds
 ```
 
 Output schema:
@@ -228,6 +295,17 @@ python3 scripts/extract_scene_adv.py <out_root> <bundle> [<bundle> ...]
 
 `scene/adv/meta.json` schema is documented in the script's docstring. Re-runnable; deletes stale PNGs that aren't in the new sprite set.
 
+### `scripts/build_scene_authors.py`
+
+Bakes the slim author metadata the scene editor needs into `scene/authors.json`. Extracts only the three fields `scene.js` reads (`id`, `nameColor_hex`, `tagged_name`) from `characters/configuration.json`. Decouples the editor's deploy data from the offline compositor's full configuration.
+
+```bash
+python3 scripts/build_scene_authors.py [<src>] [<dst>]
+                                       # defaults: ./characters/configuration.json  ./scene/authors.json
+```
+
+Re-run after `extract_character_meta.py` regenerates `characters/configuration.json`.
+
 ## Bundle extraction workflow
 
 ### 1. Probe the bundle
@@ -252,9 +330,9 @@ python3 scripts/extract_diced_atlas.py path/to/Warden_bundle characters/Warden
 
 Background / still (bulk; the extractor is single-bundle, so loop over a directory):
 ```bash
-for f in path/to/mainbackground/*.bundle; do python3 scripts/extract_background.py "$f" backgrounds/main;   done
-for f in path/to/stills/*.bundle;         do python3 scripts/extract_background.py "$f" backgrounds/stills; done
-python3 scripts/build_backgrounds_meta.py     # rebuild backgrounds/meta.json
+for f in path/to/mainbackground/*.bundle; do python3 scripts/extract_background.py "$f" scene/backgrounds/main;   done
+for f in path/to/stills/*.bundle;         do python3 scripts/extract_background.py "$f" scene/backgrounds/stills; done
+python3 scripts/build_backgrounds_meta.py     # rebuild scene/backgrounds/meta.json
 ```
 
 Adv-scene editor UI (4 prefabs only — there is no general UI extractor; the broader `ui/` tree is frozen):
@@ -283,6 +361,45 @@ Re-running `extract_bundle.py` preserves these fields, so curation survives bund
 
 These files are not generated by the extractors — they encode editorial choices about which combinations make sense for the UI.
 
+### 5. Extract character meta (one-shot, before any author-aware UI render)
+
+```bash
+python3 scripts/extract_character_meta.py \
+  /path/to/<game>_Data/resources.assets \
+  /path/to/general-data_assets_all.bundle \
+  characters/configuration.json
+```
+
+Produces a single JSON keyed by character `id` with `nameColor`, Japanese display name, asset GUID, and per-locale TMP rich-text (used by the AuthorLabel). The compositor reads it when `MANOSABA_AUTHOR=<id>` is set; without that env var the compositor falls back to the bundled placeholder string ("Author") so the file is only required for author-aware renders. See "Compositing" below for env-var details.
+
+## Compositing UI panels
+
+`scripts/compose_ui_panel.py` renders a UI prefab + optional widget instances + optional background as a 2560×1440 PNG. Linear-space alpha throughout; converts back to sRGB on save.
+
+```bash
+python3 scripts/compose_ui_panel.py <panel> "<widget1>[,widget2,...]|-" <out.png> [bg.png]
+```
+
+Env-var configuration (all optional):
+
+| variable | default | effect |
+|---|---|---|
+| `MANOSABA_LOCALE` | `ko` | Selects font face: `ko` → Noto Serif CJK KR (matches game's Noto Serif KR), `ja` → Noto Serif CJK JP (Mincho stand-in for Tsukushi Mincho). Also picks which `tagged_name[locale]` to use for author overrides. |
+| `MANOSABA_AUTHOR` | unset | When set to a character `id` from `characters/configuration.json` (e.g. `Ema`), the AuthorLabel text leaf is replaced with that character's per-locale TMP rich-text, with `<color=%COLOR%>` substituted from `nameColor_hex`. Honours stack-semantic `<color>` / `<size>` / `<voffset>` / `<space>` / `<cspace>` tags. |
+
+The text rasterizer uses PIL/freetype + a small TMP rich-text walker. For `Capline` vertical alignment (used by NormalPrinter's AuthorLabel) the cap-top reference blends `OS/2.sTypoAscender` with `hhea.ascender` at a 0.55/0.45 mix — empirically tuned to match the in-game NormalPrinter render; the actual TMP_FontAsset `m_FaceInfo.capLine` isn't shipped in any AssetBundle. See `_render_tagged_text` in `compose_ui_panel.py` for the math.
+
+See `docs/adv_ui_compositing.md` (NormalPrinter walkthrough), `docs/trial_ui_compositing.md` (TrialChoicePanel walkthrough), and `docs/text_shadows.md` (TMP underlay/outline catalog + per-leaf material assignment) for end-to-end recipes.
+
+## Python dependencies
+
+| package | used for |
+|---|---|
+| `UnityPy` | every extractor — reads AssetBundles + `resources.assets` |
+| `Pillow` (PIL) | sprite I/O, text rasterization, font loading via freetype |
+| `numpy` | linear-space pixel buffers, sprite resize, alpha compositing |
+| `fontTools` | `compose_ui_panel.py` only — reads `OS/2.sTypoAscender` from font files for Capline alignment; gracefully degrades to a 0.85 default if missing or the font can't be parsed |
+
 ## Project structure
 
 - `characters/{Character}/` — Layered character output. Contains `layers.json`, `compositions.json`, `default.json`, and one PNG per layer.
@@ -290,10 +407,13 @@ These files are not generated by the extractors — they encode editorial choice
 - `characters/{Character}/compositions.json` — Expression presets (facial layer sets). Hand-authored.
 - `characters/{Character}/default.json` — Default enabled layers on load. Hand-authored.
 - `characters/{NPC}/` — Diced atlas output. Contains `meta.json` and one PNG per pose. Generated by `extract_diced_atlas.py`.
-- `backgrounds/main/{Background_NNN_MMM}.png` — Numbered scene backgrounds. Generated by `extract_background.py`.
-- `backgrounds/stills/{Still_NNN_MMM}.png` — Numbered story stills / event CGs. Generated by `extract_background.py`.
-- `backgrounds/meta.json` — Project-wide index of all backgrounds + stills + utility primitives. Generated by `build_backgrounds_meta.py`.
+- `scene/backgrounds/main/{Background_NNN_MMM}.png` — Numbered scene backgrounds. Generated by `extract_background.py`.
+- `scene/backgrounds/stills/{Still_NNN_MMM}.png` — Numbered story stills / event CGs. Generated by `extract_background.py`.
+- `scene/backgrounds/meta.json` — Index of all backgrounds + stills + utility primitives, read by the scene editor's bg picker. Generated by `build_backgrounds_meta.py`.
 - `scene/adv/meta.json`, `scene/adv/<sprite>.png` — Self-contained Adv-mode dialog frame data for the scene editor: one consolidated layout JSON (4 prefabs filtered to resting-frame leaves) plus the deduplicated sprite PNGs. Generated by `extract_scene_adv.py` directly from the source UI bundles (`general-sprites` + `naninovel-textprinters` + `naninovel-ui`).
+- `scene/authors.json` — Slim per-character metadata used by the scene editor's AuthorLabel: only `id`, `nameColor_hex`, and `tagged_name`. Generated by `build_scene_authors.py` from `characters/configuration.json`.
+- `characters/configuration.json` — Per-character metadata: `nameColor`, Japanese `displayName`, asset GUID, and per-locale TMP rich-text for the AuthorLabel. Generated by `extract_character_meta.py` from `resources.assets` + `general-data_assets_all.bundle`.
+- `characters/font_materials.json` — TMP material variants for `SourceHanSerifSC` (9 entries: `Atlas Material`, `Font Material`, `Shadow1..6`, `Outline_Shadow`) with the `_Underlay*` / `_Outline*` shader properties. Used by `compose_ui_panel.py` to apply per-leaf text shadow. See [`docs/text_shadows.md`](./docs/text_shadows.md). Extracted from `general-fonts-sourcehanserifsc_assets_all.bundle`.
 - `ui/<AtlasName>/<sprite>.png`, `ui/<AtlasName>/layers.json` — Per-atlas folders: deduplicated sprite PNGs plus sprite-centric `layers.json` (each sprite's `usages` list shows every prefab that places it). **Frozen artifact** — no script in this repo regenerates these files; recover the original `extract_ui_layers.py` from git history if you need to re-extract.
 - `ui/<PrefabName>.json`, `ui/meta.json` — Per-prefab compositing inputs at the top level (drop-in `layers.json`-style format with `file` paths pointing into the atlas folders) plus a top-level index of all atlases and prefabs. **Frozen artifact** (same caveat as above). Read by `compose_ui_panel.py`.
 - `_ref/`, `characters/{Character}/crop/`, `_backup/` — Artifacts of the previous sprite-sheet pipeline. Not used by the current extractors or renderer; kept for reference.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scan backgrounds/{main,stills}/ and emit backgrounds/meta.json.
+"""Scan scene/backgrounds/{main,stills}/ and emit scene/backgrounds/meta.json.
 
 The scene editor reads this file to populate its picker without having to
 do a directory walk in the browser.
@@ -21,7 +21,7 @@ Numeric ids sort naturally (`"001_001"` < `"010_001"`) without a custom
 comparator because the components are zero-padded.
 
 Usage: python3 scripts/build_backgrounds_meta.py [<root>]
-       (default root: ./backgrounds)
+       (default root: ./scene/backgrounds)
 """
 from __future__ import annotations
 
@@ -85,7 +85,7 @@ def build(root: Path) -> dict:
 
 
 if __name__ == "__main__":
-    root = Path(sys.argv[1] if len(sys.argv) > 1 else "backgrounds")
+    root = Path(sys.argv[1] if len(sys.argv) > 1 else "scene/backgrounds")
     if not root.is_dir():
         raise SystemExit(f"{root}: not a directory")
     meta = build(root)
