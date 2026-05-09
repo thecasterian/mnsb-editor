@@ -15,7 +15,7 @@ const CANVAS_W = 2560;
 const CANVAS_H = 1440;
 
 // All editor assets live under scene/. Three sub-roots:
-//   scene/adv/         — UI sprites + meta.json baked by build_scene_adv.py.
+//   scene/adv/         — UI sprites + meta.json baked by extract_scene_adv.py.
 //                         meta.json is one consolidated layout file with the
 //                         four prefabs (NormalPrinter / AutoToggle /
 //                         ControlPanel / WitchBookButtonUI), pre-filtered to
@@ -70,7 +70,7 @@ let showAuthorPlate = true;
 
 // String → live-state lookup. The bake script writes these names into
 // meta.json; this table is the single point of resolution at render time.
-// Adding a new toggle = add an entry here AND in PREFABS in build_scene_adv.py.
+// Adding a new toggle = add an entry here AND in PREFABS in extract_scene_adv.py.
 const TOGGLE_FLAGS = {
   showAutoToggle:  () => showAutoToggle,
   showMenuButton:  () => showMenuButton,
@@ -967,7 +967,7 @@ function isFlagOn(flagName) {
 
 // Apply a prefab's runtime gates and merge-sort its layers + texts on shared
 // `order`. Static filters (`dropLayers` / `keepGroupPrefix`) were already
-// applied at bake time by build_scene_adv.py; this only handles per-render
+// applied at bake time by extract_scene_adv.py; this only handles per-render
 // runtime toggles.
 function selectPrefabItems(prefab) {
   const layers = prefab.layers || [];
