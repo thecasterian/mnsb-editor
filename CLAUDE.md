@@ -16,7 +16,7 @@ Decision rule:
 - **Has GameObject + Transform + SpriteRenderer + Sprite** → layered character rig, use `extract_bundle.py`.
 - **Has a single MonoBehaviour with a `sprites` list (Naninovel DicedSpriteAtlas) and no Transform tree** → NPC/creature, use `extract_diced_atlas.py`.
 - **Has only one Texture2D + one Sprite (no Transform tree, no MonoBehaviour)** → full-frame scene asset (background / still), use `extract_background.py`.
-- **Has SpriteAtlas objects with no Transform tree, OR has GameObject + RectTransform + Image MonoBehaviours** → UI bundles. Use `extract_ui_layers.py` and pass at least one of each kind together (one SpriteAtlas-bearing source bundle + one or more prefab bundles).
+- **Has SpriteAtlas objects with no Transform tree, OR has GameObject + RectTransform + Image MonoBehaviours** → UI bundles. There is no general UI extractor; the only in-tree script targeting UI bundles is `extract_scene_adv.py`, which is scoped to the four Adv-scene editor prefabs. The broader `ui/` tree in this repo is a frozen artifact (see "Static `ui/` tree" below).
 
 ### `scripts/extract_bundle.py`
 
@@ -71,17 +71,11 @@ Outputs:
 
 Re-running on an existing PNG is a no-op (the file is preserved as-is). The script does not write `meta.json`; that is built separately by `build_backgrounds_meta.py` once all bundles are extracted.
 
-### `scripts/extract_ui_layers.py`
+### Static `ui/` tree
 
-Fused UI extractor: combines sprite-atlas extraction + RectTransform layout walking into a single pass. Emits two complementary views of the same data — atlas-keyed sprite folders (deduplicated PNGs + sprite-centric `layers.json` listing every prefab usage) and per-prefab layout files at the top level (drop-in compositor input, references PNGs by relative path).
+The `ui/` tree (per-prefab JSON layouts + per-atlas sprite folders) is a frozen artifact — no script in the repo regenerates it. It was originally produced by a now-removed `extract_ui_layers.py` UI extractor; if you need to re-extract from updated bundles, recover that script from git history. `compose_ui_panel.py` and the schema below remain the contract for any consumer that reads these files.
 
-```bash
-python3 scripts/extract_ui_layers.py <out_dir> <bundle> [<bundle> ...]
-```
-
-Bundles are auto-classified: any bundle containing `SpriteAtlas` objects is treated as a sprite source; the rest are prefab bundles. Pass `general-sprites_assets_all.bundle` plus one or more UI prefab bundles in any order.
-
-Output layout:
+Layout:
 
 ```
 out_dir/
@@ -193,12 +187,12 @@ Per-atlas `<AtlasName>/layers.json` schema (sprite-centric — best for browsing
 
 Optional fields, omitted when default: `color: [r,g,b,a]` if `Image.m_Color != (1,1,1,1)`, `material: "<name>"` if `Image.m_Material != null`. These appear on per-prefab layer entries and per-atlas usage entries.
 
-Behaviours:
-- **Empty prefabs** (templates with no Image-bearing leaves — e.g. `DebatePrinter`, `AdvChoicePanel`, `ClickThroughPanel`) are skipped: no JSON is written. The static prefab carries no positions for them; their content is filled at runtime.
-- **CanvasGroup gating**: any subtree under a GameObject with `CanvasGroup.m_Alpha == 0` is skipped (handles NormalPrinter's hidden `Stream` template, etc.).
-- **Root rect convention**: prefab roots' RectTransform fields are typically stubs because the prefab is parented under a Canvas at runtime. The walker treats the root's effective rect as the canvas regardless of serialized values; children measure against the full canvas.
-- **Sprite deduplication**: each unique sprite is saved once into its atlas folder, regardless of how many prefabs reference it. Per-prefab JSONs and per-atlas usage lists both reference the single PNG.
-- **Atlas filtering**: only atlases referenced by at least one extracted prefab get a folder. Sprites the prefabs don't actually use stay out of the output.
+Extraction-time invariants baked into the static tree:
+- **Empty prefabs** (templates with no Image-bearing leaves — e.g. `DebatePrinter`, `AdvChoicePanel`, `ClickThroughPanel`) were skipped, so no JSON exists for them. The static prefab carries no positions for them; their content is filled at runtime.
+- **CanvasGroup gating**: any subtree under a GameObject with `CanvasGroup.m_Alpha == 0` is absent (handles NormalPrinter's hidden `Stream` template, etc.).
+- **Root rect convention**: prefab roots' RectTransform fields were treated as canvas-sized regardless of serialized stubs (because at runtime the prefab is parented under a Canvas); children measure against the full canvas.
+- **Sprite deduplication**: each unique sprite appears once in its atlas folder; per-prefab JSONs and per-atlas usage lists both reference the single PNG.
+- **Atlas filtering**: only atlases that at least one extracted prefab references have a folder.
 
 ### `scripts/build_backgrounds_meta.py`
 
@@ -218,6 +212,21 @@ Output schema:
 ```
 
 `utility` collects the non-numbered helpers shipped alongside numbered backgrounds (`Grid_001`, `Grid_002`, `SolidColor`, `Transparent`) so the scene editor can offer them as primitives without polluting the numbered list. Each utility entry carries a `from` field naming the directory it came from (currently always `main`). Numeric ids are zero-padded, so lexical sort yields the correct order.
+
+### `scripts/extract_scene_adv.py`
+
+Self-contained extractor for the scene editor's Adv-mode dialog frame: walks four prefabs (`NormalPrinter`, `AutoToggle`, `ControlPanel`, `WitchBookButtonUI`) straight out of the source AssetBundles, applies the resting-frame filters (`dropLayers` / `keepGroupPrefix`) offline, saves referenced sprite PNGs with flat basenames, and emits one consolidated `scene/adv/meta.json` so `scene.js` can fetch one layout file and render. Carries its own bundle walker + sprite reconstruction (no dependency on the static `ui/` tree).
+
+```bash
+python3 scripts/extract_scene_adv.py <out_root> <bundle> [<bundle> ...]
+# bundles auto-classify (SpriteAtlas-bearing → sprite source; rest → prefab source).
+# Three bundles cover the four target prefabs:
+#   general-sprites_assets_all.bundle           (sprite source)
+#   naninovel-textprinters_assets_all.bundle    (NormalPrinter)
+#   naninovel-ui_assets_all.bundle              (AutoToggle, ControlPanel, WitchBookButtonUI)
+```
+
+`scene/adv/meta.json` schema is documented in the script's docstring. Re-runnable; deletes stale PNGs that aren't in the new sprite set.
 
 ## Bundle extraction workflow
 
@@ -248,13 +257,11 @@ for f in path/to/stills/*.bundle;         do python3 scripts/extract_background.
 python3 scripts/build_backgrounds_meta.py     # rebuild backgrounds/meta.json
 ```
 
-UI atlases + layouts (pass general-sprites as the sprite source plus every UI prefab bundle in one shot):
+Adv-scene editor UI (4 prefabs only — there is no general UI extractor; the broader `ui/` tree is frozen):
 ```bash
-python3 scripts/extract_ui_layers.py ui \
+python3 scripts/extract_scene_adv.py scene/adv \
   path/to/general-sprites_assets_all.bundle \
   path/to/naninovel-textprinters_assets_all.bundle \
-  path/to/naninovel-choicehandlers_assets_all.bundle \
-  path/to/general-choicebuttons_assets_all.bundle \
   path/to/naninovel-ui_assets_all.bundle
 ```
 
@@ -286,8 +293,9 @@ These files are not generated by the extractors — they encode editorial choice
 - `backgrounds/main/{Background_NNN_MMM}.png` — Numbered scene backgrounds. Generated by `extract_background.py`.
 - `backgrounds/stills/{Still_NNN_MMM}.png` — Numbered story stills / event CGs. Generated by `extract_background.py`.
 - `backgrounds/meta.json` — Project-wide index of all backgrounds + stills + utility primitives. Generated by `build_backgrounds_meta.py`.
-- `ui/<AtlasName>/<sprite>.png`, `ui/<AtlasName>/layers.json` — Per-atlas folders: deduplicated sprite PNGs plus sprite-centric `layers.json` (each sprite's `usages` list shows every prefab that places it). Generated by `extract_ui_layers.py`.
-- `ui/<PrefabName>.json`, `ui/meta.json` — Per-prefab compositing inputs at the top level (drop-in `layers.json`-style format with `file` paths pointing into the atlas folders) plus a top-level index of all atlases and prefabs. Generated alongside the atlas folders by the same script.
+- `scene/adv/meta.json`, `scene/adv/<sprite>.png` — Self-contained Adv-mode dialog frame data for the scene editor: one consolidated layout JSON (4 prefabs filtered to resting-frame leaves) plus the deduplicated sprite PNGs. Generated by `extract_scene_adv.py` directly from the source UI bundles (`general-sprites` + `naninovel-textprinters` + `naninovel-ui`).
+- `ui/<AtlasName>/<sprite>.png`, `ui/<AtlasName>/layers.json` — Per-atlas folders: deduplicated sprite PNGs plus sprite-centric `layers.json` (each sprite's `usages` list shows every prefab that places it). **Frozen artifact** — no script in this repo regenerates these files; recover the original `extract_ui_layers.py` from git history if you need to re-extract.
+- `ui/<PrefabName>.json`, `ui/meta.json` — Per-prefab compositing inputs at the top level (drop-in `layers.json`-style format with `file` paths pointing into the atlas folders) plus a top-level index of all atlases and prefabs. **Frozen artifact** (same caveat as above). Read by `compose_ui_panel.py`.
 - `_ref/`, `characters/{Character}/crop/`, `_backup/` — Artifacts of the previous sprite-sheet pipeline. Not used by the current extractors or renderer; kept for reference.
 
 ## Frontend (`index.html` + `styles.css` + `app.js`)

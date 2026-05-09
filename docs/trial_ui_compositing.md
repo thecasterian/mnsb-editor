@@ -27,7 +27,7 @@ Both `TrialChoicePanel_Hiro` and `TrialChoicePanel_Ema` share the same structure
 
 ### Atlas-trim padding (subtle but load-bearing)
 
-`ChoicePortrait_Hiro.png` is **1090×1440** on disk, but the visible witch occupies only x ∈ [299, 1089] inside it — the left **299 px is fully transparent**. This is intentional: Unity's `SpriteAtlas` packer strips empty margins (`m_RD.textureRectOffset.x = 299.08`), and `extract_ui_layers.py` re-pads the sprite back to the sprite's full `m_Rect` size at extraction time so it aligns 1:1 with the layer's RectTransform-derived `size`.
+`ChoicePortrait_Hiro.png` is **1090×1440** on disk, but the visible witch occupies only x ∈ [299, 1089] inside it — the left **299 px is fully transparent**. This is intentional: Unity's `SpriteAtlas` packer strips empty margins (`m_RD.textureRectOffset.x = 299.08`), and the original UI extractor re-padded the sprite back to its full `m_Rect` size at extraction time so it aligns 1:1 with the layer's RectTransform-derived `size`. (`extract_scene_adv.py` carries the same `_padded_sprite_image` logic for the four scene-editor prefabs it handles.)
 
 Without this padding the sprite would be 791×1440, and a compositor that resizes-to-fit would horizontally stretch the witch by 38% to fill the 1090-wide rect — visually wrong because Unity's actual rendering at runtime offsets the trimmed texture inside the rect rather than stretching it. The padded extraction matches Unity's runtime behavior pixel-for-pixel.
 
