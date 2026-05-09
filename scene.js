@@ -46,7 +46,8 @@ const AUTHOR_ORDER = [
 const DEFAULT_AUTHOR = "Sherry";
 
 // --- App state ---
-let locale = 'ko';                  // 'ko' | 'ja'
+const LOCALES = new Set(['ko', 'ja', 'zh-Hans', 'zh-Hant']);
+let locale = 'ko';                  // one of LOCALES
 let messageText = '';
 let authorId = '';                  // resolved to the first available entry on init
 let bgPath = null;                  // null = solid black
@@ -223,7 +224,7 @@ function loadSceneConfig({ render = true } = {}) {
   }
   if (!data || data.version !== SCENE_CONFIG_VERSION) return;
 
-  if (data.locale === 'ko' || data.locale === 'ja') {
+  if (LOCALES.has(data.locale)) {
     if (data.locale !== locale) {
       locale = data.locale;
       for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
@@ -550,10 +551,20 @@ async function renderLayer(layer, dst) {
 // serif tone. Both load via Google Fonts. Glyph metrics may differ slightly
 // from the in-game font (especially Japanese), but rect anchor points are
 // exact, matching compose_ui_panel.py's substitution policy.
-
+//
+// Chinese: the game ships only one Chinese font — Source Han Serif SC
+// (general-fonts-sourcehanserifsc_assets_all.bundle) — and uses it for both
+// zh-Hans and zh-Hant. Noto Serif SC is the same typeface (Adobe + Google
+// jointly developed Source Han Serif; Google rebrands it as Noto Serif), so
+// we use it as the primary for both Chinese locales. Shared codepoints will
+// render with Mainland glyph forms in zh-Hant text — matching what the game
+// itself displays. The two locales then differ only by source-string
+// character variants (e.g. 樱 vs 櫻), not by font glyph forms.
 const FONT_FAMILY = {
-  ko: '"Noto Serif KR", "Noto Serif JP", "Noto Serif CJK KR", "Noto Serif CJK JP", serif',
-  ja: '"Noto Serif JP", "Noto Serif KR", "Noto Serif CJK JP", "Noto Serif CJK KR", serif',
+  ko:        '"Noto Serif KR", "Noto Serif JP", "Noto Serif CJK KR", "Noto Serif CJK JP", serif',
+  ja:        '"Noto Serif JP", "Noto Serif KR", "Noto Serif CJK JP", "Noto Serif CJK KR", serif',
+  'zh-Hans': '"Noto Serif SC", "Noto Serif CJK SC", "Noto Serif JP", serif',
+  'zh-Hant': '"Noto Serif SC", "Noto Serif CJK SC", "Noto Serif JP", serif',
 };
 
 // Bump the requested weight one CSS step. The game ships Tsukushi Mincho
@@ -574,7 +585,7 @@ function fontString(size, weight, italic) {
 async function ensureFontsLoaded() {
   if (!document.fonts) return;
   const variants = [];
-  for (const fam of ['Noto Serif KR', 'Noto Serif JP']) {
+  for (const fam of ['Noto Serif KR', 'Noto Serif JP', 'Noto Serif SC']) {
     for (const sz of [48, 136]) {
       // 500 covers the +100 bump from the default 400 prefab weight; 800
       // covers the bump from the rare 700 case. Both must also appear in the
@@ -595,45 +606,38 @@ const _MEAS_CTX = (() => {
   return c.getContext('2d');
 })();
 
-// Stand-in for TMP's per-material underlay (drop shadow / halo). The real
-// in-game MessageLabel and AuthorLabel both use `Shadow1` — a soft black halo
-// behind every glyph that lifts the text off arbitrary backgrounds. Rather
-// than emulate the full SDF-shader pipeline (see docs/text_shadows.md), we
-// lean on Canvas2D's built-in `shadowBlur`, which rasterizes a Gaussian
-// blurred drop shadow behind any fillText call in the same pass.
-// Applied to all narrative text leaves (MessageLabel + AuthorLabel); other UI
-// text is unconfirmed. Neon-glow halo: centered on the glyph (no offset), soft
-// black at high alpha. Visually evokes a TMP Shadow1-style underlay.
-const TEXT_SHADOW_COLOR  = 'rgba(0, 0, 0, 1)';
-// Em-relative blur — TMP's `_UnderlaySoftness` is a normalized 0..1 input
-// scaled by the glyph em, not by an absolute pixel count. We reproduce that:
-// blur in pixels = font_size * RATIO.
+// Stand-in for TMP's per-material underlay (drop shadow / halo). Two distinct
+// looks per leaf, both via Canvas2D's `shadowColor` / `shadowBlur` /
+// `shadowOffset*` API rather than the full SDF-shader pipeline (see
+// docs/text_shadows.md):
 //
-// Per-leaf ratios because each label uses a different Shadow material in-game:
-//   - MessageLabel uses `Shadow1` (Softness=1.0, big soft halo) → 6/48 anchor
-//     tuned against an in-game capture at 48 px CJK glyphs.
-//   - AuthorLabel uses one of the tighter variants (Shadow2/6, Softness=0.05–0.10
-//     in-game) — the Addressables catalog isn't shipped, so we can't pin down
-//     which one. Half of MessageLabel's ratio is a starting estimate; tune
-//     against an in-game capture if it still reads off.
+//   - MessageLabel → Shadow1-style: soft black halo, centered (no offset),
+//     blur ≈ 6/48 of font size, stacked across N passes to deepen.
+//   - AuthorLabel → Shadow2/6-style: hard, asymmetric drop. No blur, no
+//     X offset, ~1-2 px downward Y offset. Visible only as a thin black
+//     hairline on the bottom edge of each glyph stroke.
 //
-// Each glyph carries its own halo extent rather than inheriting the leaf's
-// largest size — important for rich-text where sz=73 sub-glyphs and sz=136
-// main glyphs coexist in AuthorLabel.
+// Each glyph carries its own halo/offset extent rather than inheriting the
+// leaf's largest size — important for rich-text where sz=73 sub-glyphs and
+// sz=136 main glyphs coexist in AuthorLabel.
+const TEXT_SHADOW_COLOR = 'rgba(0, 0, 0, 1)';
+// MessageLabel: em-relative blur — TMP's `_UnderlaySoftness` is a normalized
+// 0..1 input scaled by the glyph em, not absolute pixels.
 const TEXT_SHADOW_BLUR_RATIO_MESSAGE = 6 / 48;
-const TEXT_SHADOW_BLUR_RATIO_AUTHOR  = 3 / 48;
-// AuthorLabel shadow is off by default — the in-game render uses a tighter
-// Shadow variant (Shadow2/6, Softness=0.05–0.10) than what we emulate, and
-// even at half the MessageLabel ratio the Canvas2D approximation reads off.
-// Flip to `true` to re-enable the AuthorLabel halo with the ratio above.
-const AUTHOR_SHADOW_ENABLED = false;
+// AuthorLabel: zero blur (hard edge) + downward Y offset. 1.5/136 lands at
+// 1.5 px at sz=136 main glyphs and ~0.8 px at sz=73 ruby glyphs — both in
+// the "1-2 pixel only on down side" range the in-game capture shows.
+const TEXT_SHADOW_BLUR_RATIO_AUTHOR     = 0;
+const TEXT_SHADOW_OFFSET_Y_RATIO_AUTHOR = 1.5 / 136;
+const AUTHOR_SHADOW_ENABLED = true;
 // Canvas2D's shadowBlur spreads the source alpha across the blur radius, so
 // peak halo opacity ends up much lower than the source color's alpha. Stacking
-// N fillText passes with the shadow enabled multiplies halo density (each
-// pass adds another shadow layer onto the canvas) without widening the
-// spread — the alternative would be a much darker color, which then bands at
-// the glyph edge. Tune passes for intensity, ratio for spread.
-const TEXT_SHADOW_PASSES = 3;
+// N passes with the shadow enabled multiplies halo density (each pass adds
+// another shadow layer) without widening the spread. This trick only helps
+// halos — hard-edged offset shadows (AuthorLabel) paint the same silhouette
+// at the same place every pass, so 1 pass is enough.
+const TEXT_SHADOW_PASSES_MESSAGE = 3;
+const TEXT_SHADOW_PASSES_AUTHOR  = 1;
 
 function fillStyle(color) {
   const r = Math.round(color[0] * 255);
@@ -684,22 +688,24 @@ function renderPlainText(rec, dst, overrideText = null) {
     firstBaseline = ry + fbAsc;
   }
 
-  // MessageLabel + AuthorLabel get a TMP-Shadow1-style halo via Canvas2D's
-  // shadowBlur, sized em-relative to the leaf's font. Per-leaf ratio (see the
-  // ratio constants) — AuthorLabel uses a tighter halo than MessageLabel.
-  // The halo extends ~2× shadowBlur beyond the glyph footprint, so the bbox
-  // grows; other leaves keep the slim 4 px AA pad.
-  const useShadow = rec.go === 'MessageLabel'
-    || (AUTHOR_SHADOW_ENABLED && rec.go === 'AuthorLabel');
-  const blurRatio = rec.go === 'AuthorLabel'
-    ? TEXT_SHADOW_BLUR_RATIO_AUTHOR
-    : TEXT_SHADOW_BLUR_RATIO_MESSAGE;
-  const shadowBlur = fontSize * blurRatio;
+  // MessageLabel: soft halo (Shadow1-style). AuthorLabel: hard asymmetric
+  // drop (Shadow2/6-style), 1-2 px down only. Per-leaf ratio + passes.
+  // Symmetric pad sized to fit whichever footprint extension is largest
+  // (halo radius for MessageLabel, downward offset for AuthorLabel).
+  const isAuthor   = rec.go === 'AuthorLabel';
+  const useShadow  = rec.go === 'MessageLabel'
+    || (AUTHOR_SHADOW_ENABLED && isAuthor);
+  const blurRatio  = isAuthor ? TEXT_SHADOW_BLUR_RATIO_AUTHOR
+                              : TEXT_SHADOW_BLUR_RATIO_MESSAGE;
+  const shadowBlur    = fontSize * blurRatio;
+  const shadowOffsetY = isAuthor ? fontSize * TEXT_SHADOW_OFFSET_Y_RATIO_AUTHOR : 0;
   let bx;
   if (textAlign === 'center')     bx = ax - maxW / 2;
   else if (textAlign === 'right') bx = ax - maxW;
   else                            bx = ax;
-  const pad = useShadow ? Math.max(4, Math.ceil(shadowBlur * 2)) : 4;
+  const pad = useShadow
+    ? Math.max(4, Math.ceil(shadowBlur * 2 + shadowOffsetY))
+    : 4;
   const bbox = {
     x: Math.floor(bx - pad),
     y: Math.floor(firstBaseline - fbAsc - pad),
@@ -719,9 +725,11 @@ function renderPlainText(rec, dst, overrideText = null) {
     ctx.shadowColor   = TEXT_SHADOW_COLOR;
     ctx.shadowBlur    = shadowBlur;
     ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
+    ctx.shadowOffsetY = shadowOffsetY;
   }
-  const passes = useShadow ? TEXT_SHADOW_PASSES : 1;
+  const passes = !useShadow ? 1
+    : isAuthor ? TEXT_SHADOW_PASSES_AUTHOR
+              : TEXT_SHADOW_PASSES_MESSAGE;
   for (let pass = 0; pass < passes; pass++) {
     for (let i = 0; i < lines.length; i++) {
       ctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lineHeight);
@@ -883,20 +891,20 @@ function renderRichText(rec, dst, tagged, baseColorHex) {
   else if (v === 'Bottom' || v === 'Baseline')  yBaseline = ry + rh - typoDesc;
   else                                          yBaseline = ry + typoAsc;
 
-  // AuthorLabel-equivalent rich-text (the only caller today) gets a tighter
-  // halo than MessageLabel — em-relative blur per glyph (so a sz=73 ruby char
-  // gets a tighter halo than a sz=136 main char), pad grows to fit the largest
-  // blur in the leaf, glyph loop runs TEXT_SHADOW_PASSES times to deepen the
-  // halo.
+  // AuthorLabel-equivalent rich-text (the only caller today): hard asymmetric
+  // drop shadow, no blur, ~1-2 px downward offset per glyph (em-relative so
+  // sz=73 ruby glyphs get ~1 px and sz=136 main glyphs get ~1.5 px). Pad grows
+  // symmetrically to cover the largest offset in the leaf. Single pass —
+  // stacking hard-edged offsets at the same position has no visual effect.
   const useShadow = AUTHOR_SHADOW_ENABLED && rec.go === 'AuthorLabel';
-  let maxBlur = 0;
+  let maxOffsetY = 0;
   if (useShadow) {
     for (const g of glyphs) {
-      const b = g.size * TEXT_SHADOW_BLUR_RATIO_AUTHOR;
-      if (b > maxBlur) maxBlur = b;
+      const dy = g.size * TEXT_SHADOW_OFFSET_Y_RATIO_AUTHOR;
+      if (dy > maxOffsetY) maxOffsetY = dy;
     }
   }
-  const pad = useShadow ? Math.max(4, Math.ceil(maxBlur * 2)) : 4;
+  const pad = useShadow ? Math.max(4, Math.ceil(maxOffsetY)) : 4;
   const imgW = Math.ceil(textW + pad * 2);
   const imgH = Math.ceil(visibleH + pad * 2);
   if (imgW <= 0 || imgH <= 0) return;
@@ -908,16 +916,16 @@ function renderRichText(rec, dst, tagged, baseColorHex) {
   ctx.textAlign = 'left';
   if (useShadow) {
     ctx.shadowColor   = TEXT_SHADOW_COLOR;
+    ctx.shadowBlur    = 0;
     ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
   }
   const baselineInImg = capTop + pad;
-  const passes = useShadow ? TEXT_SHADOW_PASSES : 1;
+  const passes = useShadow ? TEXT_SHADOW_PASSES_AUTHOR : 1;
   for (let pass = 0; pass < passes; pass++) {
     for (const g of glyphs) {
       ctx.font = g.fontStr;
       ctx.fillStyle = fillStyle(g.color);
-      if (useShadow) ctx.shadowBlur = g.size * TEXT_SHADOW_BLUR_RATIO_AUTHOR;
+      if (useShadow) ctx.shadowOffsetY = g.size * TEXT_SHADOW_OFFSET_Y_RATIO_AUTHOR;
       ctx.fillText(g.ch, g.x + pad, baselineInImg - g.voff);
     }
   }
