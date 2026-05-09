@@ -1,0 +1,1478 @@
+{
+  "canvas_size": [
+    2560,
+    1440
+  ],
+  "prefabs": [
+    {
+      "name": "ChoiceButton_Trial",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 1,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@Approval",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@Approval",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Agreement@Ja",
+          "file": "Agreement_Ja.png",
+          "locale_variants": {
+            "Ja": "Agreement_Ja.png",
+            "Ko": "Agreement_Ko.png",
+            "ZhHans": "Agreement_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "size": [
+            199,
+            166
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@Cancel",
+      "canvas_size": [
+        767,
+        229
+      ],
+      "root_intrinsic_size": [
+        767,
+        229
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Cancel",
+          "file": "Balloon_Cancel.png",
+          "go": "ChoiceButton_Trial@Cancel",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            767,
+            229
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 1,
+          "pos": [
+            -57,
+            56
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicAnAn",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicAnAn",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Blue@Ja",
+          "file": "Magic_Blue_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Blue_Ja.png",
+            "Ko": "Magic_Blue_Ko.png",
+            "ZhHans": "Magic_Blue_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicCoco",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicCoco",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Orange@Ja",
+          "file": "Magic_Orange_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Orange_Ja.png",
+            "Ko": "Magic_Orange_Ko.png",
+            "ZhHans": "Magic_Orange_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicEma",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicEma",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Pink@Ja",
+          "file": "Magic_Pink_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Pink_Ja.png",
+            "Ko": "Magic_Pink_Ko.png",
+            "ZhHans": "Magic_Pink_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicLeia",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicLeia",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Yellow@Ja",
+          "file": "Magic_Yellow_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Yellow_Ja.png",
+            "Ko": "Magic_Yellow_Ko.png",
+            "ZhHans": "Magic_Yellow_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicMargo",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicMargo",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Purple@Ja",
+          "file": "Magic_Purple_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Purple_Ja.png",
+            "Ko": "Magic_Purple_Ko.png",
+            "ZhHans": "Magic_Purple_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@MagicNanoka",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@MagicNanoka",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Magic_Gray@Ja",
+          "file": "Magic_Gray_Ja.png",
+          "locale_variants": {
+            "Ja": "Magic_Gray_Ja.png",
+            "Ko": "Magic_Gray_Ko.png",
+            "ZhHans": "Magic_Gray_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -47
+          ],
+          "size": [
+            199,
+            172
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@Objection",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@Objection",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Objection@Ja",
+          "file": "Objection_Ja.png",
+          "locale_variants": {
+            "Ja": "Objection_Ja.png",
+            "Ko": "Objection_Ko.png",
+            "ZhHans": "Objection_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "size": [
+            199,
+            166
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@Perjury",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@Perjury",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Perjury@Ja",
+          "file": "Perjury_Ja.png",
+          "locale_variants": {
+            "Ja": "Perjury_Ja.png",
+            "Ko": "Perjury_Ko.png",
+            "ZhHans": "Perjury_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "size": [
+            198,
+            166
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChoiceButton_Trial@Question",
+      "canvas_size": [
+        1099,
+        318
+      ],
+      "root_intrinsic_size": [
+        1099,
+        318
+      ],
+      "layers": [
+        {
+          "name": "Balloon_Default",
+          "file": "Balloon_Default.png",
+          "go": "ChoiceButton_Trial@Question",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            1099,
+            318
+          ]
+        },
+        {
+          "name": "Doubt@Ja",
+          "file": "Doubt_Ja.png",
+          "locale_variants": {
+            "Ja": "Doubt_Ja.png",
+            "Ko": "Doubt_Ko.png",
+            "ZhHans": "Doubt_ZhHans.png"
+          },
+          "go": "Tag",
+          "atlas": "UI_Trial",
+          "group": "",
+          "order": 1,
+          "pos": [
+            40,
+            -41
+          ],
+          "size": [
+            195,
+            166
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "",
+          "order": 2,
+          "pos": [
+            109,
+            101
+          ],
+          "size": [
+            900,
+            100
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "Choice Text",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 42.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Middle",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow",
+          "color": [
+            0.16078431904315948,
+            0.13333334028720856,
+            0.12156863510608673,
+            1.0
+          ],
+          "spacing": {
+            "character": 6.5,
+            "word": 0.0,
+            "line": 0.0,
+            "paragraph": 0.0
+          },
+          "auto_size": {
+            "min": 0.0,
+            "max": 42.0
+          }
+        }
+      ]
+    },
+    {
+      "name": "DebateUI",
+      "canvas_size": [
+        2560,
+        1440
+      ],
+      "layers": [
+        {
+          "name": "ClockBase",
+          "file": "ClockBase.png",
+          "go": "Back",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            2068,
+            46
+          ],
+          "size": [
+            465,
+            151
+          ]
+        },
+        {
+          "name": "FastButtonBase",
+          "file": "FastButtonBase.png",
+          "go": "SkipButton",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 2,
+          "pos": [
+            1882,
+            38
+          ],
+          "size": [
+            208,
+            164
+          ]
+        },
+        {
+          "name": "FastIcon",
+          "file": "FastIcon.png",
+          "go": "Icon",
+          "atlas": "UI_Trial",
+          "group": "Wrapper/SkipButton/Button",
+          "order": 3,
+          "pos": [
+            1964,
+            96
+          ],
+          "size": [
+            52,
+            47
+          ],
+          "color": [
+            1.0,
+            0.9411764740943909,
+            0.501960813999176,
+            1.0
+          ]
+        }
+      ],
+      "texts": [
+        {
+          "go": "Label",
+          "group": "Wrapper/Back",
+          "order": 1,
+          "pos": [
+            2210,
+            94
+          ],
+          "size": [
+            256,
+            56
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "text": "<sprite name=\"0\"><sprite name=\"3\"><sprite name=\":\"><sprite name=\"5\"><sprite name=\"3\"><sprite name=\":\"><sprite name=\"6\"><sprite name=\"4\"><sprite name=\"5\">",
+          "font_asset_pptr": [
+            3,
+            -4585659588899376959
+          ],
+          "font_size": 52.0,
+          "font_weight": 400,
+          "font_style": "Normal",
+          "h_align": "Center",
+          "v_align": "Top",
+          "margin": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wrapping": "NoWrap",
+          "overflow": "Overflow"
+        }
+      ]
+    },
+    {
+      "name": "TrialChoicePanel@Ema",
+      "canvas_size": [
+        2560,
+        1440
+      ],
+      "layers": [
+        {
+          "name": "TrialChoiceBase",
+          "file": "TrialChoiceBase.png",
+          "go": "Base",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            2560,
+            1440
+          ]
+        },
+        {
+          "name": "ChoicePortrait_Ema",
+          "file": "ChoicePortrait_Ema.png",
+          "go": "ChoicePortrait",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            1614,
+            0
+          ],
+          "size": [
+            946,
+            1440
+          ]
+        }
+      ],
+      "containers": [
+        {
+          "go": "Content",
+          "group": "Wrapper",
+          "pos": [
+            1106,
+            787
+          ],
+          "size": [
+            899,
+            0
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "layout_group": {
+            "kind": "VerticalLayoutGroup",
+            "padding": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "child_alignment": "MiddleRight",
+            "spacing": 80.0,
+            "child_control_width": false,
+            "child_control_height": false,
+            "child_force_expand_width": false,
+            "child_force_expand_height": false
+          },
+          "placement": {
+            "kind": "vertical",
+            "x_anchor_canvas_pil": 2005,
+            "x_anchor_basis": "right",
+            "y_pivot_canvas_pil": 787,
+            "y_pivot_position": 0.5,
+            "spacing": 80.0,
+            "padding_top": 0,
+            "padding_bottom": 0
+          },
+          "size_fitter": {
+            "horizontal_fit": "Unconstrained",
+            "vertical_fit": "PreferredSize"
+          }
+        }
+      ]
+    },
+    {
+      "name": "TrialChoicePanel@Hiro",
+      "canvas_size": [
+        2560,
+        1440
+      ],
+      "layers": [
+        {
+          "name": "TrialChoiceBase",
+          "file": "TrialChoiceBase.png",
+          "go": "Base",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 0,
+          "pos": [
+            0,
+            0
+          ],
+          "size": [
+            2560,
+            1440
+          ]
+        },
+        {
+          "name": "ChoicePortrait_Hiro",
+          "file": "ChoicePortrait_Hiro.png",
+          "go": "ChoicePortrait",
+          "atlas": "UI_Trial",
+          "group": "Wrapper",
+          "order": 1,
+          "pos": [
+            1470,
+            0
+          ],
+          "size": [
+            1090,
+            1440
+          ]
+        }
+      ],
+      "containers": [
+        {
+          "go": "Content",
+          "group": "Wrapper",
+          "pos": [
+            1106,
+            787
+          ],
+          "size": [
+            899,
+            0
+          ],
+          "pivot": [
+            0.5,
+            0.5
+          ],
+          "layout_group": {
+            "kind": "VerticalLayoutGroup",
+            "padding": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "child_alignment": "MiddleRight",
+            "spacing": 80.0,
+            "child_control_width": false,
+            "child_control_height": false,
+            "child_force_expand_width": false,
+            "child_force_expand_height": false
+          },
+          "placement": {
+            "kind": "vertical",
+            "x_anchor_canvas_pil": 2005,
+            "x_anchor_basis": "right",
+            "y_pivot_canvas_pil": 787,
+            "y_pivot_position": 0.5,
+            "spacing": 80.0,
+            "padding_top": 0,
+            "padding_bottom": 0
+          },
+          "size_fitter": {
+            "horizontal_fit": "Unconstrained",
+            "vertical_fit": "PreferredSize"
+          }
+        }
+      ]
+    }
+  ]
+}
