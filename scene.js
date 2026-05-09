@@ -1525,7 +1525,15 @@ function attachPlacementOverlayHandlers(el) {
     selectedSlug = el.dataset.slug;
     refreshSnapshotList();
     refreshInspector();
-    refreshPlacementOverlays();
+    // Toggle .is-selected inline instead of running the full overlay refresh.
+    // The refresh re-appends every overlay (including this captured one), and
+    // appendChild on a captured element implicitly releases pointer capture
+    // in some browsers — which makes the drag get stuck the moment the cursor
+    // crosses a higher-z-order overlay (events retarget by hit-test instead
+    // of staying with the captured element).
+    for (const o of document.querySelectorAll('.placement-overlay')) {
+      o.classList.toggle('is-selected', o.dataset.slug === selectedSlug);
+    }
     const placement = placementBySlug(selectedSlug);
     if (!placement) return;
     const canvas = document.getElementById('previewContainer').querySelector('canvas');
@@ -1551,7 +1559,11 @@ function attachPlacementOverlayHandlers(el) {
     placement.x = Math.round(drag.startPlaceX + dx);
     placement.y = Math.round(drag.startPlaceY + dy);
     refreshInspector();
-    refreshPlacementOverlays();
+    // Update the dragged overlay's position directly. Avoid the full overlay
+    // refresh (which would appendChild this captured element on every move
+    // and can implicitly release pointer capture — see selectAndStartDrag).
+    el.style.left = `${placement.x * drag.displayRatio}px`;
+    el.style.top  = `${placement.y * drag.displayRatio}px`;
     schedulePlacementsSave();
     // No scheduleRender during drag — canvas re-renders take ~100 ms and
     // produce visible lag. The CSS overlay tracks the cursor live; the
