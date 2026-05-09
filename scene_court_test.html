@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Court 3D — Standalone Test</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0;
+    background: #121214;
+    color: #e8e6e3;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+  }
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  #canvas {
+    /* Preserve the 2560:1440 (16:9) aspect ratio at any viewport size by
+       clamping with max-width/max-height (both set; the browser shrinks
+       the smaller-fitting dimension and computes the other from the
+       canvas's intrinsic ratio). Earlier `width: 100vw; max-height: 100vh`
+       broke aspect ratio on viewports wider than 16:9 — width filled but
+       height was clamped without proportional shrink. */
+    max-width: 100vw;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    image-rendering: auto;
+    background: #000;
+    /* Mirror display to match Python's LH-coordinate render. Three.js uses
+       a right-handed coord system; with camera at world +Z looking at +Z,
+       camera-local +X ends up at world -X (per RH cross products), so the
+       rendered image is horizontally flipped vs Unity/Python. CSS mirror
+       at display time is the simplest fix — leaves the underlying render
+       and texture sampling math unchanged. */
+    transform: scaleX(-1);
+  }
+  #panel {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    background: rgba(28, 28, 33, 0.92);
+    border: 1px solid #333338;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 360px;
+    backdrop-filter: blur(6px);
+  }
+  #panel h2 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ff6b4a;
+  }
+  #panel label {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    align-items: center;
+    margin-bottom: 4px;
+    gap: 6px;
+  }
+  #panel select, #panel input[type="number"] {
+    background: #26262d;
+    color: #e8e6e3;
+    border: 1px solid #333338;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font: inherit;
+    width: 100%;
+  }
+  #panel button {
+    background: #ff6b4a;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  #panel button.secondary {
+    background: #26262d;
+    color: #e8e6e3;
+    border: 1px solid #333338;
+  }
+  #status {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #8a8a8e;
+  }
+  details summary { cursor: pointer; user-select: none; }
+  pre {
+    margin: 4px 0 0;
+    font-size: 10.5px;
+    color: #8a8a8e;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="canvas" width="2560" height="1440"></canvas>
+  </div>
+
+  <div id="panel">
+    <h2>Court 3D — Sanity Check</h2>
+
+    <label>Prefab
+      <select id="prefab">
+        <option value="court" selected>court (13 stands)</option>
+        <option value="court_final">court_final (14 stands)</option>
+      </select>
+    </label>
+    <label>Look character
+      <select id="char"></select>
+    </label>
+    <label>Zoom
+      <select id="zoom">
+        <option value="1" selected>Lvl1 (D=10, H=5.2)</option>
+        <option value="2">Lvl2 (D=11, H=5.3)</option>
+        <option value="3">Lvl3 (D=12, H=5.5)</option>
+        <option value="4">Lvl4 (D=13, H=5.6)</option>
+      </select>
+    </label>
+    <label>Composition
+      <select id="composition">
+        <option value="center" selected>Center</option>
+        <option value="left">Left (+0.1)</option>
+        <option value="right">Right (-0.1)</option>
+      </select>
+    </label>
+    <label>Roll
+      <select id="roll">
+        <option value="none" selected>None (0°)</option>
+        <option value="right">Right (+5°)</option>
+        <option value="left">Left (-5°)</option>
+      </select>
+    </label>
+    <label>Pitch (°)
+      <input type="number" id="pitch" value="0" step="0.5">
+    </label>
+
+    <details>
+      <summary style="margin-top: 6px; color: #a78bfa;">Direct overrides</summary>
+      <label>Yaw mult.
+        <input type="number" id="yawMultiplier" placeholder="(targetIdx + comp)" step="0.1">
+      </label>
+      <label>Distance D
+        <input type="number" id="distance" placeholder="(zoom)" step="0.5">
+      </label>
+      <label>Height H
+        <input type="number" id="height" placeholder="(zoom)" step="0.1">
+      </label>
+      <label>Roll (°)
+        <input type="number" id="rollDeg" placeholder="(preset)" step="0.5">
+      </label>
+    </details>
+
+    <button id="render">Render</button>
+    <button id="download" class="secondary">Download PNG</button>
+    <div id="status">Loading textures…</div>
+    <pre id="info"></pre>
+  </div>
+
+<script type="module">
+const BUILD_VERSION = '20260510f';
+const { CourtRenderer, CHAR_IDX_COURT, CHAR_IDX_COURT_FINAL } =
+  await import(`./scene_court.js?v=${BUILD_VERSION}`);
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('canvas');
+const status = $('status');
+const info = $('info');
+
+let renderer = null;
+
+// Repopulate the look-character dropdown when prefab changes — drop entries
+// with idx = -1 (absent in the reference trial) since they have no valid pose.
+function refreshCharSelect(prefab) {
+  const map = prefab === 'court_final' ? CHAR_IDX_COURT_FINAL : CHAR_IDX_COURT;
+  const sel = $('char');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  const entries = Object.entries(map)
+    .filter(([, idx]) => idx >= 0)
+    .sort((a, b) => a[1] - b[1]);
+  for (const [name, idx] of entries) {
+    const opt = document.createElement('option');
+    opt.value = name;
+    const display = name.charAt(0).toUpperCase() + name.slice(1);
+    opt.textContent = `${idx}: ${display}`;
+    sel.appendChild(opt);
+  }
+  if (entries.some(([n]) => n === prev)) sel.value = prev;
+}
+
+function readOpts() {
+  const prefab = $('prefab').value;
+  const map = prefab === 'court_final' ? CHAR_IDX_COURT_FINAL : CHAR_IDX_COURT;
+  const charName = $('char').value;
+  const targetIdx = map[charName] ?? 0;
+
+  const numOrUndef = (id) => {
+    const v = $(id).value;
+    return v === '' ? undefined : Number(v);
+  };
+
+  return {
+    prefab,
+    targetIdx,
+    charName,
+    zoom: Number($('zoom').value),
+    composition: $('composition').value,
+    roll: $('roll').value,
+    pitchDeg: Number($('pitch').value),
+    yawMultiplier: numOrUndef('yawMultiplier'),
+    distance: numOrUndef('distance'),
+    height: numOrUndef('height'),
+    rollDeg: numOrUndef('rollDeg'),
+  };
+}
+
+function checkWebGL() {
+  const probe = document.createElement('canvas');
+  const ctx = probe.getContext('webgl2') || probe.getContext('webgl');
+  if (!ctx) {
+    return 'no WebGL context — your browser has hardware acceleration disabled. ' +
+           'Open chrome://gpu (or about:support in Firefox) to verify; ' +
+           'then re-enable acceleration in browser settings or try a different browser.';
+  }
+  return null;
+}
+
+async function init() {
+  const webglError = checkWebGL();
+  if (webglError) {
+    status.textContent = webglError;
+    status.style.color = '#ff6b4a';
+    return;
+  }
+
+  const initialPrefab = $('prefab').value;
+  refreshCharSelect(initialPrefab);
+
+  try {
+    renderer = new CourtRenderer(canvas, { prefab: initialPrefab });
+  } catch (err) {
+    status.textContent = `Failed to create WebGL context: ${err.message}. ` +
+      `See chrome://gpu — hardware acceleration is likely disabled.`;
+    status.style.color = '#ff6b4a';
+    return;
+  }
+  try {
+    await renderer.load(BUILD_VERSION);
+  } catch (err) {
+    status.textContent = `Failed to load textures: ${err.message}`;
+    status.style.color = '#ff6b4a';
+    throw err;
+  }
+  status.textContent = 'Loaded. Adjust the panel and click Render.';
+  doRender();
+}
+
+function doRender() {
+  if (!renderer) return;
+  const opts = readOpts();
+  if (renderer.prefab !== opts.prefab) renderer.setPrefab(opts.prefab);
+  const { yawDeg, D, H, pitchDeg, rollDeg, N } = renderer.setCamera(opts);
+  renderer.render();
+
+  info.textContent = [
+    `Prefab:     ${opts.prefab}  (${N} stands)`,
+    `Target:     idx ${opts.targetIdx}  (${opts.charName})`,
+    `Geometry:   D = ${D} m,  H = ${H} m`,
+    `Yaw:        ${yawDeg.toFixed(4)}°  (mult ${(opts.yawMultiplier ?? '—')})`,
+    `Pitch:      ${pitchDeg.toFixed(4)}°`,
+    `Roll:       ${rollDeg.toFixed(4)}°`,
+    `Camera pos: (${renderer.camera.position.x.toFixed(3)}, ${renderer.camera.position.y.toFixed(3)}, ${renderer.camera.position.z.toFixed(3)})`,
+  ].join('\n');
+}
+
+$('prefab').addEventListener('change', () => {
+  refreshCharSelect($('prefab').value);
+  doRender();
+});
+['char', 'zoom', 'composition', 'roll'].forEach((id) =>
+  $(id).addEventListener('change', doRender),
+);
+['pitch', 'yawMultiplier', 'distance', 'height', 'rollDeg'].forEach((id) =>
+  $(id).addEventListener('input', doRender),
+);
+$('render').addEventListener('click', doRender);
+
+$('download').addEventListener('click', () => {
+  if (!renderer) return;
+  doRender();  // ensure latest frame is in the canvas buffer
+
+  // The canvas is *displayed* with CSS `transform: scaleX(-1)` (to make
+  // Three.js's RH render look like Unity / Python's LH render). But the
+  // raw WebGL framebuffer that `canvas.toBlob` reads is NOT mirrored, so
+  // a direct export comes out looking flipped vs. the preview. Re-blit
+  // through a 2D canvas with a horizontal flip transform so the exported
+  // PNG matches what the user sees on screen.
+  const out = document.createElement('canvas');
+  out.width = canvas.width;
+  out.height = canvas.height;
+  const ctx = out.getContext('2d');
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(canvas, 0, 0);
+
+  out.toBlob((blob) => {
+    if (!blob) return;
+    const opts = readOpts();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const tag = `${opts.prefab}_${opts.charName || `idx${opts.targetIdx}`}_zoom${opts.zoom}_${opts.composition}_roll-${opts.roll}`;
+    a.download = `court3d_${tag}.png`;
+    a.href = url;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
+});
+
+await init();
+</script>
+</body>
+</html>

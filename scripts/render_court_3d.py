@@ -1103,23 +1103,22 @@ def main():
     view = view_matrix(pos, forward, right, up)
     proj = proj_matrix(FOV_DEG_VERTICAL, WIDTH / HEIGHT, NEAR, FAR)
 
-    # All four textures live in the AssetRipper export. Loaded once here and
-    # passed by reference into the meshes; the rasteriser samples them per pixel.
-    TEX_DIR_BG = Path("/home/jeongu/CourtExportV2/ExportedProject/Assets/Texture")
-    TEX_DIR_2D = Path("/home/jeongu/CourtExportV2/ExportedProject/Assets/Texture2D")
-    OVERLAYS   = Path(__file__).resolve().parent.parent / "overlays"
+    # All textures live in scene/court/ (extracted by extract_scene_court.py).
+    # Loaded once here and passed by reference into the meshes; the rasteriser
+    # samples them per pixel.
+    COURT_TEX = Path(__file__).resolve().parent.parent / "scene" / "court"
     if not args.no_textures:
-        backdrop_tex = np.array(Image.open(TEX_DIR_BG / "Background_014_001.png").convert("RGB"))
-        floor_tex    = np.array(Image.open(TEX_DIR_2D / "Carpet 4 BaseMap.png").convert("RGB"))
-        step_tex     = np.array(Image.open(TEX_DIR_2D / "Bricks 2 BaseMap.png").convert("RGB"))
+        backdrop_tex = np.array(Image.open(COURT_TEX / "Background_014_001.png").convert("RGB"))
+        floor_tex    = np.array(Image.open(COURT_TEX / "Carpet 4 BaseMap.png").convert("RGB"))
+        step_tex     = np.array(Image.open(COURT_TEX / "Bricks 2 BaseMap.png").convert("RGB"))
         # Tangent-space normal map for the step's brick texture (per
         # Court_Step.mat's _BumpMap field). Used by the rasteriser as a
         # fake-AO darkening modulator — see `groove_strength` parameter.
-        step_normal  = np.array(Image.open(TEX_DIR_2D / "Bricks 2 Normal.png").convert("RGB"))
+        step_normal  = np.array(Image.open(COURT_TEX / "Bricks 2 Normal.png").convert("RGB"))
         # Lectern is RGBA: ~5% fully-transparent + ~2% AA-edge pixels carry
         # garbage RGB outside the silhouette. Keep alpha so the rasteriser can
         # discard / blend them properly against whatever's behind (the wall).
-        stand_tex    = np.array(Image.open(OVERLAYS / "Court_Stand.png").convert("RGBA"))
+        stand_tex    = np.array(Image.open(COURT_TEX / "Court_Stand.png").convert("RGBA"))
     else:
         backdrop_tex = floor_tex = step_tex = step_normal = stand_tex = None
 
