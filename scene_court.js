@@ -64,9 +64,9 @@ const STAND_H = 2.8;
 // gradient). That makes it pop visually compared to the wall (side-facing,
 // equator ambient only) and step rim (no direct contribution). Dimming the
 // tint balances it. Tune in [0.4, 1.0]; 0.5 ≈ half of prefab albedo.
-const CARPET_DIM = 0.4;
-const STEP_DIM   = 0.8;
-const STAND_DIM  = 0.8;
+const CARPET_DIM = 1.0;
+const STEP_DIM   = 1.0;
+const STAND_DIM  = 0.7;
 const TINT_FLOOR = [0.415, 0.159, 0.159].map((c) => c * CARPET_DIM);
 const TINT_STEP  = [0.217, 0.134, 0.124].map((c) => c * STEP_DIM);   // Court_Step.mat  — dark brown stone
 const TINT_STAND = [STAND_DIM, STAND_DIM, STAND_DIM];                // Court_Stand.mat — uniform dim
@@ -127,7 +127,7 @@ const FLOOR_REPEAT  = 2;          // carpet tiles 2× across the 61 × 61 m floo
 
 // --- Helpers ---
 
-function loadTexture(url, { anisotropy = 8 } = {}) {
+function loadTexture(url, { anisotropy = 8, flipY = true } = {}) {
   return new Promise((resolve, reject) => {
     new THREE.TextureLoader().load(
       url,
@@ -138,6 +138,15 @@ function loadTexture(url, { anisotropy = 8 } = {}) {
         // shader handles the sRGB round-trip on output.
         tex.colorSpace = THREE.NoColorSpace;
         tex.anisotropy = anisotropy;
+        // flipY=true (Three.js default) makes the GPU sample PIL[(1-v)*H,
+        // u*W]; Unity/Python sample PIL[v*H, u*W]. For the floor's PlaneGeometry
+        // (rotated to lie flat) this produces a vertical mirror of the carpet
+        // pattern. Disable for the carpet maps so they match the prefab. Wall
+        // and step happen to be invariant: wall's CylinderGeometry V layout
+        // aligns with PIL top under flipY=true, and step's integer tiling
+        // makes V flips just shift by full tiles (invisible because brick
+        // mortar is roughly horizontally symmetric).
+        tex.flipY = flipY;
         resolve(tex);
       },
       undefined,
@@ -155,10 +164,17 @@ function setRepeat(tex, repeatX, repeatY = repeatX) {
 // Python-faithful lit material — direct port of `compute_pixel_lighting` and
 // the per-pixel shading section of `rasterize_triangle_z` in
 // scripts/render_court_3d.py. Reproduces the empirical lighting model
-// (single spot + hemisphere ambient + flat exposure floor + top-face damp +
-// optional groove fake-AO) that's been verified against in-game screenshots,
-// rather than Three.js's PBR pipeline (which diverges on the BRDF / π divide,
-// inverse-square decay shape, and color-space handling).
+// (single spot + hemisphere ambient + flat exposure floor + top-face damp)
+// that's been verified against in-game screenshots, rather than Three.js's
+// PBR pipeline (which diverges on the BRDF / π divide, inverse-square decay
+// shape, and color-space handling).
+//
+// Optional true tangent-space normal mapping (carpet + brick step):
+// derivative-based TBN means no tangent attribute is needed on the geometry.
+// This supersedes Python's fake-AO groove darkening — the perturbed normal
+// produces genuine per-pixel lighting variation (brick edges catching the
+// spot, mortar grooves darkening) rather than a uniform darken on R/G
+// distance from neutral.
 //
 // Texture color-space: diffuse maps load with `colorSpace = NoColorSpace`
 // so the GPU samples raw sRGB byte values 0-1 (no sRGB → linear decode).
@@ -192,7 +208,7 @@ const vec3  EQUATOR_RGB   = vec3(0.114, 0.125, 0.133);
 const float DIRECT_GAIN   = 4.0;
 const float AMBIENT_GAIN  = 1.3;
 const float TOP_DAMP      = 0.6;
-const float EXPOSURE      = 1.2;
+const float EXPOSURE      = 1.3;
 const float FALLOFF_K     = 30.0;
 const float RANGE_M       = 90.0;
 const float OUTER_COS     = 0.342020143;   // cos(70°) — outer cone half-angle
@@ -201,9 +217,14 @@ const float INNER_COS     = 0.707106781;   // cos(45°) — inner cone half-angl
 uniform sampler2D uMap;
 uniform mat3 uMapTransform;
 uniform vec3 uTint;
-#ifdef USE_GROOVE_AO
+#ifdef USE_NORMAL_MAP
 uniform sampler2D uNormalMap;
-uniform float uGrooveStrength;
+uniform float uNormalScale;
+uniform float uBumpDarken;
+#endif
+#ifdef USE_TEXEL_CONTRAST
+uniform float uContrast;
+uniform float uContrastPivot;
 #endif
 
 varying vec3 vWorldPos;
@@ -215,6 +236,28 @@ float ss(float lo, float hi, float x) {
   return t * t * (3.0 - 2.0 * t);
 }
 
+#ifdef USE_NORMAL_MAP
+// Derivative-based TBN ("Followup: Normal Mapping Without Precomputed
+// Tangents", Schüler). Reconstructs T and B from screen-space derivatives
+// of world position and UV, so we don't need a tangent attribute on the
+// geometry — works on PlaneGeometry (carpet) and our hand-built step
+// BufferGeometry alike. T points along du, B along dv, N is the geometric
+// normal; columns of the returned matrix transform a tangent-space normal
+// (R=along-T, G=along-B, B=along-N) into world space.
+mat3 perturbTBN(vec3 N, vec3 worldPos, vec2 uv) {
+  vec3 dp1 = dFdx(worldPos);
+  vec3 dp2 = dFdy(worldPos);
+  vec2 duv1 = dFdx(uv);
+  vec2 duv2 = dFdy(uv);
+  vec3 dp2perp = cross(dp2, N);
+  vec3 dp1perp = cross(N, dp1);
+  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+  vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+  float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
+  return mat3(T * invmax, B * invmax, N);
+}
+#endif
+
 void main() {
   // Apply the texture's repeat/offset (texture.matrix). ShaderMaterial does
   // NOT auto-apply this — only built-in materials do via their shader
@@ -224,6 +267,16 @@ void main() {
   vec4 texel4 = texture2D(uMap, mapUv);
   vec3 texel = texel4.rgb;
 
+  #ifdef USE_TEXEL_CONTRAST
+  // Per-material contrast around uContrastPivot (default 0.5 = mid-gray).
+  // Pulls texel values away from the pivot when uContrast > 1, toward it
+  // when < 1. Applied BEFORE tint/lighting so the curve operates on the
+  // raw albedo. Setting the pivot at the texture's mean luminance keeps
+  // overall brightness while increasing detail separation; lower than the
+  // mean darkens the texture overall, higher brightens it.
+  texel = clamp((texel - uContrastPivot) * uContrast + uContrastPivot, 0.0, 1.0);
+  #endif
+
   vec3 N = normalize(vWorldNormal);
   // Wall renders with side=BackSide (visible from inside the cylinder); the
   // geometric normal points outward, but lighting needs the inward normal.
@@ -231,6 +284,30 @@ void main() {
   // Same trick applies for any DoubleSide material — the visible side gets
   // the camera-facing normal regardless of geometric winding.
   if (!gl_FrontFacing) N = -N;
+
+  #ifdef USE_NORMAL_MAP
+  // True tangent-space normal mapping. Replaces the geometric N with one
+  // perturbed by the per-texel tangent-space normal stored in uNormalMap.
+  // Sample at the same transformed UV as the diffuse map (both maps tile
+  // identically — repeat/offset are kept in sync on the JS side).
+  vec3 nmTangent = texture2D(uNormalMap, mapUv).xyz * 2.0 - 1.0;
+  // uNormalScale dampens or strengthens the in-plane (XY) deflection
+  // without re-baking the texture; Z is reconstructed afterwards so the
+  // result is still a unit vector.
+  nmTangent.xy *= uNormalScale;
+  // Defensive Z reconstruction: if the source was DXT5nm-style (B unused,
+  // Z = √(1 − X² − Y²)) UnityPy may have left B as 0 or 255. If B is
+  // already correct, this re-derives the same value (no-op). Costs one
+  // sqrt per fragment, buys robustness across normal-map encodings.
+  nmTangent.z = sqrt(max(0.0, 1.0 - dot(nmTangent.xy, nmTangent.xy)));
+  mat3 TBN = perturbTBN(N, vWorldPos, mapUv);
+  N = normalize(TBN * nmTangent);
+  // Cheap cavity AO: the magnitude of the in-plane deflection xy is a
+  // proxy for "how tilted is this texel" — high near groove edges, low
+  // on flat surfaces. Used as a multiplier on lightFactor below to
+  // darken bumps without a separate AO texture.
+  float bumpAO = length(nmTangent.xy);
+  #endif
 
   // Spot light direct contribution
   vec3 dl = LIGHT_POS - vWorldPos;
@@ -252,14 +329,11 @@ void main() {
 
   vec3 lightFactor = direct * LIGHT_RGB + ambient + vec3(EXPOSURE);
 
-  #ifdef USE_GROOVE_AO
-  // Fake-AO from the normal map's R/G channels — same trick Python uses.
-  // Distance from neutral (R=G=128 = no tilt) approximates how deep into a
-  // groove the texel sits; multiply lightFactor by (1 − groove · strength).
-  // Sampled at the same transformed UV as the diffuse map.
-  vec2 nmRG = texture2D(uNormalMap, mapUv).rg * 2.0 - 1.0;
-  float groove = sqrt(nmRG.x * nmRG.x + nmRG.y * nmRG.y);
-  lightFactor *= 1.0 - uGrooveStrength * groove;
+  #ifdef USE_NORMAL_MAP
+  // Darken bumps by their tilt magnitude. Independent of light direction,
+  // so it's strictly an albedo-side modulation — cavities stay dim even
+  // when the light grazes them favorably.
+  lightFactor *= 1.0 - uBumpDarken * bumpAO;
   #endif
 
   vec3 shaded = clamp(texel * uTint * lightFactor, 0.0, 1.0);
@@ -280,11 +354,13 @@ void main() {
 `;
 
 function createPythonLitMaterial(opts) {
-  const { map, tint, normalMapAO = null, grooveStrength = 0,
+  const { map, tint, normalMap = null, normalScale = 1.0, bumpDarken = 0.0,
+          contrast = 1.0, contrastPivot = 0.5,
           alphaTest = false, side = THREE.FrontSide } = opts;
   const defines = {};
-  if (normalMapAO && grooveStrength > 0) defines.USE_GROOVE_AO = '';
-  if (alphaTest) defines.USE_ALPHA_TEST = '';
+  if (normalMap)        defines.USE_NORMAL_MAP     = '';
+  if (alphaTest)        defines.USE_ALPHA_TEST     = '';
+  if (contrast !== 1.0) defines.USE_TEXEL_CONTRAST = '';
 
   // texture.matrix is normally regenerated each render (when matrixAutoUpdate
   // is true, the default). For ShaderMaterial we need it ready BEFORE the
@@ -296,9 +372,14 @@ function createPythonLitMaterial(opts) {
     uMapTransform:  { value: map.matrix },
     uTint:          { value: new THREE.Vector3(tint[0], tint[1], tint[2]) },
   };
-  if (normalMapAO && grooveStrength > 0) {
-    uniforms.uNormalMap      = { value: normalMapAO };
-    uniforms.uGrooveStrength = { value: grooveStrength };
+  if (normalMap) {
+    uniforms.uNormalMap   = { value: normalMap };
+    uniforms.uNormalScale = { value: normalScale };
+    uniforms.uBumpDarken  = { value: bumpDarken };
+  }
+  if (contrast !== 1.0) {
+    uniforms.uContrast      = { value: contrast };
+    uniforms.uContrastPivot = { value: contrastPivot };
   }
 
   return new THREE.ShaderMaterial({
@@ -309,6 +390,9 @@ function createPythonLitMaterial(opts) {
     side,
     transparent: alphaTest,
     depthWrite:  true,
+    // dFdx/dFdy are core in WebGL2 / GLSL ES 3.00; this enables the
+    // OES_standard_derivatives extension when running on a WebGL1 context.
+    extensions:  { derivatives: true },
   });
 }
 
@@ -318,11 +402,22 @@ function buildFloor(t) {
   const geo = new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE);
   geo.rotateX(-Math.PI / 2);
 
-  setRepeat(t.carpetMap, FLOOR_REPEAT);
+  // Carpet diffuse + normal must tile identically — the shader samples both
+  // at the same transformed UV (uMapTransform comes from carpetMap's
+  // matrix), so they need matching repeat/offset.
+  setRepeat(t.carpetMap,    FLOOR_REPEAT);
+  setRepeat(t.carpetNormal, FLOOR_REPEAT);
 
   const mat = createPythonLitMaterial({
-    map:  t.carpetMap,
-    tint: TINT_FLOOR,
+    map:         t.carpetMap,
+    tint:        TINT_FLOOR,
+    normalMap:   t.carpetNormal,
+    // Carpet relief is gentle weave; full strength looks fine. Tune this
+    // down (0.3-0.6) if grazing-angle highlights feel too busy.
+    normalScale: 1.0,
+    // Bump cavity darken: dims tilted texels (weave creases) regardless
+    // of light direction — cheap proxy for AO without a mask map.
+    bumpDarken:  0.5,
   });
   return new THREE.Mesh(geo, mat);
 }
@@ -407,16 +502,25 @@ function buildStep(t, stepMesh) {
   // texel sampling because the (1 − asset_v) flip Python applies and
   // Three.js's flipY=true convention cancel out under integer repeat:
   // both end up sampling the same texel at every position on the cylinder.
-  setRepeat(t.brickMap, 8, 8);
+  // Diffuse + normal must tile identically (shader shares uMapTransform).
+  setRepeat(t.brickMap,    8, 8);
   setRepeat(t.brickNormal, 8, 8);
 
-  // Python applies the brick normal map as a fake-AO modulator (groove
-  // darkening, `groove_strength = 0.5` in render_court_3d.py). Same here.
+  // True tangent-space normal mapping — supersedes Python's fake-AO trick
+  // (`groove_strength = 0.5` in render_court_3d.py). Per-pixel normals
+  // perturb the lighting equation so brick edges that face the spot get
+  // brighter and the mortar grooves get genuinely darker, instead of a
+  // uniform darken across all groove texels.
   const mat = createPythonLitMaterial({
-    map:            t.brickMap,
-    tint:           TINT_STEP,
-    normalMapAO:    t.brickNormal,
-    grooveStrength: 0.5,
+    map:         t.brickMap,
+    tint:        TINT_STEP,
+    normalMap:   t.brickNormal,
+    // Brick relief is steep; 1.0 is the authored strength. Drop to 0.6-0.8
+    // if the highlights look too sharp at grazing camera angles.
+    normalScale: 1.0,
+    // Bump cavity darken: deepens the mortar grooves between bricks.
+    // Stronger than carpet because the relief is more pronounced.
+    bumpDarken:  0.6,
   });
 
   const mesh = new THREE.Mesh(geo, mat);
@@ -444,6 +548,11 @@ function buildStands(N, t) {
     tint:      TINT_STAND,
     alphaTest: true,
     side:      THREE.DoubleSide,
+    // Pull bright/dark texels apart around the lectern's mean luminance
+    // (~0.35 — the texture is mostly shadowed wood). Tint can't do this,
+    // and pivoting at 0.5 would also darken the lectern overall.
+    contrast:      1.15,
+    contrastPivot: 0.35,
   });
 
   for (let k = 0; k < N; k++) {
@@ -585,8 +694,11 @@ export class CourtRenderer {
       stepMeshResp,
     ] = await Promise.all([
       loadTexture(u('Background_014_001.png')),
-      loadTexture(u('Carpet 4 BaseMap.png')),
-      loadTexture(u('Carpet 4 Normal.png')),
+      // Carpet maps need flipY=false to match Unity's V=0=image-bottom
+      // sampling — see loadTexture comment. Without this the carpet pattern
+      // is vertically mirrored vs the prefab.
+      loadTexture(u('Carpet 4 BaseMap.png'), { flipY: false }),
+      loadTexture(u('Carpet 4 Normal.png'),  { flipY: false }),
       loadTexture(u('Bricks 2 BaseMap.png')),
       loadTexture(u('Bricks 2 Normal.png')),
       loadTexture(u('Court_Stand.png')),
