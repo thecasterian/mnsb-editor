@@ -637,7 +637,15 @@ export class CourtRenderer {
     this._prefab = prefab;
     this._N = prefab === 'court_final' ? 14 : 13;
 
-    this._renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    // preserveDrawingBuffer: keeps the framebuffer intact between renders,
+    // so consumers that read the canvas asynchronously (e.g. drawImage on a
+    // 2D canvas, toBlob) always see the last rendered frame. Without this,
+    // an offscreen WebGL canvas (one not attached to the DOM, as used by
+    // scene.js's trial render path) can clear between render() and the
+    // subsequent 2D blit, producing a blank readback. Minor perf cost (one
+    // extra internal blit) but guarantees correctness for the offscreen
+    // pattern.
+    this._renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     this._renderer.setSize(canvas.width, canvas.height, /* updateStyle= */ false);
     // LinearSRGBColorSpace = "no encode on output". The custom shader does
     // Python's math directly in sRGB-encoded space and writes the result to

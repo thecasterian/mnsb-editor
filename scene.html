@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260507d">
+<link rel="stylesheet" href="styles.css?v=20260511a">
 </head>
 <body class="scene-editor">
 
@@ -27,7 +27,7 @@
     <div class="section-label">Scene type</div>
     <select class="char-select" id="sceneTypeSelect">
       <option value="adv" selected>Adv</option>
-      <option value="trial" disabled>Trial (coming soon)</option>
+      <option value="trial">Trial</option>
     </select>
   </div>
 
@@ -41,22 +41,22 @@
     </div>
   </div>
 
-  <div class="field">
+  <div class="field" data-scene-type="adv">
     <div class="section-label">Background</div>
     <select class="char-select" id="bgSelect"></select>
   </div>
 
-  <div class="field">
+  <div class="field" data-scene-type="adv">
     <div class="section-label">Author</div>
     <select class="char-select" id="authorSelect"></select>
   </div>
 
-  <div class="field">
+  <div class="field" data-scene-type="adv">
     <div class="section-label">Message</div>
     <textarea class="text-input" id="messageInput" rows="3" placeholder="Message"></textarea>
   </div>
 
-  <div class="field">
+  <div class="field" data-scene-type="adv">
     <div class="section-label">Overlays</div>
     <label class="switch">
       <span>Author</span>
@@ -80,7 +80,108 @@
     </label>
   </div>
 
-  <div class="field">
+  <div class="field" data-scene-type="trial">
+    <div class="section-label">Layout</div>
+    <select class="char-select" id="trialPrefab">
+      <option value="court" selected>Court (13 stands)</option>
+      <option value="court_final">Court Final (14 stands)</option>
+    </select>
+  </div>
+
+  <div class="field" data-scene-type="trial">
+    <div class="section-label">Look character</div>
+    <div class="presets" id="trialLookCharPresets"></div>
+  </div>
+
+  <div class="field" data-scene-type="trial">
+    <div class="section-label">Composition</div>
+    <div class="presets" id="trialCompositionPresets">
+      <button class="preset-btn" type="button" data-comp="left">Left</button>
+      <button class="preset-btn active" type="button" data-comp="center">Center</button>
+      <button class="preset-btn" type="button" data-comp="right">Right</button>
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial">
+    <div class="section-label">Zoom Level</div>
+    <div class="presets" id="trialZoomPresets">
+      <button class="preset-btn active" type="button" data-zoom="1">1</button>
+      <button class="preset-btn" type="button" data-zoom="2">2</button>
+      <button class="preset-btn" type="button" data-zoom="3">3</button>
+      <button class="preset-btn" type="button" data-zoom="4">4</button>
+    </div>
+  </div>
+
+  <button class="advanced-toggle" id="trialAdvancedToggle" type="button" data-scene-type="trial">Advanced</button>
+
+  <div class="field" data-scene-type="trial" data-trial-advanced>
+    <div class="section-label">Yaw multiplier</div>
+    <div class="inspector-row">
+      <input class="inspector-range" type="range" id="trialYawMultRange" min="0" max="14" step="0.05" value="0" list="trialYawMultTicks">
+      <input class="inspector-num inspector-scale-num" type="number" id="trialYawMultNum" step="0.05" value="0">
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-advanced>
+    <div class="section-label">Distance (m)</div>
+    <div class="inspector-row">
+      <input class="inspector-range" type="range" id="trialDistanceRange" min="4" max="15" step="0.1" value="10" list="trialDistanceTicks">
+      <input class="inspector-num inspector-scale-num" type="number" id="trialDistanceNum" step="0.1" value="10">
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-advanced>
+    <div class="section-label">Height (m)</div>
+    <div class="inspector-row">
+      <input class="inspector-range" type="range" id="trialHeightRange" min="5" max="6" step="0.01" value="5.2" list="trialHeightTicks">
+      <input class="inspector-num inspector-scale-num" type="number" id="trialHeightNum" step="0.01" value="5.2">
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-advanced>
+    <div class="section-label">Roll (°)</div>
+    <div class="inspector-row">
+      <input class="inspector-range" type="range" id="trialRollRange" min="-10" max="10" step="0.1" value="0" list="trialRollTicks">
+      <input class="inspector-num inspector-scale-num" type="number" id="trialRollNum" step="0.1" value="0">
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-advanced>
+    <div class="section-label">Pitch (°)</div>
+    <div class="inspector-row">
+      <input class="inspector-range" type="range" id="trialPitchRange" min="-4" max="4" step="0.1" value="0" list="trialPitchTicks">
+      <input class="inspector-num inspector-scale-num" type="number" id="trialPitchNum" step="0.1" value="0">
+    </div>
+  </div>
+
+  <!-- Tick mark sources for the trial sliders. The browser renders a small
+       mark at each option value along the slider track. No labels — these
+       are visual-only reference points, not clickable shortcuts. -->
+  <datalist id="trialYawMultTicks">
+    <option value="0"></option><option value="1"></option><option value="2"></option>
+    <option value="3"></option><option value="4"></option><option value="5"></option>
+    <option value="6"></option><option value="7"></option><option value="8"></option>
+    <option value="9"></option><option value="10"></option><option value="11"></option>
+    <option value="12"></option><option value="13"></option><option value="14"></option>
+  </datalist>
+  <datalist id="trialDistanceTicks">
+    <option value="10"></option><option value="11"></option>
+    <option value="12"></option><option value="13"></option>
+  </datalist>
+  <datalist id="trialHeightTicks">
+    <option value="5.0"></option><option value="5.1"></option><option value="5.2"></option>
+    <option value="5.3"></option><option value="5.4"></option><option value="5.5"></option>
+    <option value="5.6"></option><option value="5.7"></option><option value="5.8"></option>
+    <option value="5.9"></option><option value="6.0"></option>
+  </datalist>
+  <datalist id="trialRollTicks">
+    <option value="-5"></option><option value="0"></option><option value="5"></option>
+  </datalist>
+  <datalist id="trialPitchTicks">
+    <option value="-2"></option><option value="0"></option><option value="2"></option>
+  </datalist>
+
+  <div class="field" data-scene-type="adv">
     <div class="section-label">
       Characters
       <span class="section-hint" id="snapshotHint">Send from the character editor</span>
@@ -96,7 +197,7 @@
     <div class="snapshot-list" id="snapshotList"></div>
   </div>
 
-  <div class="field placement-inspector" id="placementInspector">
+  <div class="field placement-inspector" id="placementInspector" data-scene-type="adv">
     <div class="section-label">Placement</div>
     <div class="inspector-name" id="inspectorName"></div>
     <div class="inspector-row">
@@ -193,6 +294,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260507d"></script>
+<script type="module" src="scene.js?v=20260511a"></script>
 </body>
 </html>

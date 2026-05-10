@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260509i';
+const BUILD_VERSION = '20260511a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -47,10 +47,56 @@ const DEFAULT_AUTHOR = "Sherry";
 
 // --- App state ---
 const LOCALES = new Set(['ko', 'ja', 'zh-Hans', 'zh-Hant']);
+const SCENE_TYPES = new Set(['adv', 'trial']);
+let sceneType = 'adv';              // one of SCENE_TYPES — drives field visibility + render dispatch
 let locale = 'ko';                  // one of LOCALES
 let messageText = '';
 let authorId = '';                  // resolved to the first available entry on init
 let bgPath = null;                  // null = solid black
+
+// Trial scene state. The renderer (scene_court.js) is loaded lazily on first
+// trial render — Adv-only sessions never pay the Three.js download cost.
+//
+// Camera state is held as the *direct* values (yaw multiplier / distance /
+// height / pitch / roll). The Look character / Composition / Zoom dropdowns
+// are snap-to-preset shortcuts — picking one writes the corresponding direct
+// values onto the sliders and number inputs. Any subsequent slider drag or
+// number input edit moves the camera away from the preset (the dropdowns
+// don't auto-update to reflect that, by design — they remain whatever the
+// user last clicked). `trialLookChar` is stored as the lowercase character id
+// (e.g. "ema") rather than the numeric stand index so saved configs survive
+// CHAR_IDX_* changes.
+const TRIAL_PREFABS = new Set(['court', 'court_final']);
+// Mirrors of scene_court.js's ZOOM_LEVELS / COMPOSITIONS. Duplicated so the
+// template-snap helpers don't need to await the lazy court module import on
+// dropdown change. Keep in sync if scene_court.js's tables ever shift.
+const TRIAL_ZOOM_LEVELS = {
+  1: { D: 10, H: 5.2 },
+  2: { D: 11, H: 5.3 },
+  3: { D: 12, H: 5.5 },
+  4: { D: 13, H: 5.6 },
+};
+const TRIAL_COMPOSITIONS = { center: 0, left: +0.1, right: -0.1 };
+
+let trialPrefab      = 'court';
+let trialLookChar    = 'ema';        // template; resolved against CHAR_IDX_* per prefab
+let trialComposition = 'center';     // template; 'center' | 'left' | 'right'
+let trialZoom        = 1;            // template; 1..4
+// Direct camera params — these are what get sent to setCamera each render.
+// Defaults match the snap-from-templates above (ema=0, comp=0, zoom 1 = D=10
+// H=5.2), so a fresh page initialised from defaults produces identical output
+// to the previous "templates only" implementation. Roll + pitch have no
+// templates — they're slider-only.
+let trialYawMult  = 0;
+let trialDistance = 10;
+let trialHeight   = 5.2;
+let trialRollDeg  = 0;               // free numeric, no preset shortcut
+let trialPitchDeg = 0;
+// Advanced mode hides/shows the direct-value sliders (yaw mult, distance,
+// height, roll, pitch). The four template controls (Layout, Look character,
+// Composition, Zoom) stay visible in either mode. Mirrors the character
+// editor's `advancedMode` toggle.
+let trialAdvancedMode = false;
 let sceneMeta = null;               // scene/adv/meta.json: { canvas_size, prefabs: [...] }
 let charsConfig = null;
 let bgMeta = null;
@@ -192,11 +238,27 @@ function saveSceneConfig() {
   try {
     localStorage.setItem(SCENE_CONFIG_KEY, JSON.stringify({
       version:   SCENE_CONFIG_VERSION,
-      sceneType: 'adv',  // only 'adv' is implemented; placeholder for future
+      sceneType,
       locale,
       bgPath,
       authorId,
       messageText,
+      // Trial state — saved unconditionally so a user can flip back from Adv
+      // to Trial and find their previous camera setup intact. Templates
+      // (lookChar, composition, zoom) and direct values (yawMult, distance,
+      // height) are both saved so the dropdowns restore to whatever the user
+      // last clicked, while the actual rendered camera stays at whatever
+      // they last dragged the sliders to.
+      trialPrefab,
+      trialLookChar,
+      trialComposition,
+      trialZoom,
+      trialYawMult,
+      trialDistance,
+      trialHeight,
+      trialRollDeg,
+      trialPitchDeg,
+      trialAdvancedMode,
     }));
   } catch (e) {
     console.error('Failed to save scene config:', e);
@@ -223,6 +285,102 @@ function loadSceneConfig({ render = true } = {}) {
     return;
   }
   if (!data || data.version !== SCENE_CONFIG_VERSION) return;
+
+  if (SCENE_TYPES.has(data.sceneType) && data.sceneType !== sceneType) {
+    sceneType = data.sceneType;
+    document.getElementById('sceneTypeSelect').value = sceneType;
+    if (sceneType === 'trial') {
+      // Fire-and-forget: populates the look-character dropdown once the
+      // module loads. The dropdown sits in a hidden field until the user
+      // picks a value, so a brief empty-state during the import is fine.
+      ensureTrialUIInit();
+    }
+  }
+  // Restore advanced-mode flag before the visibility apply below so the
+  // direct-value field rows render hidden vs visible correctly on load.
+  if (typeof data.trialAdvancedMode === 'boolean') {
+    trialAdvancedMode = data.trialAdvancedMode;
+    document.getElementById('trialAdvancedToggle').classList.toggle('active', trialAdvancedMode);
+  }
+  applySidebarVisibility();
+
+  // Trial state — apply individually to dropdowns/inputs, but skip the
+  // look-character dropdown if it's not populated yet (the value is held in
+  // the module-level `trialLookChar` and will be picked up by the next
+  // populate or render).
+  if (TRIAL_PREFABS.has(data.trialPrefab)) {
+    trialPrefab = data.trialPrefab;
+    document.getElementById('trialPrefab').value = trialPrefab;
+  }
+  if (typeof data.trialLookChar === 'string') {
+    trialLookChar = data.trialLookChar;
+    // Active class will be applied once populateTrialLookCharSelect runs
+    // (buttons don't exist until the lazy court module loads); we still
+    // call refresh here so the run-after-populate case picks it up.
+    refreshTrialLookCharActive();
+  }
+  // trialZoom is *derived* from (trialDistance, trialHeight) — restoring
+  // the saved value here is just a hint; the authoritative recompute below
+  // (after distance/height are restored) will overwrite it. Handles null /
+  // the legacy 1..4 forms equivalently.
+  if (data.trialZoom === null
+      || (Number.isInteger(data.trialZoom) && data.trialZoom >= 1 && data.trialZoom <= 4)) {
+    trialZoom = data.trialZoom;
+    refreshTrialZoomActive();
+  }
+  // Accept '' as the "no preset selected" sentinel set by setTrialYawMult,
+  // alongside the three real preset names. Without this, a saved '' falls
+  // through and the in-memory default 'center' wins — which would re-mark
+  // the Center pill active after a reload even though yaw is non-preset.
+  if (data.trialComposition === ''
+      || ['center', 'left', 'right'].includes(data.trialComposition)) {
+    trialComposition = data.trialComposition;
+    refreshTrialCompositionActive();
+  }
+  // Roll: numeric trialRollDeg supersedes the old preset string. If a stale
+  // saved record only has the string form (`trialRoll`), translate it
+  // to the equivalent numeric value (none=0, right=+5, left=-5) using the
+  // same mapping the renderer's old preset table used.
+  if (Number.isFinite(data.trialRollDeg)) {
+    trialRollDeg = data.trialRollDeg;
+  } else if (typeof data.trialRoll === 'string') {
+    trialRollDeg = ({ none: 0, right: +5, left: -5 })[data.trialRoll] ?? 0;
+  }
+  syncRollUI();
+  if (Number.isFinite(data.trialPitchDeg)) {
+    trialPitchDeg = data.trialPitchDeg;
+  }
+  syncPitchUI();
+  // Direct camera values — restore last so a saved override survives even if
+  // the dropdowns above also restore (the slider/number show whatever the
+  // user last set, regardless of which template the dropdowns are currently
+  // pointing at). Fall back to the template-derived value when the saved
+  // record predates this slider feature (no trialYawMult/etc. fields).
+  if (Number.isFinite(data.trialYawMult)) {
+    trialYawMult = data.trialYawMult;
+  } else {
+    const compShift = TRIAL_COMPOSITIONS[trialComposition] ?? 0;
+    trialYawMult = trialTargetIdx() + compShift;
+  }
+  syncYawMultUI();
+  if (Number.isFinite(data.trialDistance)) {
+    trialDistance = data.trialDistance;
+  } else {
+    trialDistance = (TRIAL_ZOOM_LEVELS[trialZoom] || TRIAL_ZOOM_LEVELS[1]).D;
+  }
+  syncDistanceUI();
+  if (Number.isFinite(data.trialHeight)) {
+    trialHeight = data.trialHeight;
+  } else {
+    trialHeight = (TRIAL_ZOOM_LEVELS[trialZoom] || TRIAL_ZOOM_LEVELS[1]).H;
+  }
+  syncHeightUI();
+  // Authoritative recompute of the zoom pill state from the now-restored
+  // (D, H) pair. Overrides whatever the saved trialZoom hint said — saves
+  // can be inconsistent (e.g. a stale value persisted before a slider
+  // edit), so the pill state should always reflect what the camera actually
+  // is now.
+  syncZoomPillFromDH();
 
   if (LOCALES.has(data.locale)) {
     if (data.locale !== locale) {
@@ -988,6 +1146,283 @@ function selectPrefabItems(prefab) {
   return items;
 }
 
+// --- Trial scene render (delegates to scene_court.js / Three.js) ---
+//
+// scene_court.js is imported lazily so users who only ever touch the Adv
+// editor never pay the Three.js + court-module download cost. The same
+// CourtRenderer + offscreen canvas is reused across renders; we don't want
+// to churn WebGL contexts on every preview update.
+let _courtModule         = null;
+let _courtRenderer       = null;
+let _courtCanvas         = null;
+// Promise singleton — concurrent calls during the initial load (e.g. when
+// scheduleRender from loadPlacements collides with init's explicit
+// drawPreview) used to each construct their own CourtRenderer + WebGLRenderer
+// and overwrite _courtCanvas, leaving the first renderer rendering to an
+// orphaned canvas while the second's content was the only thing read by the
+// blit. Sharing one promise means one renderer, one canvas, no race.
+let _courtRendererPromise = null;
+
+async function getCourtModule() {
+  if (_courtModule) return _courtModule;
+  _courtModule = await import(`./scene_court.js?v=${BUILD_VERSION}`);
+  return _courtModule;
+}
+
+function getCourtRenderer() {
+  if (_courtRendererPromise) return _courtRendererPromise;
+  _courtRendererPromise = (async () => {
+    const mod = await getCourtModule();
+    _courtCanvas = document.createElement('canvas');
+    _courtCanvas.width  = CANVAS_W;
+    _courtCanvas.height = CANVAS_H;
+    _courtRenderer = new mod.CourtRenderer(_courtCanvas, { prefab: trialPrefab });
+    await _courtRenderer.load(BUILD_VERSION);
+    return _courtRenderer;
+  })();
+  return _courtRendererPromise;
+}
+
+// Resolve `trialLookChar` (a character id like "ema") against the prefab's
+// stand index map. Returns 0 if the id is missing or stands out of the
+// reference trial — the user shouldn't be able to pick those (the dropdown
+// filters them) but be defensive against stale saved configs.
+function trialTargetIdx() {
+  if (!_courtModule) return 0;
+  const map = trialPrefab === 'court_final'
+    ? _courtModule.CHAR_IDX_COURT_FINAL
+    : _courtModule.CHAR_IDX_COURT;
+  const idx = map[trialLookChar];
+  return (typeof idx === 'number' && idx >= 0) ? idx : 0;
+}
+
+async function renderTrialScene() {
+  const r = await getCourtRenderer();
+  if (r.prefab !== trialPrefab) r.setPrefab(trialPrefab);
+  // Pass direct values — yawMultiplier / distance / height override the
+  // setCamera derivations from targetIdx / zoom / composition. Dropdowns
+  // (Look character / Composition / Zoom) feed these via snap-to-preset
+  // helpers; we never re-derive at render time.
+  r.setCamera({
+    yawMultiplier: trialYawMult,
+    distance:      trialDistance,
+    height:        trialHeight,
+    rollDeg:       trialRollDeg,
+    pitchDeg:      trialPitchDeg,
+  });
+  r.render();
+  // Re-blit the WebGL framebuffer through a 2D canvas with `scaleX(-1)` to
+  // produce the LH-coordinate (Unity / Python) mirror. The same trick the
+  // standalone test page uses for its export. Doing it here means the canvas
+  // returned to drawPreview is a plain 2D canvas — no CSS transform tricks
+  // needed at display, and toDataURL on this canvas exports the displayed
+  // image directly.
+  const out = document.createElement('canvas');
+  out.width  = CANVAS_W;
+  out.height = CANVAS_H;
+  const ctx = out.getContext('2d');
+  ctx.translate(CANVAS_W, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(_courtCanvas, 0, 0);
+  return out;
+}
+
+// Populate the look-character preset row from CHAR_IDX_*. Filters out entries
+// with idx<0 (characters absent from the reference trial). Sorted by idx so
+// the row reads "0: Ema, 1: Hanna, ..." in stand order. Each button carries a
+// click handler that snaps yaw mult to that character's stand position; this
+// is the same one-way "snap to template" semantics as the dropdown version
+// — clicking the button doesn't track slider drags afterwards.
+async function populateTrialLookCharSelect() {
+  const mod = await getCourtModule();
+  const map = trialPrefab === 'court_final' ? mod.CHAR_IDX_COURT_FINAL : mod.CHAR_IDX_COURT;
+  const wrap = document.getElementById('trialLookCharPresets');
+  wrap.innerHTML = '';
+  const entries = Object.entries(map)
+    .filter(([, idx]) => idx >= 0)
+    .sort((a, b) => a[1] - b[1]);
+  for (const [name, idx] of entries) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'preset-btn';
+    btn.dataset.look = name;
+    const display = name.charAt(0).toUpperCase() + name.slice(1);
+    btn.textContent = `${idx}: ${display}`;
+    btn.addEventListener('click', () => {
+      trialLookChar = name;
+      refreshTrialLookCharActive();
+      applyYawMultFromTemplate();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+    wrap.appendChild(btn);
+  }
+  // Snap the selection to a valid entry if the previous choice doesn't exist
+  // for the current prefab (e.g. switching from court_final to court drops
+  // Hiro/Noah/Yuki). Skip when trialLookChar is empty — that's the "no
+  // preset selected" sentinel set by setTrialYawMult after the user drags
+  // the yaw slider to a non-preset value, and falling back to entries[0]
+  // here would resurrect Ema as active on the next page load.
+  if (trialLookChar !== ''
+      && !entries.some(([n]) => n === trialLookChar)
+      && entries.length > 0) {
+    trialLookChar = entries[0][0];
+  }
+  refreshTrialLookCharActive();
+}
+
+function refreshTrialLookCharActive() {
+  const wrap = document.getElementById('trialLookCharPresets');
+  if (!wrap) return;
+  for (const b of wrap.querySelectorAll('.preset-btn')) {
+    b.classList.toggle('active', b.dataset.look === trialLookChar);
+  }
+  // Composition pills depend on look char — see refreshTrialCompositionActive.
+  // Pairing the call here means every look-char update keeps composition in
+  // step automatically.
+  refreshTrialCompositionActive();
+}
+
+function refreshTrialCompositionActive() {
+  // Composition is a delta to the looked-at character's stand position
+  // (compShift in {0, +0.1, -0.1}). Without a look character there's no
+  // base to shift from, so disable the pills entirely. When disabled, no
+  // pill is marked active — the user can't pick a composition until they
+  // pick a character first.
+  const disabled = trialLookChar === '';
+  for (const b of document.querySelectorAll('#trialCompositionPresets .preset-btn')) {
+    b.classList.toggle('active', !disabled && b.dataset.comp === trialComposition);
+    b.disabled = disabled;
+  }
+}
+
+function refreshTrialZoomActive() {
+  for (const b of document.querySelectorAll('#trialZoomPresets .preset-btn')) {
+    b.classList.toggle('active', Number(b.dataset.zoom) === trialZoom);
+  }
+}
+
+// Find the (look char, composition) preset combo that produces yaw `v`, or
+// null if `v` doesn't match any. Each yaw value is uniquely produced by at
+// most one (idx, comp) pair: the three composition shifts (0, +0.1, -0.1)
+// are distinct and all stand indices are distinct. Tolerance handles float
+// error from 0.1 (e.g. 1 + 0.1 ≠ exactly 1.1 in IEEE 754).
+function findYawMultPreset(v) {
+  if (!_courtModule) return null;
+  const map = trialPrefab === 'court_final'
+    ? _courtModule.CHAR_IDX_COURT_FINAL
+    : _courtModule.CHAR_IDX_COURT;
+  for (const [name, idx] of Object.entries(map)) {
+    if (idx < 0) continue;
+    for (const [comp, shift] of Object.entries(TRIAL_COMPOSITIONS)) {
+      if (Math.abs(v - (idx + shift)) < 1e-6) return { lookChar: name, composition: comp };
+    }
+  }
+  return null;
+}
+
+// Setter for trialYawMult that also keeps the look-char + composition pills
+// in sync with the slider:
+//   - on a preset value (idx + {0, ±0.1}) → mark matching pills active.
+//   - on a non-preset value             → deselect both rows entirely.
+// Click-to-snap (applyYawMultFromTemplate) doesn't go through this setter
+// — it sets the pill state explicitly via its own click handler before
+// updating yaw — so the two paths converge to the same UI state without
+// stepping on each other.
+function setTrialYawMult(v) {
+  trialYawMult = v;
+  const preset = findYawMultPreset(v);
+  trialLookChar    = preset ? preset.lookChar    : '';
+  trialComposition = preset ? preset.composition : '';
+  refreshTrialLookCharActive();
+  refreshTrialCompositionActive();
+}
+
+// Find the zoom preset (1..4) whose (D, H) matches the given pair, or null
+// if none does. Each ZOOM_LEVELS entry is unique on (D, H), so at most one
+// match. Tolerance handles slider-step float noise.
+function findDistanceHeightZoomPreset(d, h) {
+  for (const [zoomStr, def] of Object.entries(TRIAL_ZOOM_LEVELS)) {
+    if (Math.abs(d - def.D) < 1e-6 && Math.abs(h - def.H) < 1e-6) {
+      return Number(zoomStr);
+    }
+  }
+  return null;
+}
+
+// Setters for trialDistance and trialHeight that also keep the zoom pill in
+// sync — same one-way snap-and-resolve relationship that yaw mult has with
+// the look-char + composition pills:
+//   - click a Zoom pill → applyZoomFromTemplate sets D + H to the preset.
+//   - drag distance/height onto a preset (D, H) → matching pill activates.
+//   - drag off-preset                          → all zoom pills deselect.
+// applyZoomFromTemplate doesn't go through these setters; the pill click
+// handler manages trialZoom + refreshTrialZoomActive directly.
+function syncZoomPillFromDH() {
+  const z = findDistanceHeightZoomPreset(trialDistance, trialHeight);
+  trialZoom = z;     // null = no preset; refreshTrialZoomActive matches none.
+  refreshTrialZoomActive();
+}
+function setTrialDistance(v) { trialDistance = v; syncZoomPillFromDH(); }
+function setTrialHeight(v)   { trialHeight   = v; syncZoomPillFromDH(); }
+
+// One-time trial UI population. Called when sceneType becomes 'trial' (either
+// on user click or saved-state restore). Populating earlier than necessary
+// would force the scene_court.js module download even for Adv-only users.
+let _trialUIInitPromise = null;
+function ensureTrialUIInit() {
+  if (!_trialUIInitPromise) _trialUIInitPromise = populateTrialLookCharSelect();
+  return _trialUIInitPromise;
+}
+
+// Slider <-> number sync. Each direct camera param has both a range and a
+// number input that show the same value; updating one keeps the other
+// honest, and a programmatic change (snap-to-template) updates both.
+function syncTrialPairUI(rangeId, numId, value, decimals = 2) {
+  const range = document.getElementById(rangeId);
+  const num   = document.getElementById(numId);
+  if (range) range.value = String(value);
+  // Use a fixed-decimal string for the number input so spinner clicks land
+  // on the configured step (e.g. 0.01 vs 0.1), and the displayed string is
+  // stable across saves/restores.
+  if (num)   num.value   = Number(value).toFixed(decimals);
+}
+function syncYawMultUI()  { syncTrialPairUI('trialYawMultRange',  'trialYawMultNum',  trialYawMult,  2); }
+function syncDistanceUI() { syncTrialPairUI('trialDistanceRange', 'trialDistanceNum', trialDistance, 1); }
+function syncHeightUI()   { syncTrialPairUI('trialHeightRange',   'trialHeightNum',   trialHeight,   2); }
+function syncRollUI()     { syncTrialPairUI('trialRollRange',     'trialRollNum',     trialRollDeg,  1); }
+function syncPitchUI()    { syncTrialPairUI('trialPitchRange',    'trialPitchNum',    trialPitchDeg, 1); }
+
+// Snap helpers — called from Look character / Composition / Zoom onchange to
+// reset the direct camera params to whatever the template implies. Subsequent
+// slider/number edits then pull away from the template freely.
+function applyYawMultFromTemplate() {
+  const compShift = TRIAL_COMPOSITIONS[trialComposition] ?? 0;
+  trialYawMult = trialTargetIdx() + compShift;
+  syncYawMultUI();
+}
+function applyZoomFromTemplate() {
+  const def = TRIAL_ZOOM_LEVELS[trialZoom];
+  if (!def) return;
+  trialDistance = def.D;
+  trialHeight   = def.H;
+  syncDistanceUI();
+  syncHeightUI();
+}
+
+// Apply both axes of sidebar visibility:
+//   - data-scene-type: must match the active sceneType (adv vs trial).
+//   - data-trial-advanced: only visible when trialAdvancedMode is true.
+// An element is shown only when *both* axes pass. Used on init, on
+// sceneType change, on advanced-toggle click, and after loadSceneConfig.
+function applySidebarVisibility() {
+  for (const el of document.querySelectorAll('[data-scene-type]')) {
+    const sceneOk    = el.dataset.sceneType === sceneType;
+    const advancedOk = !el.hasAttribute('data-trial-advanced') || trialAdvancedMode;
+    el.hidden = !(sceneOk && advancedOk);
+  }
+}
+
 async function renderScene() {
   await ensureFontsLoaded();
   const dst = new Float32Array(CANVAS_W * CANVAS_H * 4);
@@ -1484,6 +1919,15 @@ function refreshPlacementOverlays() {
   const previewContainer = document.getElementById('previewContainer');
   const canvas = previewContainer && previewContainer.querySelector('canvas');
   if (!canvas) return;
+  // Adv-only — trial mode's 3D court doesn't have per-character placements
+  // (path A, the next step, will introduce them as billboards on the
+  // lectern positions, but those won't be DOM overlays). Clear any leftover
+  // overlays from a prior Adv session so they don't paint over the trial
+  // canvas.
+  if (sceneType === 'trial') {
+    for (const el of previewContainer.querySelectorAll('.placement-overlay')) el.remove();
+    return;
+  }
   const displayRatio = canvas.clientHeight / CANVAS_H;
   if (!Number.isFinite(displayRatio) || displayRatio <= 0) return;
 
@@ -1614,7 +2058,7 @@ async function drawPreview() {
   const seq = ++renderSeq;
   let canvas;
   try {
-    canvas = await renderScene();
+    canvas = sceneType === 'trial' ? await renderTrialScene() : await renderScene();
   } catch (e) {
     console.error('Render failed:', e);
     return;
@@ -1640,11 +2084,15 @@ async function drawPreview() {
 // --- Export ---
 
 async function exportPng() {
-  const canvas = await renderScene();
+  const canvas = sceneType === 'trial' ? await renderTrialScene() : await renderScene();
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
-  const author = authorId || 'noauthor';   // 'noauthor' only fires if charsConfig had no entries for the active locale
-  a.download = `scene_adv_${locale}_${author}_${Date.now()}.png`;
+  if (sceneType === 'trial') {
+    a.download = `scene_trial_${trialPrefab}_${trialLookChar}_zoom${trialZoom}_${trialComposition}_${Date.now()}.png`;
+  } else {
+    const author = authorId || 'noauthor';   // 'noauthor' only fires if charsConfig had no entries for the active locale
+    a.download = `scene_adv_${locale}_${author}_${Date.now()}.png`;
+  }
   a.click();
   const btn = document.getElementById('exportBtn');
   const orig = btn.textContent;
@@ -1730,7 +2178,105 @@ function showModal(message) {
   populateBgSelect();
   populateAuthorSelect();
   document.getElementById('messageInput').value = messageText;
+  // Initial sidebar visibility: defaults to sceneType='adv', so Adv fields
+  // visible and Trial fields hidden until either the user picks 'Trial' from
+  // the dropdown or loadSceneConfig restores a saved 'trial' state.
+  applySidebarVisibility();
 
+  document.getElementById('sceneTypeSelect').onchange = async (e) => {
+    if (!SCENE_TYPES.has(e.target.value)) return;
+    sceneType = e.target.value;
+    applySidebarVisibility();
+    if (sceneType === 'trial') await ensureTrialUIInit();
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+  // Trial advanced toggle — flips visibility of the 5 direct-value sliders
+  // (yaw mult, distance, height, roll, pitch). The 4 template controls
+  // (Layout, Look character, Composition, Zoom) stay visible regardless.
+  // Same shape as the character editor's advancedToggle (app.js).
+  document.getElementById('trialAdvancedToggle').onclick = (e) => {
+    trialAdvancedMode = !trialAdvancedMode;
+    e.currentTarget.classList.toggle('active', trialAdvancedMode);
+    applySidebarVisibility();
+    scheduleSceneConfigSave();
+    // No scheduleRender — visibility doesn't change the camera, just what
+    // the user can see in the panel.
+  };
+  document.getElementById('trialPrefab').onchange = async (e) => {
+    if (!TRIAL_PREFABS.has(e.target.value)) return;
+    trialPrefab = e.target.value;
+    // Repopulate the look-character dropdown — court has 13 entries while
+    // court_final has 14, with different mappings (Hiro = stand 8 in
+    // court_final but absent in court).
+    await populateTrialLookCharSelect();
+    // The look-char index → yaw mapping is prefab-dependent, so re-snap.
+    applyYawMultFromTemplate();
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+  // Composition: 3 static preset buttons. Look-character buttons are wired
+  // inside populateTrialLookCharSelect (per-button click handler at create
+  // time, since the buttons don't exist until the lazy court module loads).
+  for (const b of document.querySelectorAll('#trialCompositionPresets .preset-btn')) {
+    b.addEventListener('click', () => {
+      trialComposition = b.dataset.comp;
+      refreshTrialCompositionActive();
+      applyYawMultFromTemplate();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+  }
+  // Zoom: 4 static preset buttons (Lvl 1..4). Snaps distance + height to
+  // the corresponding ZOOM_LEVELS preset when clicked, mirroring how
+  // Composition snaps yaw multiplier.
+  for (const b of document.querySelectorAll('#trialZoomPresets .preset-btn')) {
+    b.addEventListener('click', () => {
+      const v = Number(b.dataset.zoom);
+      if (!Number.isInteger(v) || v < 1 || v > 4) return;
+      trialZoom = v;
+      refreshTrialZoomActive();
+      applyZoomFromTemplate();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+  }
+
+  // Direct sliders + number inputs. Each pair shares the same underlying
+  // state var (trialYawMult / trialDistance / trialHeight); updating one
+  // input mirrors to the other so the displayed values never diverge.
+  // Slider drags use a tighter scheduleRender delay than number-input typing
+  // because pointer-drag generates an `input` event per pixel and we want
+  // the preview to feel live; typing into a number input fires per
+  // keystroke, where coalescing more aggressively is fine.
+  function bindTrialSliderPair(rangeId, numId, decimals, setter, dragDelay = 60, typeDelay = 120) {
+    const range = document.getElementById(rangeId);
+    const num   = document.getElementById(numId);
+    range.oninput = (e) => {
+      const v = Number(e.target.value);
+      if (!Number.isFinite(v)) return;
+      setter(v);
+      num.value = Number(v).toFixed(decimals);
+      scheduleRender(dragDelay);
+      scheduleSceneConfigSave();
+    };
+    num.oninput = (e) => {
+      const v = Number(e.target.value);
+      if (!Number.isFinite(v)) return;
+      setter(v);
+      range.value = String(v);
+      scheduleRender(typeDelay);
+      scheduleSceneConfigSave();
+    };
+  }
+  // Each setter also handles its corresponding pill row's deselect/snap-on-
+  // preset logic. setTrialYawMult covers look-char + composition pills;
+  // setTrialDistance / setTrialHeight cover the zoom pill row.
+  bindTrialSliderPair('trialYawMultRange',  'trialYawMultNum',  2, setTrialYawMult);
+  bindTrialSliderPair('trialDistanceRange', 'trialDistanceNum', 1, setTrialDistance);
+  bindTrialSliderPair('trialHeightRange',   'trialHeightNum',   2, setTrialHeight);
+  bindTrialSliderPair('trialRollRange',     'trialRollNum',     1, (v) => { trialRollDeg  = v; });
+  bindTrialSliderPair('trialPitchRange',    'trialPitchNum',    1, (v) => { trialPitchDeg = v; });
   document.getElementById('bgSelect').onchange = (e) => {
     bgPath = e.target.value || null;
     scheduleRender();
@@ -1776,6 +2322,35 @@ function showModal(message) {
 
   document.getElementById('resetBtn').onclick = async () => {
     if (!await showModal('Reset all customizations to default?')) return;
+    if (sceneType === 'trial') {
+      // Trial reset: dropdowns (templates) + direct camera values + roll +
+      // pitch. Locale isn't part of the trial preview, so it's deliberately
+      // left as-is — same behaviour as the standalone scene_court_test page.
+      trialPrefab       = 'court';
+      trialLookChar     = 'ema';
+      trialComposition  = 'center';
+      trialZoom         = 1;
+      trialRollDeg      = 0;
+      trialPitchDeg     = 0;
+      trialAdvancedMode = false;
+      document.getElementById('trialAdvancedToggle').classList.remove('active');
+      applySidebarVisibility();
+      document.getElementById('trialPrefab').value      = trialPrefab;
+      await populateTrialLookCharSelect();   // also refreshes look-char active class
+      refreshTrialCompositionActive();
+      refreshTrialZoomActive();
+      // Direct camera values reset to whatever the templates imply at
+      // defaults — applyZoomFromTemplate uses TRIAL_ZOOM_LEVELS[1] = (10, 5.2),
+      // applyYawMultFromTemplate uses idx 0 (ema) + comp 0 = 0. Roll/pitch
+      // have no template, just sync the slider+number pairs to 0.
+      applyYawMultFromTemplate();
+      applyZoomFromTemplate();
+      syncRollUI();
+      syncPitchUI();
+      scheduleRender();
+      scheduleSceneConfigSave();
+      return;
+    }
     setLocale('ko');
     messageText = '';
     bgPath = bgMeta.main && bgMeta.main[0] ? `${SCENE_BG_ROOT}/main/${bgMeta.main[0].file}` : null;
@@ -1903,6 +2478,11 @@ function showModal(message) {
     if (selectedSlug && sendPlacementToBack(selectedSlug)) refreshInspector();
   };
 
+  // Cancel any pending scheduleRender timer fired during load* setup
+  // (loadPlacements calls scheduleRender if any saved placements exist; that
+  // would race with the explicit drawPreview below and, on the trial path,
+  // duplicate the CourtRenderer construction).
+  if (renderTimer) { clearTimeout(renderTimer); renderTimer = null; }
   await drawPreview();
 })();
 

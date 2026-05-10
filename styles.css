@@ -103,6 +103,13 @@ body {
   box-shadow: 0 0 12px var(--accent-soft);
   transform: translateY(-1px);
 }
+/* Disabled preset pills — used by trial composition row when no look
+   character is selected (composition has nothing to apply to). */
+.preset-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.preset-btn:disabled:hover { background: var(--bg-card); color: var(--text-muted); }
 
 /* Layer groups */
 .group {
@@ -458,6 +465,11 @@ body {
    back to just the 6 px margin, while the panel gap still applies between
    adjacent .field blocks. */
 .field { display: block; }
+/* `.field { display: block }` would otherwise out-specificity the user-agent
+   `[hidden] { display: none }` rule, leaving sceneType-gated trial/adv fields
+   visible after their `hidden` attribute is set. Pin the hidden state with a
+   matching-specificity selector. */
+.field[hidden] { display: none; }
 /* When a .field stacks multiple .switch toggles (e.g. the Overlays group),
    give them a small inter-switch gap so they don't sit flush against each
    other. The first switch keeps the section-label's existing 6px margin. */
