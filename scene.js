@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260511b';
+const BUILD_VERSION = '20260511c';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -1264,10 +1264,11 @@ function ensureTrialLookCharValidForPrefab() {
 
 // Populate the look-character preset row from CHAR_IDX_*. Filters out
 // entries with idx<0 (characters absent from the reference trial). Sorted
-// by idx so the row reads "0: Ema, 1: Hanna, ..." in stand order. Each
-// button click snaps yaw mult to that character's stand position via
-// applyYawMultFromTemplate (one-way snap — subsequent slider drags are not
-// tracked back into the pill).
+// by stand index so the row reads "Ema, Hanna, Sherry, ..." left-to-right
+// in clockwise stand order around the court. Each button click snaps yaw
+// mult to that character's stand position via applyYawMultFromTemplate
+// (one-way snap — subsequent slider drags are not tracked back into the
+// pill).
 async function populateTrialLookCharSelect() {
   const mod = await getCourtModule();
   // Snap before painting so the active class lands on a real pill. Mutates
@@ -1279,13 +1280,12 @@ async function populateTrialLookCharSelect() {
   const entries = Object.entries(map)
     .filter(([, idx]) => idx >= 0)
     .sort((a, b) => a[1] - b[1]);
-  for (const [name, idx] of entries) {
+  for (const [name] of entries) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'preset-btn';
     btn.dataset.look = name;
-    const display = name.charAt(0).toUpperCase() + name.slice(1);
-    btn.textContent = `${idx}: ${display}`;
+    btn.textContent = name.charAt(0).toUpperCase() + name.slice(1);
     btn.addEventListener('click', () => {
       trialLookChar = name;
       // applyYawMultFromTemplate routes through setTrialYawMult, which
@@ -2364,9 +2364,13 @@ function showModal(message) {
   document.getElementById('resetBtn').onclick = async () => {
     if (!await showModal('Reset all customizations to default?')) return;
     if (sceneType === 'trial') {
-      // Trial reset: dropdowns (templates) + direct camera values + roll +
-      // pitch. Locale isn't part of the trial preview, so it's deliberately
-      // left as-is — same behaviour as the standalone scene_court_test page.
+      // Trial reset: locale + dropdowns (templates) + direct camera values
+      // + roll + pitch. Locale doesn't affect the current trial preview,
+      // but resetting it keeps trial and adv reset behaviour symmetric (so
+      // reset-from-trial-then-flip-to-adv behaves the same as reset-from-
+      // adv) and gives any future locale-dependent trial UI (stand
+      // placards, character labels) a sane starting point.
+      setLocale('ko');
       trialPrefab       = 'court';
       trialLookChar     = 'ema';
       trialComposition  = 'center';
