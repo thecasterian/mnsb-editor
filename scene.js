@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260511a';
+const BUILD_VERSION = '20260511b';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -1172,13 +1172,23 @@ async function getCourtModule() {
 function getCourtRenderer() {
   if (_courtRendererPromise) return _courtRendererPromise;
   _courtRendererPromise = (async () => {
-    const mod = await getCourtModule();
-    _courtCanvas = document.createElement('canvas');
-    _courtCanvas.width  = CANVAS_W;
-    _courtCanvas.height = CANVAS_H;
-    _courtRenderer = new mod.CourtRenderer(_courtCanvas, { prefab: trialPrefab });
-    await _courtRenderer.load(BUILD_VERSION);
-    return _courtRenderer;
+    try {
+      const mod = await getCourtModule();
+      _courtCanvas = document.createElement('canvas');
+      _courtCanvas.width  = CANVAS_W;
+      _courtCanvas.height = CANVAS_H;
+      _courtRenderer = new mod.CourtRenderer(_courtCanvas, { prefab: trialPrefab });
+      await _courtRenderer.load(BUILD_VERSION);
+      return _courtRenderer;
+    } catch (e) {
+      // Don't cache the rejection — a transient network failure on the
+      // first load shouldn't permanently break trial mode for the session.
+      // Clear the partial state so the next caller can retry from scratch.
+      _courtRendererPromise = null;
+      _courtCanvas          = null;
+      _courtRenderer        = null;
+      throw e;
+    }
   })();
   return _courtRendererPromise;
 }
@@ -1227,14 +1237,42 @@ async function renderTrialScene() {
   return out;
 }
 
-// Populate the look-character preset row from CHAR_IDX_*. Filters out entries
-// with idx<0 (characters absent from the reference trial). Sorted by idx so
-// the row reads "0: Ema, 1: Hanna, ..." in stand order. Each button carries a
-// click handler that snaps yaw mult to that character's stand position; this
-// is the same one-way "snap to template" semantics as the dropdown version
-// — clicking the button doesn't track slider drags afterwards.
+// Snap trialLookChar to a stand that exists in the current prefab.
+// Pure state mutation — does not touch the DOM. The '' sentinel (set by
+// setTrialYawMult after a non-preset slider drag) is preserved so the
+// "no look character" state survives prefab switches and reloads.
+//
+// Called from populateTrialLookCharSelect (so a re-paint always lands on a
+// valid pill); decoupled into its own helper so any future caller that
+// needs a valid trialLookChar before populate has run (e.g. one that calls
+// trialTargetIdx() directly) can do so explicitly.
+function ensureTrialLookCharValidForPrefab() {
+  if (!_courtModule) return;
+  if (trialLookChar === '') return;
+  const map = trialPrefab === 'court_final'
+    ? _courtModule.CHAR_IDX_COURT_FINAL
+    : _courtModule.CHAR_IDX_COURT;
+  const idx = map[trialLookChar];
+  if (typeof idx === 'number' && idx >= 0) return;
+  // Pick the entry with the lowest valid stand index — typically Ema (0).
+  let pick = null, pickIdx = Infinity;
+  for (const [n, i] of Object.entries(map)) {
+    if (i >= 0 && i < pickIdx) { pick = n; pickIdx = i; }
+  }
+  if (pick) trialLookChar = pick;
+}
+
+// Populate the look-character preset row from CHAR_IDX_*. Filters out
+// entries with idx<0 (characters absent from the reference trial). Sorted
+// by idx so the row reads "0: Ema, 1: Hanna, ..." in stand order. Each
+// button click snaps yaw mult to that character's stand position via
+// applyYawMultFromTemplate (one-way snap — subsequent slider drags are not
+// tracked back into the pill).
 async function populateTrialLookCharSelect() {
   const mod = await getCourtModule();
+  // Snap before painting so the active class lands on a real pill. Mutates
+  // trialLookChar; safe to run again at any later call site.
+  ensureTrialLookCharValidForPrefab();
   const map = trialPrefab === 'court_final' ? mod.CHAR_IDX_COURT_FINAL : mod.CHAR_IDX_COURT;
   const wrap = document.getElementById('trialLookCharPresets');
   wrap.innerHTML = '';
@@ -1250,23 +1288,16 @@ async function populateTrialLookCharSelect() {
     btn.textContent = `${idx}: ${display}`;
     btn.addEventListener('click', () => {
       trialLookChar = name;
-      refreshTrialLookCharActive();
+      // applyYawMultFromTemplate routes through setTrialYawMult, which
+      // reconciles both the look-char and composition pills — including the
+      // case where trialComposition was '' (deselected after a non-preset
+      // slider drag), in which case the resolved yaw lands on a Center
+      // preset and Center reactivates.
       applyYawMultFromTemplate();
       scheduleRender();
       scheduleSceneConfigSave();
     });
     wrap.appendChild(btn);
-  }
-  // Snap the selection to a valid entry if the previous choice doesn't exist
-  // for the current prefab (e.g. switching from court_final to court drops
-  // Hiro/Noah/Yuki). Skip when trialLookChar is empty — that's the "no
-  // preset selected" sentinel set by setTrialYawMult after the user drags
-  // the yaw slider to a non-preset value, and falling back to entries[0]
-  // here would resurrect Ema as active on the next page load.
-  if (trialLookChar !== ''
-      && !entries.some(([n]) => n === trialLookChar)
-      && entries.length > 0) {
-    trialLookChar = entries[0][0];
   }
   refreshTrialLookCharActive();
 }
@@ -1325,10 +1356,8 @@ function findYawMultPreset(v) {
 // in sync with the slider:
 //   - on a preset value (idx + {0, ±0.1}) → mark matching pills active.
 //   - on a non-preset value             → deselect both rows entirely.
-// Click-to-snap (applyYawMultFromTemplate) doesn't go through this setter
-// — it sets the pill state explicitly via its own click handler before
-// updating yaw — so the two paths converge to the same UI state without
-// stepping on each other.
+// All paths that change yaw (slider, number input, click-to-snap from
+// templates) route through this setter so pill state reconciles uniformly.
 function setTrialYawMult(v) {
   trialYawMult = v;
   const preset = findYawMultPreset(v);
@@ -1351,13 +1380,11 @@ function findDistanceHeightZoomPreset(d, h) {
 }
 
 // Setters for trialDistance and trialHeight that also keep the zoom pill in
-// sync — same one-way snap-and-resolve relationship that yaw mult has with
-// the look-char + composition pills:
-//   - click a Zoom pill → applyZoomFromTemplate sets D + H to the preset.
-//   - drag distance/height onto a preset (D, H) → matching pill activates.
-//   - drag off-preset                          → all zoom pills deselect.
-// applyZoomFromTemplate doesn't go through these setters; the pill click
-// handler manages trialZoom + refreshTrialZoomActive directly.
+// sync — all paths that change D/H (slider, number input, click-to-snap from
+// the Zoom template) route through these setters so pill reconciliation is
+// uniform:
+//   - drag/snap onto a preset (D, H) → matching pill activates.
+//   - drag off-preset                → all zoom pills deselect.
 function syncZoomPillFromDH() {
   const z = findDistanceHeightZoomPreset(trialDistance, trialHeight);
   trialZoom = z;     // null = no preset; refreshTrialZoomActive matches none.
@@ -1393,19 +1420,23 @@ function syncHeightUI()   { syncTrialPairUI('trialHeightRange',   'trialHeightNu
 function syncRollUI()     { syncTrialPairUI('trialRollRange',     'trialRollNum',     trialRollDeg,  1); }
 function syncPitchUI()    { syncTrialPairUI('trialPitchRange',    'trialPitchNum',    trialPitchDeg, 1); }
 
-// Snap helpers — called from Look character / Composition / Zoom onchange to
-// reset the direct camera params to whatever the template implies. Subsequent
-// slider/number edits then pull away from the template freely.
+// Snap helpers — called from Look character / Composition / Zoom onclick to
+// reset the direct camera params to whatever the template implies. Routed
+// through the setTrial* setters so pill state reconciles via the same
+// findYawMultPreset / findDistanceHeightZoomPreset path that the slider /
+// number inputs use; the snap value is by construction a preset, so the
+// matching pill ends up active. Subsequent slider/number edits then pull
+// away from the template freely.
 function applyYawMultFromTemplate() {
   const compShift = TRIAL_COMPOSITIONS[trialComposition] ?? 0;
-  trialYawMult = trialTargetIdx() + compShift;
+  setTrialYawMult(trialTargetIdx() + compShift);
   syncYawMultUI();
 }
 function applyZoomFromTemplate() {
   const def = TRIAL_ZOOM_LEVELS[trialZoom];
   if (!def) return;
-  trialDistance = def.D;
-  trialHeight   = def.H;
+  setTrialDistance(def.D);
+  setTrialHeight(def.H);
   syncDistanceUI();
   syncHeightUI();
 }
@@ -2088,7 +2119,13 @@ async function exportPng() {
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
   if (sceneType === 'trial') {
-    a.download = `scene_trial_${trialPrefab}_${trialLookChar}_zoom${trialZoom}_${trialComposition}_${Date.now()}.png`;
+    // After a non-preset slider drag, trialLookChar / trialComposition can be
+    // '' and trialZoom can be null — substitute 'custom' so the filename
+    // doesn't produce empty fragments or the literal 'null'.
+    const lookFrag = trialLookChar    || 'custom';
+    const compFrag = trialComposition || 'custom';
+    const zoomFrag = trialZoom != null ? trialZoom : 'custom';
+    a.download = `scene_trial_${trialPrefab}_${lookFrag}_zoom${zoomFrag}_${compFrag}_${Date.now()}.png`;
   } else {
     const author = authorId || 'noauthor';   // 'noauthor' only fires if charsConfig had no entries for the active locale
     a.download = `scene_adv_${locale}_${author}_${Date.now()}.png`;
@@ -2206,9 +2243,12 @@ function showModal(message) {
   document.getElementById('trialPrefab').onchange = async (e) => {
     if (!TRIAL_PREFABS.has(e.target.value)) return;
     trialPrefab = e.target.value;
-    // Repopulate the look-character dropdown — court has 13 entries while
+    // Repopulate the look-character pill row — court has 13 entries while
     // court_final has 14, with different mappings (Hiro = stand 8 in
-    // court_final but absent in court).
+    // court_final but absent in court). populateTrialLookCharSelect calls
+    // ensureTrialLookCharValidForPrefab internally, so the look-char will
+    // be snapped to a valid stand for the new prefab once the await
+    // resolves.
     await populateTrialLookCharSelect();
     // The look-char index → yaw mapping is prefab-dependent, so re-snap.
     applyYawMultFromTemplate();
@@ -2221,7 +2261,7 @@ function showModal(message) {
   for (const b of document.querySelectorAll('#trialCompositionPresets .preset-btn')) {
     b.addEventListener('click', () => {
       trialComposition = b.dataset.comp;
-      refreshTrialCompositionActive();
+      // applyYawMultFromTemplate → setTrialYawMult reconciles the pills.
       applyYawMultFromTemplate();
       scheduleRender();
       scheduleSceneConfigSave();
@@ -2235,7 +2275,8 @@ function showModal(message) {
       const v = Number(b.dataset.zoom);
       if (!Number.isInteger(v) || v < 1 || v > 4) return;
       trialZoom = v;
-      refreshTrialZoomActive();
+      // applyZoomFromTemplate → setTrialDistance / setTrialHeight →
+      // syncZoomPillFromDH reconciles the pill (resolves to v).
       applyZoomFromTemplate();
       scheduleRender();
       scheduleSceneConfigSave();
