@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260511c">
+<link rel="stylesheet" href="styles.css?v=20260511g">
 </head>
 <body class="scene-editor">
 
@@ -88,69 +88,87 @@
     </select>
   </div>
 
-  <div class="field" data-scene-type="trial">
-    <div class="section-label">Look character</div>
-    <div class="presets" id="trialLookCharPresets"></div>
-  </div>
-
-  <div class="field" data-scene-type="trial">
-    <div class="section-label">Composition</div>
-    <div class="presets" id="trialCompositionPresets">
-      <button class="preset-btn" type="button" data-comp="left">Left</button>
-      <button class="preset-btn active" type="button" data-comp="center">Center</button>
-      <button class="preset-btn" type="button" data-comp="right">Right</button>
-    </div>
-  </div>
-
-  <div class="field" data-scene-type="trial">
-    <div class="section-label">Zoom Level</div>
-    <div class="presets" id="trialZoomPresets">
-      <button class="preset-btn active" type="button" data-zoom="1">1</button>
-      <button class="preset-btn" type="button" data-zoom="2">2</button>
-      <button class="preset-btn" type="button" data-zoom="3">3</button>
-      <button class="preset-btn" type="button" data-zoom="4">4</button>
-    </div>
-  </div>
-
   <button class="advanced-toggle" id="trialAdvancedToggle" type="button" data-scene-type="trial">Advanced</button>
 
-  <div class="field" data-scene-type="trial" data-trial-advanced>
-    <div class="section-label">Yaw multiplier</div>
-    <div class="inspector-row">
-      <input class="inspector-range" type="range" id="trialYawMultRange" min="0" max="14" step="0.05" value="0" list="trialYawMultTicks">
-      <input class="inspector-num inspector-scale-num" type="number" id="trialYawMultNum" step="0.05" value="0">
+  <div id="groups" data-scene-type="trial">
+    <div class="group">
+      <div class="group-header">
+        <span>Look character</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="group-options group-options-stack">
+        <div class="layer-row" id="trialLookCharPresets"></div>
+        <div class="group-divider"></div>
+        <div class="layer-row" id="trialCompositionPresets">
+          <button class="layer-btn" type="button" data-comp="left">Left</button>
+          <button class="layer-btn active" type="button" data-comp="center">Center</button>
+          <button class="layer-btn" type="button" data-comp="right">Right</button>
+        </div>
+        <div class="group-divider" data-trial-advanced></div>
+        <div class="trial-slider" data-trial-advanced>
+          <div class="trial-slider-label">Yaw multiplier</div>
+          <div class="inspector-row">
+            <input class="inspector-range" type="range" id="trialYawMultRange" min="0" max="14" step="0.05" value="0" list="trialYawMultTicks">
+            <input class="inspector-num inspector-scale-num" type="number" id="trialYawMultNum" step="0.05" value="0">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="field" data-scene-type="trial" data-trial-advanced>
-    <div class="section-label">Distance (m)</div>
-    <div class="inspector-row">
-      <input class="inspector-range" type="range" id="trialDistanceRange" min="4" max="15" step="0.1" value="10" list="trialDistanceTicks">
-      <input class="inspector-num inspector-scale-num" type="number" id="trialDistanceNum" step="0.1" value="10">
+    <div class="group">
+      <div class="group-header">
+        <span>Zoom</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="group-options group-options-stack">
+        <div class="layer-row" id="trialZoomPresets">
+          <button class="layer-btn active" type="button" data-zoom="1">1</button>
+          <button class="layer-btn" type="button" data-zoom="2">2</button>
+          <button class="layer-btn" type="button" data-zoom="3">3</button>
+          <button class="layer-btn" type="button" data-zoom="4">4</button>
+        </div>
+        <div class="group-divider" data-trial-advanced></div>
+        <div class="trial-slider" data-trial-advanced>
+          <div class="trial-slider-label">Distance (m)</div>
+          <div class="inspector-row">
+            <input class="inspector-range" type="range" id="trialDistanceRange" min="4" max="15" step="0.1" value="10" list="trialDistanceTicks">
+            <input class="inspector-num inspector-scale-num" type="number" id="trialDistanceNum" step="0.1" value="10">
+          </div>
+        </div>
+        <div class="trial-slider" data-trial-advanced>
+          <div class="trial-slider-label">Height (m)</div>
+          <div class="inspector-row">
+            <input class="inspector-range" type="range" id="trialHeightRange" min="5" max="6" step="0.01" value="5.2" list="trialHeightTicks">
+            <input class="inspector-num inspector-scale-num" type="number" id="trialHeightNum" step="0.01" value="5.2">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="field" data-scene-type="trial" data-trial-advanced>
-    <div class="section-label">Height (m)</div>
-    <div class="inspector-row">
-      <input class="inspector-range" type="range" id="trialHeightRange" min="5" max="6" step="0.01" value="5.2" list="trialHeightTicks">
-      <input class="inspector-num inspector-scale-num" type="number" id="trialHeightNum" step="0.01" value="5.2">
+    <div class="group">
+      <div class="group-header">
+        <span>Roll (°)</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="group-options group-options-stack">
+        <div class="inspector-row">
+          <input class="inspector-range" type="range" id="trialRollRange" min="-10" max="10" step="0.1" value="0" list="trialRollTicks">
+          <input class="inspector-num inspector-scale-num" type="number" id="trialRollNum" step="0.1" value="0">
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="field" data-scene-type="trial" data-trial-advanced>
-    <div class="section-label">Roll (°)</div>
-    <div class="inspector-row">
-      <input class="inspector-range" type="range" id="trialRollRange" min="-10" max="10" step="0.1" value="0" list="trialRollTicks">
-      <input class="inspector-num inspector-scale-num" type="number" id="trialRollNum" step="0.1" value="0">
-    </div>
-  </div>
-
-  <div class="field" data-scene-type="trial" data-trial-advanced>
-    <div class="section-label">Pitch (°)</div>
-    <div class="inspector-row">
-      <input class="inspector-range" type="range" id="trialPitchRange" min="-4" max="4" step="0.1" value="0" list="trialPitchTicks">
-      <input class="inspector-num inspector-scale-num" type="number" id="trialPitchNum" step="0.1" value="0">
+    <div class="group">
+      <div class="group-header">
+        <span>Pitch (°)</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="group-options group-options-stack">
+        <div class="inspector-row">
+          <input class="inspector-range" type="range" id="trialPitchRange" min="-4" max="4" step="0.1" value="0" list="trialPitchTicks">
+          <input class="inspector-num inspector-scale-num" type="number" id="trialPitchNum" step="0.1" value="0">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -294,6 +312,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260511c"></script>
+<script type="module" src="scene.js?v=20260511g"></script>
 </body>
 </html>

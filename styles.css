@@ -150,6 +150,43 @@ body {
   padding-top: 0;
   padding-bottom: 0;
 }
+/* Vertical-stack variant of .group-options for groups whose contents are
+   labeled rows rather than wrapping pills (e.g. the trial scene editor's
+   Advanced group, which stacks five labeled sliders). */
+.group-options-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+/* Trial-scene Advanced group: each slider gets a small uppercase label
+   above the slider+number-input row. The wrapper is just a vertical pair;
+   spacing between sliders comes from .group-options-stack's gap. */
+.trial-slider-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+/* Inspector-row outside a group keeps its 8 px stack margin (placement
+   inspector). Inside a group, .group-options-stack's gap is the sole
+   spacing source, so kill the extra margin. */
+.group-options .inspector-row { margin-bottom: 0; }
+
+/* Inner row of buttons inside a stacked group — used to host two .layer-btn
+   rows under one .group (e.g. Look character + Composition merged), wrapping
+   horizontally like the default .group-options layout. */
+.layer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.group-divider {
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
 
 .group-status {
   font-size: 12px;

@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260511c';
+const BUILD_VERSION = '20260511g';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -92,10 +92,9 @@ let trialDistance = 10;
 let trialHeight   = 5.2;
 let trialRollDeg  = 0;               // free numeric, no preset shortcut
 let trialPitchDeg = 0;
-// Advanced mode hides/shows the direct-value sliders (yaw mult, distance,
-// height, roll, pitch). The four template controls (Layout, Look character,
-// Composition, Zoom) stay visible in either mode. Mirrors the character
-// editor's `advancedMode` toggle.
+// Advanced mode gates the three direct-camera sliders (yaw multiplier,
+// distance, height) that live under the Look character / Zoom groups.
+// Roll and Pitch have their own groups and stay visible in either mode.
 let trialAdvancedMode = false;
 let sceneMeta = null;               // scene/adv/meta.json: { canvas_size, prefabs: [...] }
 let charsConfig = null;
@@ -296,8 +295,8 @@ function loadSceneConfig({ render = true } = {}) {
       ensureTrialUIInit();
     }
   }
-  // Restore advanced-mode flag before the visibility apply below so the
-  // direct-value field rows render hidden vs visible correctly on load.
+  // Restore advanced-mode flag before the visibility apply so the gated
+  // slider rows render hidden vs visible correctly on load.
   if (typeof data.trialAdvancedMode === 'boolean') {
     trialAdvancedMode = data.trialAdvancedMode;
     document.getElementById('trialAdvancedToggle').classList.toggle('active', trialAdvancedMode);
@@ -1283,7 +1282,7 @@ async function populateTrialLookCharSelect() {
   for (const [name] of entries) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'preset-btn';
+    btn.className = 'layer-btn';
     btn.dataset.look = name;
     btn.textContent = name.charAt(0).toUpperCase() + name.slice(1);
     btn.addEventListener('click', () => {
@@ -1305,7 +1304,7 @@ async function populateTrialLookCharSelect() {
 function refreshTrialLookCharActive() {
   const wrap = document.getElementById('trialLookCharPresets');
   if (!wrap) return;
-  for (const b of wrap.querySelectorAll('.preset-btn')) {
+  for (const b of wrap.querySelectorAll('.layer-btn')) {
     b.classList.toggle('active', b.dataset.look === trialLookChar);
   }
   // Composition pills depend on look char — see refreshTrialCompositionActive.
@@ -1321,14 +1320,14 @@ function refreshTrialCompositionActive() {
   // pill is marked active — the user can't pick a composition until they
   // pick a character first.
   const disabled = trialLookChar === '';
-  for (const b of document.querySelectorAll('#trialCompositionPresets .preset-btn')) {
+  for (const b of document.querySelectorAll('#trialCompositionPresets .layer-btn')) {
     b.classList.toggle('active', !disabled && b.dataset.comp === trialComposition);
     b.disabled = disabled;
   }
 }
 
 function refreshTrialZoomActive() {
-  for (const b of document.querySelectorAll('#trialZoomPresets .preset-btn')) {
+  for (const b of document.querySelectorAll('#trialZoomPresets .layer-btn')) {
     b.classList.toggle('active', Number(b.dataset.zoom) === trialZoom);
   }
 }
@@ -1441,16 +1440,19 @@ function applyZoomFromTemplate() {
   syncHeightUI();
 }
 
-// Apply both axes of sidebar visibility:
+// Toggle each section in the sidebar along two axes:
 //   - data-scene-type: must match the active sceneType (adv vs trial).
-//   - data-trial-advanced: only visible when trialAdvancedMode is true.
-// An element is shown only when *both* axes pass. Used on init, on
-// sceneType change, on advanced-toggle click, and after loadSceneConfig.
+//   - data-trial-advanced: trial-only sub-rows (yaw mult / distance /
+//     height sliders) shown only when advanced mode is on. Roll and Pitch
+//     have their own groups and don't carry this attribute.
+// The two queries are independent — a row carrying both attributes only
+// becomes visible when both axes pass.
 function applySidebarVisibility() {
   for (const el of document.querySelectorAll('[data-scene-type]')) {
-    const sceneOk    = el.dataset.sceneType === sceneType;
-    const advancedOk = !el.hasAttribute('data-trial-advanced') || trialAdvancedMode;
-    el.hidden = !(sceneOk && advancedOk);
+    el.hidden = el.dataset.sceneType !== sceneType;
+  }
+  for (const el of document.querySelectorAll('[data-trial-advanced]')) {
+    el.hidden = !trialAdvancedMode;
   }
 }
 
@@ -2228,17 +2230,23 @@ function showModal(message) {
     scheduleRender();
     scheduleSceneConfigSave();
   };
-  // Trial advanced toggle — flips visibility of the 5 direct-value sliders
-  // (yaw mult, distance, height, roll, pitch). The 4 template controls
-  // (Layout, Look character, Composition, Zoom) stay visible regardless.
-  // Same shape as the character editor's advancedToggle (app.js).
+  // Group headers fold each trial section open/closed (mirrors the
+  // character editor's #groups). All trial groups default expanded;
+  // collapse state lives in the DOM only and isn't persisted across reloads.
+  for (const header of document.querySelectorAll('#groups .group-header')) {
+    header.addEventListener('click', () => {
+      header.parentElement.classList.toggle('collapsed');
+    });
+  }
+  // Advanced toggle gates the three direct-camera sliders (yaw mult,
+  // distance, height) that live as data-trial-advanced sub-rows under the
+  // Look character / Zoom groups. No scheduleRender — visibility doesn't
+  // change the camera, just what the user can see in the panel.
   document.getElementById('trialAdvancedToggle').onclick = (e) => {
     trialAdvancedMode = !trialAdvancedMode;
     e.currentTarget.classList.toggle('active', trialAdvancedMode);
     applySidebarVisibility();
     scheduleSceneConfigSave();
-    // No scheduleRender — visibility doesn't change the camera, just what
-    // the user can see in the panel.
   };
   document.getElementById('trialPrefab').onchange = async (e) => {
     if (!TRIAL_PREFABS.has(e.target.value)) return;
@@ -2258,7 +2266,7 @@ function showModal(message) {
   // Composition: 3 static preset buttons. Look-character buttons are wired
   // inside populateTrialLookCharSelect (per-button click handler at create
   // time, since the buttons don't exist until the lazy court module loads).
-  for (const b of document.querySelectorAll('#trialCompositionPresets .preset-btn')) {
+  for (const b of document.querySelectorAll('#trialCompositionPresets .layer-btn')) {
     b.addEventListener('click', () => {
       trialComposition = b.dataset.comp;
       // applyYawMultFromTemplate → setTrialYawMult reconciles the pills.
@@ -2270,7 +2278,7 @@ function showModal(message) {
   // Zoom: 4 static preset buttons (Lvl 1..4). Snaps distance + height to
   // the corresponding ZOOM_LEVELS preset when clicked, mirroring how
   // Composition snaps yaw multiplier.
-  for (const b of document.querySelectorAll('#trialZoomPresets .preset-btn')) {
+  for (const b of document.querySelectorAll('#trialZoomPresets .layer-btn')) {
     b.addEventListener('click', () => {
       const v = Number(b.dataset.zoom);
       if (!Number.isInteger(v) || v < 1 || v > 4) return;
@@ -2379,6 +2387,10 @@ function showModal(message) {
       trialPitchDeg     = 0;
       trialAdvancedMode = false;
       document.getElementById('trialAdvancedToggle').classList.remove('active');
+      // All trial groups default expanded — clear any user-toggled .collapsed.
+      for (const g of document.querySelectorAll('#groups .group')) {
+        g.classList.remove('collapsed');
+      }
       applySidebarVisibility();
       document.getElementById('trialPrefab').value      = trialPrefab;
       await populateTrialLookCharSelect();   // also refreshes look-char active class
