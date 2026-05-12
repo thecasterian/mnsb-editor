@@ -24,21 +24,27 @@ Targets:
                        Albedo for Court_Step (raised brick band around
                        the floor).
   Bricks 2 MaskMap     (1024×1024, RGB) general-prefabs
-                       Court_Step mask channel (smoothness / occlusion /
-                       metallic packed per-channel, per Unity's HDRP/URP
-                       lit-shader convention).
+                       Court_Step mask channel. Saved REPACKED to
+                       Three.js's expected ORM layout (R=AO, G=Roughness,
+                       B=Metallic) rather than Unity's URP packing
+                       (R=Metal, G=AO, A=Smoothness). One PNG can be
+                       fed to MeshStandardMaterial's aoMap, roughnessMap,
+                       and metalnessMap slots simultaneously.
   Bricks 2 Normal      (1024×1024, RGB) general-prefabs
-                       Court_Step tangent-space normal. ``render_court_3d.py``
-                       (commit 37d8b48) currently samples this as a fake-AO
-                       modulator (groove darkening) rather than as a true
-                       normal map; a more complete renderer would use it
-                       for proper per-pixel lighting.
+                       Court_Step tangent-space normal. Saved REPACKED
+                       to standard XYZ (R=X, G=Y, B=Z reconstructed)
+                       rather than Unity's DXT5nm packing (X in A, R=1
+                       filler). Downstream consumers read .rgb directly.
   Carpet 4 BaseMap     (2048×2048, RGB) general-prefabs
                        Albedo for Court_Floor.
   Carpet 4 MaskMap     (2048×2048, RGB) general-prefabs
-                       Court_Floor mask channel.
+                       Court_Floor mask channel. Saved REPACKED to
+                       Three.js ORM layout (same swizzle as Bricks 2
+                       MaskMap) so the floor's PBR material can share
+                       it across aoMap / roughnessMap / metalnessMap.
   Carpet 4 Normal      (2048×2048, RGB) general-prefabs
-                       Court_Floor tangent-space normal.
+                       Court_Floor tangent-space normal. Saved REPACKED
+                       to standard XYZ (same swizzle as Bricks 2 Normal).
 
 The current ``render_court_3d.py`` only samples three of the six PBR maps
 (both BaseMaps + Bricks 2 Normal as a fake-AO hack); the other three —
@@ -94,7 +100,9 @@ import struct
 import sys
 from pathlib import Path
 
+import numpy as np
 import UnityPy
+from PIL import Image
 
 
 # Texture name -> required (width, height) or None for any.
@@ -110,6 +118,80 @@ TARGET_TEXTURES: dict[str, tuple[int, int] | None] = {
     "Carpet 4 BaseMap":   None,
     "Carpet 4 MaskMap":   None,
     "Carpet 4 Normal":    None,
+}
+
+
+def _swizzle_dxt5nm_to_xyz(img: Image.Image) -> Image.Image:
+    """Repack a Unity DXT5nm tangent-space normal map to standard XYZ.
+
+    Unity ships DXT5-compressed normals with X stored in the alpha channel
+    (DXT5 alpha bit pool gives it more precision than green), Y in the
+    green channel, and R = 1.0 filler. UnityPy decompresses to PNG
+    preserving that channel layout — meaning downstream consumers reading
+    the file as ``texture.rgb`` interpret R (filler) as X, which is
+    catastrophically wrong.
+
+    Repack to the standard tangent-space layout consumed by Three.js and
+    every other engine outside Unity:
+        R = X = (original A)
+        G = Y = (original G)
+        B = Z = √(max(0, 1 − X² − Y²))   (reconstructed)
+    Alpha is dropped. Z is reconstructed deterministically rather than
+    copied from the original blue (the source's B channel turns out to be
+    a duplicate of G in the carpet PNG and meaningless in the brick PNG —
+    neither is a valid Z)."""
+    arr = np.asarray(img.convert("RGBA"), dtype=np.float32) / 255.0
+    x = arr[..., 3] * 2.0 - 1.0
+    y = arr[..., 1] * 2.0 - 1.0
+    z = np.sqrt(np.clip(1.0 - x * x - y * y, 0.0, 1.0))
+    out = np.stack(
+        [
+            (x * 0.5 + 0.5),
+            (y * 0.5 + 0.5),
+            (z * 0.5 + 0.5),
+        ],
+        axis=-1,
+    )
+    return Image.fromarray(np.clip(out * 255.0, 0, 255).astype(np.uint8), mode="RGB")
+
+
+def _repack_unity_maskmap_to_orm(img: Image.Image) -> Image.Image:
+    """Repack a Unity URP MaskMap to Three.js's ORM packed-map layout.
+
+    Unity URP MaskMap channels (per Court_Step.mat):
+        R = Metallic
+        G = Occlusion
+        B = Detail mask  (unused by our pipeline)
+        A = Smoothness
+
+    Three.js's MeshStandardMaterial expects a packed map where:
+        aoMap reads        .r
+        roughnessMap reads .g
+        metalnessMap reads .b
+    So the three slots can share one packed PNG. Repack to:
+        R = Occlusion         = (original G)
+        G = Roughness         = 1 − (original A)         (smoothness → roughness)
+        B = Metallic          = (original R)
+    Alpha is dropped."""
+    arr = np.asarray(img.convert("RGBA"))
+    out = np.stack(
+        [
+            arr[..., 1],          # AO        from Unity G
+            255 - arr[..., 3],    # Roughness from inverted Unity A (smoothness)
+            arr[..., 0],          # Metallic  from Unity R
+        ],
+        axis=-1,
+    )
+    return Image.fromarray(out, mode="RGB")
+
+
+# Per-texture post-processing applied after UnityPy decompresses to PIL.
+# Keyed by m_Name; absent entries are saved as-is.
+TEXTURE_POSTPROCESS = {
+    "Bricks 2 Normal":  _swizzle_dxt5nm_to_xyz,
+    "Carpet 4 Normal":  _swizzle_dxt5nm_to_xyz,
+    "Bricks 2 MaskMap": _repack_unity_maskmap_to_orm,
+    "Carpet 4 MaskMap": _repack_unity_maskmap_to_orm,
 }
 
 # Mesh spec keyed by vertex count. Both court meshes have m_Name='default'
@@ -218,7 +300,11 @@ def build(out_root: Path, bundle_paths: list[Path]) -> tuple[dict, dict]:
                 if constraint is not None and (d.m_Width, d.m_Height) != constraint:
                     continue
                 out_path = out_root / f"{name}.png"
-                d.image.save(out_path)
+                img = d.image
+                postprocess = TEXTURE_POSTPROCESS.get(name)
+                if postprocess is not None:
+                    img = postprocess(img)
+                img.save(out_path)
                 saved_textures[name] = out_path
 
             elif obj.type.name == "Mesh":

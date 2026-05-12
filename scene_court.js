@@ -53,23 +53,17 @@ const STAND_H = 2.8;
 
 // --- Material tints (URP `_BaseColor` per .mat file, LINEAR RGB) ---
 //
-// Verbatim from the prefab .mat YAML files. The custom shader applies them
-// as `tex_rgb * tint * lightFactor`, matching render_court_3d.py's empirical
-// math (which works in sRGB-encoded space — non-physical, but matches the
-// in-game look).
+// Verbatim from the prefab .mat YAML files. Used as MeshStandardMaterial
+// `color`, which is multiplied with the sRGB-decoded albedo before the
+// BRDF — matching how Unity's URP/Lit applies `_BaseColor`.
 //
-// CARPET_DIM scales TINT_FLOOR down: under our lighting model the floor is
-// the only surface with both full direct (it's directly under the spot) AND
-// full sky-color ambient (N.y = 1 picks the bright SKY end of the hemisphere
-// gradient). That makes it pop visually compared to the wall (side-facing,
-// equator ambient only) and step rim (no direct contribution). Dimming the
-// tint balances it. Tune in [0.4, 1.0]; 0.5 ≈ half of prefab albedo.
-const CARPET_DIM = 1.0;
-const STEP_DIM   = 1.0;
-const STAND_DIM  = 0.7;
-const TINT_FLOOR = [0.415, 0.159, 0.159].map((c) => c * CARPET_DIM);
-const TINT_STEP  = [0.217, 0.134, 0.124].map((c) => c * STEP_DIM);   // Court_Step.mat  — dark brown stone
-const TINT_STAND = [STAND_DIM, STAND_DIM, STAND_DIM];                // Court_Stand.mat — uniform dim
+// The *_DIM constants are per-surface multiplicative tuning knobs (default
+// 1.0 = prefab albedo). Drop below 1 to darken a surface without changing
+// the lighting; useful for balancing against the SpotLight intensity if
+// any single surface reads too bright after a renderer change.
+const TINT_FLOOR = [0.847, 0.118, 0.130];
+const TINT_STEP  = [0.120, 0.051, 0.047];   // Court_Step.mat  — dark brown stone
+const TINT_STAND = [1.0,   1.0,   1.0  ];   // Court_Stand.mat — uniform dim
 const TINT_WALLS = [1.0,   1.0,   1.0  ];   // Court_Wall*.mat — no tint
 
 // Wall material UV (m_Scale.x, m_Offset.x) per half-cylinder, matching the
@@ -120,12 +114,16 @@ const WALL_Y_TILT_RAD = -Math.PI / 24;     // = −7.5°, matches prefab quatern
 const FLOOR_REPEAT  = 2;          // carpet tiles 2× across the 61 × 61 m floor
 
 // --- Lighting ---
-// All lighting constants (spot, hemisphere, exposure floor, top-face damp,
-// cone angles, falloff, etc.) are baked into the custom fragment shader
-// PYTHON_LIT_FS below as `const` declarations — direct ports of
-// render_court_3d.py's `compute_pixel_lighting`. No Three.js Light objects
-// are added to the scene because the custom ShaderMaterial doesn't read
-// them; tweak the shader-side constants if you need to adjust lighting.
+// Mixed pipeline: the floor and step use MeshStandardMaterial (Three.js's
+// URP/Lit approximation), driven by a SpotLight + HemisphereLight added
+// to the scene in CourtRenderer's constructor. The SpotLight parameters
+// mirror Court(_Final).prefab's `/Court/Lighting/SpotLight` exactly.
+//
+// The walls and stands stay on the custom PYTHON_LIT_FS shader below —
+// its empirical hemisphere ambient + flat exposure floor renders the
+// panorama and lecterns more legibly than the prefab's spot-dominated
+// PBR setup. ShaderMaterials ignore scene lights, so the SpotLight and
+// HemisphereLight only affect the two PBR surfaces.
 
 // --- Helpers ---
 
@@ -163,6 +161,27 @@ function setRepeat(tex, repeatX, repeatY = repeatX) {
   tex.repeat.set(repeatX, repeatY);
   return tex;
 }
+
+// Inject an sRGB gamma encode at the end of a MeshStandardMaterial's
+// fragment shader. We keep renderer.outputColorSpace = LinearSRGBColorSpace
+// so Three.js doesn't re-encode the output, which means PBR materials
+// would otherwise write linear values into a framebuffer treated as
+// sRGB-encoded — too bright. The chunk replacement runs after the
+// (no-op-under-Linear) <colorspace_fragment> chunk, so the encode lands
+// just before gl_FragColor is presented. Simple gamma 2.2 approximation
+// — matches the legacy Three.js encode path and is consistent across
+// the four PBR surfaces.
+function applyOutputSRGBEncode(material) {
+  material.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <colorspace_fragment>',
+      '#include <colorspace_fragment>\n' +
+      '  gl_FragColor.rgb = pow(max(gl_FragColor.rgb, vec3(0.0)), vec3(1.0 / 2.2));',
+    );
+  };
+  return material;
+}
+
 
 // ---------------------------------------------------------------------------
 // Python-faithful lit material — direct port of `compute_pixel_lighting` and
@@ -212,7 +231,7 @@ const vec3  EQUATOR_RGB   = vec3(0.114, 0.125, 0.133);
 const float DIRECT_GAIN   = 4.0;
 const float AMBIENT_GAIN  = 1.3;
 const float TOP_DAMP      = 0.6;
-const float EXPOSURE      = 1.3;
+const float EXPOSURE      = 0.5;
 const float FALLOFF_K     = 30.0;
 const float RANGE_M       = 90.0;
 const float OUTER_COS     = 0.342020143;   // cos(70°) — outer cone half-angle
@@ -400,29 +419,38 @@ function createPythonLitMaterial(opts) {
   });
 }
 
+
 // --- Geometry builders ---
 
 function buildFloor(t) {
   const geo = new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE);
   geo.rotateX(-Math.PI / 2);
 
-  // Carpet diffuse + normal must tile identically — the shader samples both
-  // at the same transformed UV (uMapTransform comes from carpetMap's
-  // matrix), so they need matching repeat/offset.
-  setRepeat(t.carpetMap,    FLOOR_REPEAT);
-  setRepeat(t.carpetNormal, FLOOR_REPEAT);
+  // Material parameters mirror Court_Floor.mat: URP/Lit, BaseMap+BumpMap
+  // tile (2,2), MetallicGlossMap supplies metal+smoothness, no
+  // OcclusionMap (the prefab's _OCCLUSIONMAP keyword is NOT set even
+  // though _OcclusionStrength has a default 1.0 — so URP/Lit's AO term
+  // is skipped). We mirror that by NOT wiring carpetMaskMap into aoMap.
+  setRepeat(t.carpetMap,     FLOOR_REPEAT);
+  setRepeat(t.carpetNormal,  FLOOR_REPEAT);
+  setRepeat(t.carpetMaskMap, FLOOR_REPEAT);
 
-  const mat = createPythonLitMaterial({
-    map:         t.carpetMap,
-    tint:        TINT_FLOOR,
-    normalMap:   t.carpetNormal,
-    // Carpet relief is gentle weave; full strength looks fine. Tune this
-    // down (0.3-0.6) if grazing-angle highlights feel too busy.
-    normalScale: 1.0,
-    // Bump cavity darken: dims tilted texels (weave creases) regardless
-    // of light direction — cheap proxy for AO without a mask map.
-    bumpDarken:  0.5,
+  t.carpetMap.colorSpace     = THREE.SRGBColorSpace;
+  t.carpetNormal.colorSpace  = THREE.NoColorSpace;
+  t.carpetMaskMap.colorSpace = THREE.NoColorSpace;
+
+  const mat = new THREE.MeshStandardMaterial({
+    map:           t.carpetMap,
+    color:         new THREE.Color().fromArray(TINT_FLOOR),
+    normalMap:     t.carpetNormal,
+    normalScale:   new THREE.Vector2(1, 1),
+    roughnessMap:  t.carpetMaskMap,
+    roughness:     1.0,                // ×roughnessMap.g (mean ≈ 0.88 → matte)
+    metalnessMap:  t.carpetMaskMap,
+    metalness:     1.0,                // ×metalnessMap.b (= 0 → dielectric)
   });
+  applyOutputSRGBEncode(mat);
+
   return new THREE.Mesh(geo, mat);
 }
 
@@ -443,6 +471,13 @@ function buildWalls(prefab, t, wallMesh) {
 
   const halfUV = WALL_HALF_UV[prefab];
   if (!halfUV) throw new Error(`Unknown prefab ${prefab}`);
+
+  // Walls use the custom PYTHON_LIT_FS shader, not PBR — its empirical
+  // hemisphere ambient + exposure floor lights the panorama more evenly
+  // than the prefab's authored SpotLight alone. The custom shader reads
+  // raw sRGB byte values (NoColorSpace), so we ensure the backdrop is
+  // back on that default in case a prior PBR pass mutated it.
+  t.backdropTex.colorSpace = THREE.NoColorSpace;
 
   // Build the BufferGeometry once; both walls share its position/UV/index
   // buffers (each Mesh has its own world transform + material).
@@ -477,8 +512,6 @@ function buildWalls(prefab, t, wallMesh) {
     // the shader's `N = -N` flip stays disabled — N is already aimed at
     // the camera, ready for lighting (Python's `flip_normals: True` on
     // the wall is baked into the asset's winding, not done at runtime).
-    // The procedural CylinderGeometry path needed BackSide instead because
-    // its generated normals point outward.
     const mat = createPythonLitMaterial({
       map:  tex,
       tint: TINT_WALLS,
@@ -513,7 +546,7 @@ function buildWalls(prefab, t, wallMesh) {
 
 function buildStep(t, stepMesh) {
   // Use the prefab's actual mesh data (default_0.asset, extracted via
-  // scripts/extract_step_mesh.py). Three.js's procedural CylinderGeometry
+  // scripts/extract_scene_court.py). Three.js's procedural CylinderGeometry
   // would produce a uniform UV sweep; the prefab's asset uses a non-uniform
   // unwrap (alternating sub-strips on the side, separate cap UVs) that the
   // brick texture is authored against. Without the asset's UVs, the brick
@@ -529,30 +562,49 @@ function buildStep(t, stepMesh) {
   geo.setIndex(new THREE.BufferAttribute(indices, 1));
   geo.computeVertexNormals();
 
-  // Material UV scale (Court_Step.mat m_Scale = 8, 8). Matches Python's
-  // texel sampling because the (1 − asset_v) flip Python applies and
-  // Three.js's flipY=true convention cancel out under integer repeat:
-  // both end up sampling the same texel at every position on the cylinder.
-  // Diffuse + normal must tile identically (shader shares uMapTransform).
-  setRepeat(t.brickMap,    8, 8);
-  setRepeat(t.brickNormal, 8, 8);
+  // Material UV scale (Court_Step.mat m_Scale = 8, 8). All three Three.js
+  // material slots (map/normalMap/maskMap) share the same Texture objects,
+  // so setting repeat once propagates. Diffuse + normal + mask must tile
+  // identically because the PBR shader samples each map at the same UV.
+  setRepeat(t.brickMap,     8, 8);
+  setRepeat(t.brickNormal,  8, 8);
+  setRepeat(t.brickMaskMap, 8, 8);
 
-  // True tangent-space normal mapping — supersedes Python's fake-AO trick
-  // (`groove_strength = 0.5` in render_court_3d.py). Per-pixel normals
-  // perturb the lighting equation so brick edges that face the spot get
-  // brighter and the mortar grooves get genuinely darker, instead of a
-  // uniform darken across all groove texels.
-  const mat = createPythonLitMaterial({
-    map:         t.brickMap,
-    tint:        TINT_STEP,
-    normalMap:   t.brickNormal,
-    // Brick relief is steep; 1.0 is the authored strength. Drop to 0.6-0.8
-    // if the highlights look too sharp at grazing camera angles.
-    normalScale: 1.0,
-    // Bump cavity darken: deepens the mortar grooves between bricks.
-    // Stronger than carpet because the relief is more pronounced.
-    bumpDarken:  0.6,
+  // Material parameters mirror Court_Step.mat: URP/Lit, BaseMap+BumpMap
+  // tile (8,8), MetallicGlossMap supplies metal+smoothness, OcclusionMap
+  // shares the same texture (and the prefab's _OCCLUSIONMAP keyword IS
+  // set — unlike Court_Floor.mat where it isn't).
+
+  // Albedo: sRGB-decode at sample time so the BRDF math happens in linear
+  // space. Normal + mask carry linear data (not color), so they stay
+  // NoColorSpace.
+  t.brickMap.colorSpace     = THREE.SRGBColorSpace;
+  t.brickNormal.colorSpace  = THREE.NoColorSpace;
+  t.brickMaskMap.colorSpace = THREE.NoColorSpace;
+
+  // MeshStandardMaterial's aoMap defaults to UV channel 1 (Unity ships a
+  // separate AO unwrap on most prefabs; ours doesn't). Force the brick
+  // mask map to read from UV channel 0 — the only set the step mesh
+  // carries. Texture.channel was introduced in r152.
+  t.brickMaskMap.channel = 0;
+
+  const mat = new THREE.MeshStandardMaterial({
+    map:           t.brickMap,
+    color:         new THREE.Color().fromArray(TINT_STEP),
+    normalMap:     t.brickNormal,
+    normalScale:   new THREE.Vector2(1, 1),
+    // The ORM-packed Bricks 2 MaskMap (R=AO, G=Roughness, B=Metallic — see
+    // _repack_unity_maskmap_to_orm in extract_scene_court.py) feeds all
+    // three slots; Three.js samples the right channel from each.
+    aoMap:         t.brickMaskMap,
+    aoMapIntensity: 1.0,
+    roughnessMap:  t.brickMaskMap,
+    roughness:     1.0,                // multiplied by roughnessMap.g
+    metalnessMap:  t.brickMaskMap,
+    metalness:     1.0,                // multiplied by metalnessMap.b (= 0 for non-metallic brick)
   });
+
+  applyOutputSRGBEncode(mat);
 
   const mesh = new THREE.Mesh(geo, mat);
   // Mesh data is in mesh-local (unit cylinder, y ∈ [-1, +1]). Apply prefab
@@ -571,8 +623,15 @@ function buildStands(N, t) {
   // Court_Stand.png is RGBA — the lectern silhouette has alpha-zero corners
   // we want to discard so the wall behind shows through. `alphaTest = 0.1`
   // does this without blending (cleaner depth than transparent=true alone).
+  // Stands stay on the custom PYTHON_LIT_FS shader (same as walls); the
+  // empirical hemisphere ambient + exposure floor renders the lecterns more
+  // legibly than the prefab's spot-dominated PBR setup.
   const group = new THREE.Group();
   group.name = `stands-${N}`;
+
+  // Custom shader reads raw sRGB byte values, so reset to NoColorSpace in
+  // case an earlier pass mutated it.
+  t.standTex.colorSpace = THREE.NoColorSpace;
 
   const mat = createPythonLitMaterial({
     map:       t.standTex,
@@ -678,16 +737,16 @@ export class CourtRenderer {
     // pattern.
     this._renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     this._renderer.setSize(canvas.width, canvas.height, /* updateStyle= */ false);
-    // LinearSRGBColorSpace = "no encode on output". The custom shader does
-    // Python's math directly in sRGB-encoded space and writes the result to
-    // gl_FragColor; we don't want Three.js to re-encode it as if the value
-    // were linear (which is what SRGBColorSpace would do — that was halving
-    // every channel because shader_output ≈ 0.945 was being treated as a
-    // linear 0.945 and encoded back down to 0.498 sRGB).
+    // LinearSRGBColorSpace = "no encode on output". Each PBR material's
+    // onBeforeCompile patch (applyOutputSRGBEncode in this file) re-encodes
+    // its own output to sRGB-byte space before gl_FragColor, so we don't
+    // want Three.js to additionally re-encode at the framebuffer level.
+    // Net result: framebuffer bytes are sRGB-encoded (what the canvas
+    // expects).
     this._renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
-    // No tone mapping: the empirical lighting model already includes its
-    // own exposure floor (EXPOSURE = 0.4 in the shader); a multiplicative
-    // tone-map on top would diverge from Python.
+    // No tone mapping: the prefab's URP setup doesn't apply tone mapping
+    // to the trial scene either, and our SpotLight intensity is tuned in
+    // a linear range that doesn't clip after sRGB encode for this scene.
     this._renderer.toneMapping = THREE.NoToneMapping;
 
     this._scene = new THREE.Scene();
@@ -696,12 +755,41 @@ export class CourtRenderer {
     const aspect = canvas.width / canvas.height;
     this._camera = new THREE.PerspectiveCamera(30, aspect, 0.3, 200);
 
-    // No Three.js Light objects in the scene — the custom ShaderMaterial
-    // ports Python's empirical lighting model directly into the fragment
-    // shader (constants for the spot, hemisphere, and exposure are baked
-    // into PYTHON_LIT_FS). Adding HemisphereLight / SpotLight / AmbientLight
-    // here would have no effect on the meshes (ShaderMaterial ignores them)
-    // and would just add overhead.
+    // Scene lights driving the two PBR surfaces (floor + step). The walls
+    // and stands use the custom PYTHON_LIT_FS shader, which ignores scene
+    // lights — its empirical lighting model is baked into the fragment
+    // shader, so these lights cost nothing there.
+    //
+    // SpotLight: lifted directly from Court(_Final).prefab's single
+    // realtime Spot at /Court/Lighting/SpotLight. The prefab's
+    // m_SpotAngle = 140° / m_InnerSpotAngle = 90° are full cone angles
+    // (Unity convention); we pass the outer half-angle (70°) and a
+    // penumbra fraction (1 − inner_half / outer_half = (70−45)/70) which
+    // is how Three.js parameterizes the same cone. Range/intensity/decay
+    // are verbatim from the prefab.
+    const spot = new THREE.SpotLight(
+      0xffffff,
+      /* intensity (cd, prefab m_Intensity) */ 700,
+      /* distance (m, prefab m_Range)       */ 90,
+      /* outer half-angle (rad)             */ THREE.MathUtils.degToRad(70),
+      /* penumbra fraction                  */ (70 - 45) / 70,
+      /* decay (2 = physical inverse-sq)    */ 2,
+    );
+    spot.position.set(0, 30, 0);
+    // SpotLight's default target is at (0, 0, 0) — straight down. No need
+    // to add a separate target object to the scene.
+    this._scene.add(spot);
+
+    // Hemisphere ambient stands in for whatever scene-level URP ambient
+    // the prefab inherits at runtime (the prefab itself ships no
+    // RenderSettings asset). Colors picked empirically: SKY_RGB roughly
+    // matches the panorama's bright tones, EQUATOR_RGB matches the
+    // shadowed floor regions. Intensity is the single tuning knob if all
+    // four surfaces feel uniformly too bright/dim.
+    const SKY_RGB     = new THREE.Color(0.4,   0.4,   0.4);
+    const EQUATOR_RGB = new THREE.Color(0.114, 0.125, 0.133);
+    const hemi = new THREE.HemisphereLight(SKY_RGB, EQUATOR_RGB, /* intensity */ 1.0);
+    this._scene.add(hemi);
 
     this._textures = null;
     this._sceneMeshes = null;
@@ -715,21 +803,15 @@ export class CourtRenderer {
     const stepMeshUrl = `${COURT_TEX_DIR}/step_mesh.json${v}`;
     const wallMeshUrl = `${COURT_TEX_DIR}/wall_mesh.json${v}`;
 
-    // All textures load with `NoColorSpace` (the loadTexture default) so
-    // sampling returns raw sRGB byte values 0-1 — matching Python's PIL
-    // load + direct float multiplication. The shader handles the sRGB
-    // round-trip on output (sRGBToLinear + Three.js's auto-encode).
-    //
-    // Mask maps (Carpet 4 MaskMap, Bricks 2 MaskMap) are no longer loaded —
-    // Python's lighting model doesn't reference them, and the ORM-channel
-    // shuffle was only needed for MeshStandardMaterial (which we replaced
-    // with the custom shader). Carpet's normal map is also loaded but
-    // currently unused — only the brick normal map drives fake-AO on the
-    // step. Both kept loaded in case a future tweak wants them.
+    // All textures load with `NoColorSpace` (the loadTexture default).
+    // Each builder (buildFloor / buildStep / buildWalls / buildStands)
+    // overrides the colorSpace on its own diffuse maps to SRGBColorSpace
+    // so the GPU decodes albedo to linear before the BRDF. Normal and
+    // mask maps stay NoColorSpace since they carry linear data, not color.
     const [
       backdropTex,
-      carpetMap, carpetNormal,
-      brickMap,  brickNormal,
+      carpetMap, carpetNormal, carpetMaskMap,
+      brickMap,  brickNormal,  brickMaskMap,
       standTex,
       stepMeshResp,
       wallMeshResp,
@@ -740,8 +822,10 @@ export class CourtRenderer {
       // is vertically mirrored vs the prefab.
       loadTexture(u('Carpet 4 BaseMap.png'), { flipY: false }),
       loadTexture(u('Carpet 4 Normal.png'),  { flipY: false }),
+      loadTexture(u('Carpet 4 MaskMap.png'), { flipY: false }),
       loadTexture(u('Bricks 2 BaseMap.png')),
       loadTexture(u('Bricks 2 Normal.png')),
+      loadTexture(u('Bricks 2 MaskMap.png')),
       loadTexture(u('Court_Stand.png')),
       fetch(stepMeshUrl).then((r) => {
         if (!r.ok) throw new Error(`step_mesh.json fetch failed: ${r.status}`);
@@ -755,8 +839,8 @@ export class CourtRenderer {
 
     this._textures = {
       backdropTex,
-      carpetMap, carpetNormal,
-      brickMap,  brickNormal,
+      carpetMap, carpetNormal, carpetMaskMap,
+      brickMap,  brickNormal,  brickMaskMap,
       standTex,
     };
     this._stepMesh = stepMeshResp;
