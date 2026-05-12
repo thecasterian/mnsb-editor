@@ -81,7 +81,10 @@ const TINT_WALLS = [1.0,   1.0,   1.0  ];   // Court_Wall*.mat — no tint
 // 0.25 offset.
 //
 // Sourced from `_WALL_MATERIAL_UV` in scripts/render_court_3d.py, which in
-// turn reads them straight from the .mat files.
+// turn reads them straight from the .mat files. Applied directly via
+// Texture.repeat / .offset on top of the prefab mesh's authored UVs — the
+// previous flip-and-shift workaround for procedural CylinderGeometry's
+// opposite U direction is no longer needed now that we use the prefab mesh.
 const WALL_HALF_UV = {
   court: {
     wall_1: { scale: 6.544, offset: -0.0377 },
@@ -93,22 +96,21 @@ const WALL_HALF_UV = {
   },
 };
 
-// The prefab's wall mesh has UV running 0.998 (at θ_local = 180°) → 0.005
-// (at θ_local = 360°), i.e. DECREASING along the arc. Three.js's
-// CylinderGeometry generates u INCREASING along the arc, so we flip via a
-// negative `repeat.x` and shift via `offset.x` so the prefab's effective
-// `mesh_U(u) = 0.998 − 0.993·u` is reproduced.
-const WALL_MESH_U_AT_START = 0.998;        // U at θ_local = 180°
-const WALL_MESH_U_SPAN     = 0.993;        // 0.998 − 0.005
-
+// Wall uses the prefab's actual half-shell mesh (default.asset, extracted via
+// scripts/extract_scene_court.py → scene/court/wall_mesh.json). Mesh-local
+// is a unit half-cylinder covering z ∈ [-1, 0] (the -Z hemisphere) with
+// radius 1 and full height 1 (y ∈ [-0.5, +0.5]); apply scale (WALL_RADIUS,
+// WALL_HEIGHT, WALL_RADIUS) and the per-wall rotation below to place.
+//
 // Both prefab wall quaternions encode a 180° rotation about an axis tilted
 // 3.75° from the main axis (qx = ±0.0654, qz = ±0.9979 for Wall_1 / Wall_2).
-// Decomposing each rotation matrix gives `R = R_y(−7.5°) · R_{z|x}(180°)` —
-// i.e. the prefab applies an extra −7.5° Y-rotation on top of the "clean"
-// half-cylinder placement. In Three.js, increasing `thetaStart` by Δ is
-// equivalent to applying R_y(Δ), so we shift each wall's `thetaStart` by
-// −7.5° (≈ −π/24) to put the panorama's stained-glass windows in front of
-// the lecterns where the prefab puts them.
+// Decomposing each rotation matrix gives R = R_y(−7.5°) · R_{z|x}(180°):
+//   Wall_1: R_y(−7.5°) · R_z(180°) — keeps the canonical -Z hemisphere
+//           coverage; flips x and y.
+//   Wall_2: R_y(−7.5°) · R_x(180°) — sends the -Z hemisphere to +Z; flips
+//           y and z.
+// The −7.5° Y-tilt aligns the panorama's stained-glass windows with the
+// lecterns. Composed at runtime via THREE.Quaternion (see buildWalls).
 const WALL_Y_TILT_RAD = -Math.PI / 24;     // = −7.5°, matches prefab quaternion tilt
 
 // Step uses the prefab's actual mesh asset (default_0.asset extracted via
@@ -142,10 +144,12 @@ function loadTexture(url, { anisotropy = 8, flipY = true } = {}) {
         // u*W]; Unity/Python sample PIL[v*H, u*W]. For the floor's PlaneGeometry
         // (rotated to lie flat) this produces a vertical mirror of the carpet
         // pattern. Disable for the carpet maps so they match the prefab. Wall
-        // and step happen to be invariant: wall's CylinderGeometry V layout
-        // aligns with PIL top under flipY=true, and step's integer tiling
-        // makes V flips just shift by full tiles (invisible because brick
-        // mortar is roughly horizontally symmetric).
+        // and step happen to be invariant: the wall mesh's raw V ranges
+        // 0..0.9865 with V=0 at mesh-y=+0.5, and the prefab's R_{z|x}(180°)
+        // wall rotations flip y so V=0 ends up at world-top — correct under
+        // flipY=true; step's integer tiling makes V flips just shift by full
+        // tiles (invisible because brick mortar is roughly horizontally
+        // symmetric).
         tex.flipY = flipY;
         resolve(tex);
       },
@@ -422,61 +426,88 @@ function buildFloor(t) {
   return new THREE.Mesh(geo, mat);
 }
 
-function buildWalls(prefab, t) {
-  // Two half-cylinders matching Court(_Final).prefab's Wall_1 + Wall_2 setup.
-  // Each covers a 180° arc with its own texture instance + per-wall UV
-  // transform; the per-half offsets stitch the panorama continuously across
-  // the +X and −X seams between the two walls.
+function buildWalls(prefab, t, wallMesh) {
+  // Two instances of the prefab's canonical half-shell mesh, matching
+  // Court(_Final).prefab's Wall_1 + Wall_2 setup. Each covers a 180° arc
+  // with its own texture instance + per-wall UV transform; the per-half
+  // offsets stitch the panorama continuously across the +X and −X seams
+  // between the two walls.
   //
-  // Geometry (matches the rotated half-cylinder mesh in `render_court_3d.py`):
-  //   Wall_1 covers world theta_w ∈ [180°, 360°] (negative-Z hemisphere).
-  //         CylinderGeometry: thetaStart = π/2, thetaLength = π, going from
-  //         +X (u=0) through −Z (u=0.5) to −X (u=1).
-  //   Wall_2 covers world theta_w ∈ [0°, 180°] (positive-Z hemisphere).
-  //         CylinderGeometry: thetaStart = 3π/2, thetaLength = π, going from
-  //         −X (u=0) through +Z (u=0.5) to +X (u=1).
-  // At u=0 each wall samples Python's mesh U = 0.998; at u=1 it samples 0.005.
-  // The −0.993 negative repeat is the U-direction flip; the offset bakes in
-  // the prefab's per-wall m_Offset.x.
+  // Geometry comes from scene/court/wall_mesh.json (default.asset, 128
+  // verts / 64 tris). Mesh-local: radius 1, full height 1 (y ∈ [-0.5,
+  // +0.5]), covering the -Z hemisphere only (z ∈ [-1, 0]). The prefab's
+  // per-wall rotation maps it to the right hemisphere:
+  //   Wall_1: R_y(−7.5°) · R_z(180°) — stays on -Z; flips x and y.
+  //   Wall_2: R_y(−7.5°) · R_x(180°) — sends to +Z; flips y and z.
+  // Composed via THREE.Quaternion below.
 
   const halfUV = WALL_HALF_UV[prefab];
   if (!halfUV) throw new Error(`Unknown prefab ${prefab}`);
 
-  const buildHalf = (name, thetaStart, { scale, offset }) => {
+  // Build the BufferGeometry once; both walls share its position/UV/index
+  // buffers (each Mesh has its own world transform + material).
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(wallMesh.positions);
+  const uvs       = new Float32Array(wallMesh.uvs);
+  const indices   = wallMesh.vertex_count > 65535
+    ? new Uint32Array(wallMesh.indices)
+    : new Uint16Array(wallMesh.indices);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('uv',       new THREE.BufferAttribute(uvs, 2));
+  geo.setIndex(new THREE.BufferAttribute(indices, 1));
+  geo.computeVertexNormals();
+
+  // R_y(−7.5°) — shared post-rotation applied to both walls.
+  const qTilt = new THREE.Quaternion()
+    .setFromAxisAngle(new THREE.Vector3(0, 1, 0), WALL_Y_TILT_RAD);
+
+  const buildHalf = (name, qInner, { scale, offset }) => {
     const tex = t.backdropTex.clone();
     tex.needsUpdate = true;
-    tex.repeat.set(-WALL_MESH_U_SPAN * scale, 1);
-    tex.offset.set(WALL_MESH_U_AT_START * scale + offset, 0);
+    // Per-prefab m_Scale.x / m_Offset.x applied directly on top of the
+    // mesh's authored UVs — no flip needed because the prefab UVs already
+    // encode the panorama mapping in the correct direction.
+    tex.repeat.set(scale, 1);
+    tex.offset.set(offset, 0);
 
-    const geo = new THREE.CylinderGeometry(
-      WALL_RADIUS, WALL_RADIUS, WALL_HEIGHT,
-      /* radialSegments= */ 16,
-      /* heightSegments= */ 1,
-      /* openEnded= */ true,
-      thetaStart,
-      Math.PI,
-    );
-
-    // BackSide: camera sits INSIDE the cylinder. The shader's
-    // `if (!gl_FrontFacing) N = -N;` flip handles the inward-normal need
-    // (Python's `flip_normals: True` on the wall) automatically.
+    // FrontSide: the prefab mesh's authored winding produces face normals
+    // that point INWARD (toward the cylinder axis = toward the camera that
+    // sits inside the courtroom). Front-side culling keeps exactly those
+    // triangles, and `gl_FrontFacing = true` for the visible fragment so
+    // the shader's `N = -N` flip stays disabled — N is already aimed at
+    // the camera, ready for lighting (Python's `flip_normals: True` on
+    // the wall is baked into the asset's winding, not done at runtime).
+    // The procedural CylinderGeometry path needed BackSide instead because
+    // its generated normals point outward.
     const mat = createPythonLitMaterial({
       map:  tex,
       tint: TINT_WALLS,
-      side: THREE.BackSide,
+      side: THREE.FrontSide,
     });
 
     const mesh = new THREE.Mesh(geo, mat);
+    // Final rotation = R_y(−7.5°) · R_{z|x}(180°). THREE.Quaternion.multiply
+    // is left-multiplication on the existing quat (q := q · q'), so to get
+    // qTilt · qInner we start from a copy of qTilt and multiply by qInner.
+    mesh.quaternion.copy(qTilt).multiply(qInner);
+    // Mesh-local is unit radius and unit full height; scale to world dims.
+    mesh.scale.set(WALL_RADIUS, WALL_HEIGHT, WALL_RADIUS);
     mesh.position.set(0, WALL_Y_CENTER, 0);
     mesh.name = name;
     return mesh;
   };
 
+  // R_z(180°) and R_x(180°) — the per-wall "inner" rotations from the
+  // prefab quaternion decomposition.
+  const qWall1 = new THREE.Quaternion()
+    .setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI);
+  const qWall2 = new THREE.Quaternion()
+    .setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI);
+
   const group = new THREE.Group();
   group.name = 'walls';
-  // Each thetaStart includes the prefab's −7.5° Y-rotation (WALL_Y_TILT_RAD).
-  group.add(buildHalf('wall_1',     Math.PI / 2 + WALL_Y_TILT_RAD, halfUV.wall_1));
-  group.add(buildHalf('wall_2', 3 * Math.PI / 2 + WALL_Y_TILT_RAD, halfUV.wall_2));
+  group.add(buildHalf('wall_1', qWall1, halfUV.wall_1));
+  group.add(buildHalf('wall_2', qWall2, halfUV.wall_2));
   return group;
 }
 
@@ -682,6 +713,7 @@ export class CourtRenderer {
     const u = (name) => `${COURT_TEX_DIR}/${encodeURIComponent(name)}${v}`;
 
     const stepMeshUrl = `${COURT_TEX_DIR}/step_mesh.json${v}`;
+    const wallMeshUrl = `${COURT_TEX_DIR}/wall_mesh.json${v}`;
 
     // All textures load with `NoColorSpace` (the loadTexture default) so
     // sampling returns raw sRGB byte values 0-1 — matching Python's PIL
@@ -700,6 +732,7 @@ export class CourtRenderer {
       brickMap,  brickNormal,
       standTex,
       stepMeshResp,
+      wallMeshResp,
     ] = await Promise.all([
       loadTexture(u('Background_014_001.png')),
       // Carpet maps need flipY=false to match Unity's V=0=image-bottom
@@ -714,6 +747,10 @@ export class CourtRenderer {
         if (!r.ok) throw new Error(`step_mesh.json fetch failed: ${r.status}`);
         return r.json();
       }),
+      fetch(wallMeshUrl).then((r) => {
+        if (!r.ok) throw new Error(`wall_mesh.json fetch failed: ${r.status}`);
+        return r.json();
+      }),
     ]);
 
     this._textures = {
@@ -723,6 +760,7 @@ export class CourtRenderer {
       standTex,
     };
     this._stepMesh = stepMeshResp;
+    this._wallMesh = wallMeshResp;
 
     this._buildScene();
     this._loaded = true;
@@ -744,7 +782,7 @@ export class CourtRenderer {
 
     const t = this._textures;
     const floor  = buildFloor(t);
-    const walls  = buildWalls(this._prefab, t);
+    const walls  = buildWalls(this._prefab, t, this._wallMesh);
     const step   = buildStep(t, this._stepMesh);
     const stands = buildStands(this._N, t);
 

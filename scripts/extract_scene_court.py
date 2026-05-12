@@ -55,17 +55,27 @@ Mesh extraction:
   Three.js's procedural ``CylinderGeometry`` produces a uniform sweep that
   doesn't line up with the brick texture's authored layout.
 
+  wall_mesh.json (= default.asset, 128 verts / 64 tris) — the wall's
+  canonical half-shell. Mesh-local: radius 1, full height 1 (y ∈ [-0.5,
+  +0.5]), covering the -Z hemisphere only (z ∈ [-1, 0]). Loaded by
+  ``scene_court.js`` and instantiated twice with the prefab's per-wall
+  rotations + per-half material UV. Carries the prefab's authored UV
+  unwrap (V along height, U along arc, with the prefab's specific
+  start/direction baked in), which lets the renderer drop the
+  flip-and-shift gymnastics that the procedural ``CylinderGeometry``
+  path needed.
+
   Both court meshes (the wall half-shell ``default`` and the step
   ``default_0``) are stored under the same Unity ``m_Name`` (literal
   string ``"default"``), so this script disambiguates by vertex count
-  (128 for the wall, 194 for the step). Only the step mesh is exported;
-  the wall is built procedurally in the renderer.
+  (128 for the wall, 194 for the step).
 
-Output: ``scene/court/<unity_texture_name>.png`` and
-``scene/court/step_mesh.json``. Filenames preserve the exact Unity
-texture names, including spaces, since render_court_3d.py reads them
-literally (e.g. ``"Carpet 4 BaseMap.png"``). Re-runnable; deletes any
-stale PNG/JSON in ``out_root`` that isn't in the target set.
+Output: ``scene/court/<unity_texture_name>.png``,
+``scene/court/step_mesh.json``, and ``scene/court/wall_mesh.json``.
+Texture filenames preserve the exact Unity names, including spaces,
+since render_court_3d.py reads them literally (e.g. ``"Carpet 4
+BaseMap.png"``). Re-runnable; deletes any stale PNG/JSON in
+``out_root`` that isn't in the target set.
 
 Usage::
 
@@ -116,6 +126,21 @@ TARGET_MESHES: dict[int, dict] = {
             "Texture.flipY=true (default) and material.map.repeat=(8, 8), "
             "no V-flip is needed: the flipY+integer-repeat combination "
             "matches Python's (1 - asset_v) * 8 transform under wrap."
+        ),
+    },
+    128: {
+        "expect_tris":  64,
+        "out_filename": "wall_mesh.json",
+        "doc_comment":  (
+            "Wall (canonical half-shell) mesh from default.asset. "
+            "Mesh-local: radius 1, full height 1 (y in [-0.5, +0.5]), "
+            "covering the -Z hemisphere only (z in [-1, 0]). Apply "
+            "prefab scale (WALL_RADIUS, WALL_HEIGHT, WALL_RADIUS) and "
+            "the prefab's per-wall rotation (R_y(-7.5°) · R_z(180°) for "
+            "Wall_1; R_y(-7.5°) · R_x(180°) for Wall_2) to place. UVs "
+            "are RAW asset values; the per-wall material m_Scale.x and "
+            "m_Offset.x are then applied directly via Texture.repeat / "
+            ".offset (no flip-and-shift workaround needed)."
         ),
     },
 }
