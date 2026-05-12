@@ -96,31 +96,71 @@ let trialPitchDeg = 0;
 // distance, height) that live under the Look character / Zoom groups.
 // Roll and Pitch have their own groups and stay visible in either mode.
 let trialAdvancedMode = false;
+
+// Trial scenes carry one of two "subtypes" inside the courtroom:
+//   adv    — the same NormalPrinter/AutoToggle/ControlPanel/WitchBookButtonUI
+//            overlay set used by Adv scenes (matches Naninovel's BeginAdv /
+//            EndAdv blocks inside BeginTrial).
+//   debate — the cross-examination overlay set (DebateUI, ChoiceButtons,
+//            ChoiceEvidence, etc. — matches BeginDebate / EndDebate). Not
+//            yet implemented; the renderer falls through to the bare 3D
+//            court for this subtype.
+const TRIAL_SUBTYPES = new Set(['adv', 'debate']);
+let trialSubtype = 'adv';
+
 let sceneMeta = null;               // scene/adv/meta.json: { canvas_size, prefabs: [...] }
 let charsConfig = null;
 let bgMeta = null;
 let renderSeq = 0;
+
 // Per-overlay enable flags. Names match the strings used in scene/adv/meta.json's
 // `toggle` / `items_toggle` fields — see TOGGLE_FLAGS below. NormalPrinter has
 // `toggle: null` (the dialog frame is the scene's anchor; toggling it off would
 // leave just background + buttons floating, which isn't useful).
-let showAutoToggle = true;          // gates the AutoToggle prefab
-let showMenuButton = true;          // gates the ControlPanel prefab (OpenButton group)
-let showBookButton = true;          // gates the WitchBookButtonUI prefab
+//
+// Two parallel sets of state, one per sceneType. Adv- and trial-with-adv-overlays
+// renders share the same overlay machinery (selectPrefabItems + the prefab loop
+// in renderScene), so the toggle *names* are the same — TOGGLE_FLAGS routes
+// each name through a sceneType-aware getter that picks the right backing var.
+// Lets the user e.g. hide the witch book in trial-adv without affecting the
+// pure Adv preview.
+let showAutoToggle = true;          // gates the AutoToggle prefab (adv)
+let showMenuButton = true;          // gates the ControlPanel prefab (adv)
+let showBookButton = true;          // gates the WitchBookButtonUI prefab (adv)
 // Toggles NamePlateBase sprite + AuthorLabel text together (both live under
 // NormalPrinter's `Wrapper/AuthorPanel` subtree). One switch covers both
 // because rendering the plate without text — or text without a plate — would
 // look broken; the user thinks of the plate as a single unit.
 let showAuthorPlate = true;
+// Mirror set for trial-with-adv-overlays.
+let trialShowAutoToggle = true;
+let trialShowMenuButton = true;
+let trialShowBookButton = true;
+let trialShowAuthorPlate = true;
+// Trial-side AuthorLabel + MessageLabel content. Separate from the adv-side
+// `authorId` / `messageText` so a user can pose a trial line ("Objection!")
+// without overwriting the adv preview's dialog, and vice versa.
+// Default trialAuthorId mirrors the adv default (DEFAULT_AUTHOR — see
+// populateAuthorSelects); resolved properly once charsConfig loads.
+let trialAuthorId    = '';
+let trialMessageText = '';
+
+// Resolve the "active" author / message based on sceneType, so the shared
+// text-rendering path in renderTextLeaf doesn't need to know about subtypes.
+// (Adv scenes always read the adv-side state; trial scenes always read the
+// trial-side state, regardless of subtype — debate renders no overlays
+// today, so the value is unused there but kept consistent for future use.)
+function activeAuthorId()    { return sceneType === 'trial' ? trialAuthorId    : authorId; }
+function activeMessageText() { return sceneType === 'trial' ? trialMessageText : messageText; }
 
 // String → live-state lookup. The bake script writes these names into
 // meta.json; this table is the single point of resolution at render time.
 // Adding a new toggle = add an entry here AND in PREFABS in extract_scene_adv.py.
 const TOGGLE_FLAGS = {
-  showAutoToggle:  () => showAutoToggle,
-  showMenuButton:  () => showMenuButton,
-  showBookButton:  () => showBookButton,
-  showAuthorPlate: () => showAuthorPlate,
+  showAutoToggle:  () => (sceneType === 'trial' ? trialShowAutoToggle : showAutoToggle),
+  showMenuButton:  () => (sceneType === 'trial' ? trialShowMenuButton : showMenuButton),
+  showBookButton:  () => (sceneType === 'trial' ? trialShowBookButton : showBookButton),
+  showAuthorPlate: () => (sceneType === 'trial' ? trialShowAuthorPlate : showAuthorPlate),
 };
 
 // --- Character snapshots (handed off from the character editor) ---
@@ -249,6 +289,9 @@ function saveSceneConfig() {
       // last clicked, while the actual rendered camera stays at whatever
       // they last dragged the sliders to.
       trialPrefab,
+      trialSubtype,
+      trialAuthorId,
+      trialMessageText,
       trialLookChar,
       trialComposition,
       trialZoom,
@@ -258,6 +301,13 @@ function saveSceneConfig() {
       trialRollDeg,
       trialPitchDeg,
       trialAdvancedMode,
+      // Trial-side overlay toggles (only consumed when trialSubtype === 'adv';
+      // saved unconditionally so a user can flip subtype and find their
+      // previous toggle state intact).
+      trialShowAutoToggle,
+      trialShowMenuButton,
+      trialShowBookButton,
+      trialShowAuthorPlate,
     }));
   } catch (e) {
     console.error('Failed to save scene config:', e);
@@ -300,6 +350,27 @@ function loadSceneConfig({ render = true } = {}) {
   if (typeof data.trialAdvancedMode === 'boolean') {
     trialAdvancedMode = data.trialAdvancedMode;
     document.getElementById('trialAdvancedToggle').classList.toggle('active', trialAdvancedMode);
+  }
+  // Restore trial subtype before the visibility apply so subtype-gated rows
+  // (the trial-side overlay toggle group) end up correctly hidden/shown.
+  if (TRIAL_SUBTYPES.has(data.trialSubtype)) {
+    trialSubtype = data.trialSubtype;
+    refreshTrialSubtypeActive();
+  }
+  // Restore trial-side overlay toggles. Each writes its module-level flag and
+  // syncs the corresponding checkbox; doesn't touch the adv-side toggles.
+  const trialToggleRestores = [
+    ['trialShowAutoToggle',  'toggleTrialAutoToggle',  (v) => { trialShowAutoToggle  = v; }],
+    ['trialShowMenuButton',  'toggleTrialMenuButton',  (v) => { trialShowMenuButton  = v; }],
+    ['trialShowBookButton',  'toggleTrialBookButton',  (v) => { trialShowBookButton  = v; }],
+    ['trialShowAuthorPlate', 'toggleTrialAuthorPlate', (v) => { trialShowAuthorPlate = v; }],
+  ];
+  for (const [field, elId, set] of trialToggleRestores) {
+    if (typeof data[field] === 'boolean') {
+      set(data[field]);
+      const el = document.getElementById(elId);
+      if (el) el.checked = data[field];
+    }
   }
   applySidebarVisibility();
 
@@ -411,6 +482,22 @@ function loadSceneConfig({ render = true } = {}) {
   if (typeof data.messageText === 'string' && document.activeElement !== msgEl) {
     messageText = data.messageText;
     msgEl.value = messageText;
+  }
+
+  // Trial-side author / message. Same shape as the adv-side handling above:
+  // option-membership check for the dropdown, active-element guard for the
+  // textarea so cross-tab sync doesn't clobber in-progress typing.
+  if (typeof data.trialAuthorId === 'string') {
+    const tSel = document.getElementById('trialAuthorSelect');
+    if (tSel && [...tSel.options].some(o => o.value === data.trialAuthorId)) {
+      trialAuthorId = data.trialAuthorId;
+      tSel.value = trialAuthorId;
+    }
+  }
+  const trialMsgEl = document.getElementById('trialMessageInput');
+  if (typeof data.trialMessageText === 'string' && document.activeElement !== trialMsgEl) {
+    trialMessageText = data.trialMessageText;
+    if (trialMsgEl) trialMsgEl.value = trialMessageText;
   }
 
   if (render) scheduleRender();
@@ -1095,11 +1182,13 @@ function renderRichText(rec, dst, tagged, baseColorHex) {
 // --- Top-level scene render ---
 
 async function renderTextLeaf(rec, dst) {
+  const author  = activeAuthorId();
+  const message = activeMessageText();
   // AuthorLabel routing: when an author is selected and the active locale ships
   // a non-empty tagged_name, render via the rich-text path. Otherwise fall
   // through to the plain placeholder so we still draw *something*.
-  if (rec.go === 'AuthorLabel' && authorId) {
-    const charRec = (charsConfig.characters || []).find(c => c.id === authorId);
+  if (rec.go === 'AuthorLabel' && author) {
+    const charRec = (charsConfig.characters || []).find(c => c.id === author);
     const tagged = charRec && (charRec.tagged_name || {})[locale];
     if (tagged) {
       renderRichText(rec, dst, tagged, charRec.nameColor_hex);
@@ -1109,7 +1198,7 @@ async function renderTextLeaf(rec, dst) {
   if (rec.go === 'AuthorLabel') {
     renderPlainText(rec, dst, 'Author');
   } else if (rec.go === 'MessageLabel') {
-    renderPlainText(rec, dst, messageText);
+    renderPlainText(rec, dst, message);
   } else {
     renderPlainText(rec, dst);
   }
@@ -1220,19 +1309,53 @@ async function renderTrialScene() {
     pitchDeg:      trialPitchDeg,
   });
   r.render();
+
   // Re-blit the WebGL framebuffer through a 2D canvas with `scaleX(-1)` to
   // produce the LH-coordinate (Unity / Python) mirror. The same trick the
   // standalone test page uses for its export. Doing it here means the canvas
-  // returned to drawPreview is a plain 2D canvas — no CSS transform tricks
-  // needed at display, and toDataURL on this canvas exports the displayed
+  // we composite onto is a plain 2D canvas — no CSS transform tricks needed
+  // at display, and toDataURL on the final output exports the displayed
   // image directly.
+  const mirror = document.createElement('canvas');
+  mirror.width  = CANVAS_W;
+  mirror.height = CANVAS_H;
+  const mctx = mirror.getContext('2d');
+  mctx.translate(CANVAS_W, 0);
+  mctx.scale(-1, 1);
+  mctx.drawImage(_courtCanvas, 0, 0);
+
+  // 'debate' subtype renders bare 3D — its overlay set (DebateUI,
+  // ChoiceButtons, ChoiceEvidence, etc.) lives in a separate not-yet-
+  // extracted prefab tree, so for now this path just returns the
+  // courtroom without overlays. The pill UI still exists so existing
+  // sessions don't lose the subtype value across reloads.
+  if (trialSubtype !== 'adv') return mirror;
+
+  // 'adv' subtype: composite the same NormalPrinter/AutoToggle/ControlPanel/
+  // WitchBookButtonUI overlays the Adv scene uses, on top of the courtroom
+  // render. The trial 3D output is the new "background" for the existing
+  // overlay loop in renderScene — read it back into a linear Float32Array
+  // (sRGB-decoded via imageDataToLinear) so renderLayer/renderTextLeaf can
+  // alpha-composite in the same linear space they always do.
+  //
+  // TOGGLE_FLAGS routes each adv-side toggle name through a sceneType-aware
+  // getter, so the prefab loop transparently reads from the trialShow* state
+  // when sceneType === 'trial' without any prefab-data changes.
+  await ensureFontsLoaded();
+  const dst = imageDataToLinear(mctx.getImageData(0, 0, CANVAS_W, CANVAS_H));
+
+  for (const prefab of sceneMeta.prefabs) {
+    if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
+    for (const [, kind, item] of selectPrefabItems(prefab)) {
+      if (kind === 'layer') await renderLayer(item, dst);
+      else                  await renderTextLeaf(item, dst);
+    }
+  }
+
   const out = document.createElement('canvas');
   out.width  = CANVAS_W;
   out.height = CANVAS_H;
-  const ctx = out.getContext('2d');
-  ctx.translate(CANVAS_W, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(_courtCanvas, 0, 0);
+  out.getContext('2d').putImageData(linearToImageData(dst, CANVAS_W, CANVAS_H), 0, 0);
   return out;
 }
 
@@ -1329,6 +1452,12 @@ function refreshTrialCompositionActive() {
 function refreshTrialZoomActive() {
   for (const b of document.querySelectorAll('#trialZoomPresets .layer-btn')) {
     b.classList.toggle('active', Number(b.dataset.zoom) === trialZoom);
+  }
+}
+
+function refreshTrialSubtypeActive() {
+  for (const b of document.querySelectorAll('#trialSubtypePresets .layer-btn')) {
+    b.classList.toggle('active', b.dataset.subtype === trialSubtype);
   }
 }
 
@@ -1440,19 +1569,26 @@ function applyZoomFromTemplate() {
   syncHeightUI();
 }
 
-// Toggle each section in the sidebar along two axes:
+// Toggle each section in the sidebar along three axes:
 //   - data-scene-type: must match the active sceneType (adv vs trial).
 //   - data-trial-advanced: trial-only sub-rows (yaw mult / distance /
 //     height sliders) shown only when advanced mode is on. Roll and Pitch
 //     have their own groups and don't carry this attribute.
-// The two queries are independent — a row carrying both attributes only
-// becomes visible when both axes pass.
+//   - data-trial-subtype: trial-only rows that further depend on which
+//     subtype (adv vs debate) is active — e.g. the overlay toggle group
+//     only makes sense for the 'adv' subtype.
+// The passes layer on top of each other: a row stays hidden if any axis
+// fails. We don't un-hide in later passes, so scene-type=adv elements
+// stay hidden under all trial-only checks regardless of subtype value.
 function applySidebarVisibility() {
   for (const el of document.querySelectorAll('[data-scene-type]')) {
     el.hidden = el.dataset.sceneType !== sceneType;
   }
   for (const el of document.querySelectorAll('[data-trial-advanced]')) {
-    el.hidden = !trialAdvancedMode;
+    if (!el.hidden) el.hidden = !trialAdvancedMode;
+  }
+  for (const el of document.querySelectorAll('[data-trial-subtype]')) {
+    if (!el.hidden) el.hidden = el.dataset.trialSubtype !== trialSubtype;
   }
 }
 
@@ -1527,8 +1663,14 @@ function authorDisplayName(id) {
   return id;
 }
 
-function populateAuthorSelect() {
-  const sel = document.getElementById('authorSelect');
+// Populate one author <select> from charsConfig + AUTHOR_ORDER, filtered to
+// entries that ship a non-empty tagged_name for the active locale. The
+// currentId / setCurrentId pair handles reading and writing the state var
+// the caller owns — same logic is reused for adv (`authorId`) and trial
+// (`trialAuthorId`).
+function populateOneAuthorSelect(selectId, currentId, setCurrentId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
   sel.innerHTML = '';
   const byId = new Map((charsConfig.characters || []).map(c => [c.id, c]));
   for (const id of AUTHOR_ORDER) {
@@ -1544,17 +1686,25 @@ function populateAuthorSelect() {
   // fall back to DEFAULT_AUTHOR (then to the first option) so the dropdown is
   // never empty and the rendered AuthorLabel always shows a real name.
   const optValues = [...sel.options].map(o => o.value);
-  if (authorId && optValues.includes(authorId)) {
-    sel.value = authorId;
+  if (currentId && optValues.includes(currentId)) {
+    sel.value = currentId;
   } else if (optValues.includes(DEFAULT_AUTHOR)) {
-    authorId = DEFAULT_AUTHOR;
-    sel.value = authorId;
+    setCurrentId(DEFAULT_AUTHOR);
+    sel.value = DEFAULT_AUTHOR;
   } else if (optValues.length > 0) {
-    authorId = optValues[0];
-    sel.value = authorId;
+    setCurrentId(optValues[0]);
+    sel.value = optValues[0];
   } else {
-    authorId = '';
+    setCurrentId('');
   }
+}
+
+// Repopulate both author selects (adv + trial-adv-subtype) from charsConfig.
+// Safe to call before the trial select exists in the DOM — populateOneAuthorSelect
+// short-circuits on a missing element.
+function populateAuthorSelect() {
+  populateOneAuthorSelect('authorSelect',      authorId,      (v) => { authorId      = v; });
+  populateOneAuthorSelect('trialAuthorSelect', trialAuthorId, (v) => { trialAuthorId = v; });
 }
 
 function setLocale(next) {
@@ -2127,7 +2277,13 @@ async function exportPng() {
     const lookFrag = trialLookChar    || 'custom';
     const compFrag = trialComposition || 'custom';
     const zoomFrag = trialZoom != null ? trialZoom : 'custom';
-    a.download = `scene_trial_${trialPrefab}_${lookFrag}_zoom${zoomFrag}_${compFrag}_${Date.now()}.png`;
+    // For the 'adv' subtype, include the trial-side author in the filename
+    // (matches scene_adv_<locale>_<author>_…), so a user exporting multiple
+    // trial-with-adv-overlay shots of different speakers doesn't get
+    // identically-named files. Debate subtype has no author concept yet, so
+    // we skip the author fragment there.
+    const authorFrag = trialSubtype === 'adv' ? `_${trialAuthorId || 'noauthor'}` : '';
+    a.download = `scene_trial_${trialSubtype}${authorFrag}_${trialPrefab}_${lookFrag}_zoom${zoomFrag}_${compFrag}_${Date.now()}.png`;
   } else {
     const author = authorId || 'noauthor';   // 'noauthor' only fires if charsConfig had no entries for the active locale
     a.download = `scene_adv_${locale}_${author}_${Date.now()}.png`;
@@ -2291,6 +2447,42 @@ function showModal(message) {
     });
   }
 
+  // Subtype: 2 static preset buttons (Adv / Debate). Picks which overlay
+  // set composites on top of the courtroom render. Also toggles the
+  // visibility of subtype-gated rows (currently just the trial overlay
+  // toggle group).
+  for (const b of document.querySelectorAll('#trialSubtypePresets .layer-btn')) {
+    b.addEventListener('click', () => {
+      if (!TRIAL_SUBTYPES.has(b.dataset.subtype)) return;
+      if (trialSubtype === b.dataset.subtype) return;
+      trialSubtype = b.dataset.subtype;
+      refreshTrialSubtypeActive();
+      applySidebarVisibility();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+  }
+
+  // Trial-side overlay toggles. Each writes its module-level flag and
+  // re-renders. Only consumed when trialSubtype === 'adv' (the prefab loop
+  // in renderTrialScene routes through TOGGLE_FLAGS, which routes the four
+  // toggle names through sceneType-aware getters).
+  const trialOverlayBindings = [
+    ['toggleTrialAuthorPlate', (v) => { trialShowAuthorPlate = v; }],
+    ['toggleTrialAutoToggle',  (v) => { trialShowAutoToggle  = v; }],
+    ['toggleTrialMenuButton',  (v) => { trialShowMenuButton  = v; }],
+    ['toggleTrialBookButton',  (v) => { trialShowBookButton  = v; }],
+  ];
+  for (const [id, set] of trialOverlayBindings) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.onchange = (e) => {
+      set(e.target.checked);
+      scheduleRender();
+      scheduleSceneConfigSave();
+    };
+  }
+
   // Direct sliders + number inputs. Each pair shares the same underlying
   // state var (trialYawMult / trialDistance / trialHeight); updating one
   // input mirrors to the other so the displayed values never diverge.
@@ -2347,6 +2539,21 @@ function showModal(message) {
   // the pending render at the default short delay so the canvas commits as
   // soon as the user moves focus away.
   messageInput.onchange = () => scheduleRender();
+
+  // Trial-side Author + Message — same shape as the adv handlers above, just
+  // bound to the trial state vars. Visible only when trialSubtype === 'adv'.
+  document.getElementById('trialAuthorSelect').onchange = (e) => {
+    trialAuthorId = e.target.value;
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+  const trialMessageInput = document.getElementById('trialMessageInput');
+  trialMessageInput.oninput = (e) => {
+    trialMessageText = e.target.value;
+    scheduleRender(400);
+    scheduleSceneConfigSave();
+  };
+  trialMessageInput.onchange = () => scheduleRender();
   for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
     b.addEventListener('click', () => {
       setLocale(b.dataset.locale);
@@ -2387,6 +2594,23 @@ function showModal(message) {
       trialPitchDeg     = 0;
       trialAdvancedMode = false;
       document.getElementById('trialAdvancedToggle').classList.remove('active');
+      // Subtype back to 'adv' (the default and the only fully-implemented
+      // variant). Trial overlay toggles back to all-on.
+      trialSubtype = 'adv';
+      refreshTrialSubtypeActive();
+      trialShowAuthorPlate = trialShowAutoToggle = trialShowMenuButton = trialShowBookButton = true;
+      for (const id of ['toggleTrialAuthorPlate', 'toggleTrialAutoToggle', 'toggleTrialMenuButton', 'toggleTrialBookButton']) {
+        const el = document.getElementById(id);
+        if (el) el.checked = true;
+      }
+      // Trial author + message reset. Empty trialMessageText (matches adv
+      // reset). Drop trialAuthorId so populateAuthorSelect re-resolves to
+      // DEFAULT_AUTHOR for the active locale, same pattern as the adv side.
+      trialMessageText = '';
+      trialAuthorId    = '';
+      populateAuthorSelect();   // repopulates both selects; the trial one
+                                // ends up on DEFAULT_AUTHOR for active locale
+      document.getElementById('trialMessageInput').value = '';
       // All trial groups default expanded — clear any user-toggled .collapsed.
       for (const g of document.querySelectorAll('#groups .group')) {
         g.classList.remove('collapsed');

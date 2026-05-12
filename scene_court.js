@@ -62,7 +62,7 @@ const STAND_H = 2.8;
 // the lighting; useful for balancing against the SpotLight intensity if
 // any single surface reads too bright after a renderer change.
 const TINT_FLOOR = [0.847, 0.118, 0.130];
-const TINT_STEP  = [0.120, 0.051, 0.047];   // Court_Step.mat  — dark brown stone
+const TINT_STEP  = [0.22, 0.073, 0.067];   // Court_Step.mat  — dark brown stone
 const TINT_STAND = [1.0,   1.0,   1.0  ];   // Court_Stand.mat — uniform dim
 const TINT_WALLS = [1.0,   1.0,   1.0  ];   // Court_Wall*.mat — no tint
 
@@ -592,7 +592,7 @@ function buildStep(t, stepMesh) {
     map:           t.brickMap,
     color:         new THREE.Color().fromArray(TINT_STEP),
     normalMap:     t.brickNormal,
-    normalScale:   new THREE.Vector2(1, 1),
+    normalScale:   new THREE.Vector2(2, 2),
     // The ORM-packed Bricks 2 MaskMap (R=AO, G=Roughness, B=Metallic — see
     // _repack_unity_maskmap_to_orm in extract_scene_court.py) feeds all
     // three slots; Three.js samples the right channel from each.
@@ -788,7 +788,7 @@ export class CourtRenderer {
     // four surfaces feel uniformly too bright/dim.
     const SKY_RGB     = new THREE.Color(0.4,   0.4,   0.4);
     const EQUATOR_RGB = new THREE.Color(0.114, 0.125, 0.133);
-    const hemi = new THREE.HemisphereLight(SKY_RGB, EQUATOR_RGB, /* intensity */ 1.0);
+    const hemi = new THREE.HemisphereLight(SKY_RGB, EQUATOR_RGB, /* intensity */ 2.0);
     this._scene.add(hemi);
 
     this._textures = null;

@@ -81,11 +81,53 @@
   </div>
 
   <div class="field" data-scene-type="trial">
+    <div class="section-label">Subtype</div>
+    <div class="layer-row" id="trialSubtypePresets">
+      <button class="layer-btn active" type="button" data-subtype="adv">Adv</button>
+      <button class="layer-btn"        type="button" data-subtype="debate">Debate</button>
+    </div>
+  </div>
+
+  <div class="field" data-scene-type="trial">
     <div class="section-label">Layout</div>
     <select class="char-select" id="trialPrefab">
       <option value="court" selected>13 stands</option>
       <option value="court_final">14 stands</option>
     </select>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-subtype="adv">
+    <div class="section-label">Author</div>
+    <select class="char-select" id="trialAuthorSelect"></select>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-subtype="adv">
+    <div class="section-label">Message</div>
+    <textarea class="text-input" id="trialMessageInput" rows="3" placeholder="Message"></textarea>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-subtype="adv">
+    <div class="section-label">Overlays</div>
+    <label class="switch">
+      <span>Author</span>
+      <input type="checkbox" id="toggleTrialAuthorPlate" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Auto-toggle</span>
+      <input type="checkbox" id="toggleTrialAutoToggle" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Menu</span>
+      <input type="checkbox" id="toggleTrialMenuButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Witch Book</span>
+      <input type="checkbox" id="toggleTrialBookButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
   </div>
 
   <button class="advanced-toggle" id="trialAdvancedToggle" type="button" data-scene-type="trial">Advanced</button>
