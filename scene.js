@@ -63,9 +63,8 @@ let bgPath = null;                  // null = solid black
 // values onto the sliders and number inputs. Any subsequent slider drag or
 // number input edit moves the camera away from the preset (the dropdowns
 // don't auto-update to reflect that, by design — they remain whatever the
-// user last clicked). `trialLookChar` is stored as the lowercase character id
-// (e.g. "ema") rather than the numeric stand index so saved configs survive
-// CHAR_IDX_* changes.
+// user last clicked). `trialLookStandIdx` is the integer stand index the
+// camera looks at (or null = no look target).
 const TRIAL_PREFABS = new Set(['court', 'court_final']);
 // Mirrors of scene_court.js's ZOOM_LEVELS / COMPOSITIONS. Duplicated so the
 // template-snap helpers don't need to await the lazy court module import on
@@ -79,7 +78,34 @@ const TRIAL_ZOOM_LEVELS = {
 const TRIAL_COMPOSITIONS = { center: 0, left: +0.1, right: -0.1 };
 
 let trialPrefab      = 'court';
-let trialLookChar    = 'ema';        // template; resolved against CHAR_IDX_* per prefab
+
+// --- Stand slots (snapshot placements for the 3D court) ---
+//
+// One array per prefab, length == stand count (13 for "court", 14 for
+// "court_final"). Each cell holds a snapshot slug (string) or null (empty).
+// The same `snapshots` Map is the source of truth for the blob & metadata;
+// stand slots only persist *which slug goes on which stand*. Lazy-initialised
+// to all-nulls on first access so the adv-only path doesn't allocate them.
+//
+// Stand slots are independent across prefabs by design — switching between
+// "13 stands" and "14 stands" reveals each prefab's own assignment untouched,
+// so the user can prep both layouts in parallel.
+let trialStandSlots = { court: null, court_final: null };
+// Which stand row is currently "active" in the UI. Empty stands become active
+// when clicked; clicking a library snapshot then drops it into the active
+// stand (or selects a non-empty stand for the placement inspector). null when
+// no stand is selected — initial state, and the state after the user removes
+// a placement or switches prefabs.
+let trialSelectedStand = null;
+// Camera look-target stand index, or null = "no look target" (off-preset
+// after a non-preset slider drag). Resolved into a yaw via the formula
+// `yawMult = standIdx + composition` in applyYawMultFromTemplate. Replaces
+// the older `trialLookChar` (character-id-keyed) lookup — stand indices are
+// directly meaningful to the camera math, so dropping the character-id
+// indirection lets the look-pill row track whatever the user actually placed
+// on each stand, not a fixed canonical roster.
+let trialLookStandIdx = 0;
+
 let trialComposition = 'center';     // template; 'center' | 'left' | 'right'
 let trialZoom        = 1;            // template; 1..4
 // Direct camera params — these are what get sent to setCamera each render.
@@ -289,10 +315,16 @@ function saveSceneConfig() {
       // last clicked, while the actual rendered camera stays at whatever
       // they last dragged the sliders to.
       trialPrefab,
+      // Per-prefab stand-slot arrays. Null prefab entries (lazy-uninitialised)
+      // are saved as null and restored as such on load; the lazy-seed path
+      // populates them on first access.
+      trialStandSlots,
       trialSubtype,
       trialAuthorId,
       trialMessageText,
-      trialLookChar,
+      // trialLookStandIdx replaces the older trialLookChar (character-id-keyed)
+      // — see the state declaration for why. Saved as an integer or null.
+      trialLookStandIdx,
       trialComposition,
       trialZoom,
       trialYawMult,
@@ -376,17 +408,43 @@ function loadSceneConfig({ render = true } = {}) {
 
   // Trial state — apply individually to dropdowns/inputs, but skip the
   // look-character dropdown if it's not populated yet (the value is held in
-  // the module-level `trialLookChar` and will be picked up by the next
+  // the module-level `trialLookStandIdx` and will be picked up by the next
   // populate or render).
   if (TRIAL_PREFABS.has(data.trialPrefab)) {
     trialPrefab = data.trialPrefab;
     document.getElementById('trialPrefab').value = trialPrefab;
   }
-  if (typeof data.trialLookChar === 'string') {
-    trialLookChar = data.trialLookChar;
-    // Active class will be applied once populateTrialLookCharSelect runs
-    // (buttons don't exist until the lazy court module loads); we still
-    // call refresh here so the run-after-populate case picks it up.
+  // Stand-slot maps: validated per-prefab. Each entry must be an array of
+  // length N whose elements are either null or a string slug that still
+  // exists in `snapshots` (orphans get nulled out). On any structural
+  // failure for a given prefab we leave that map as null so the lazy-seed
+  // path runs on first access.
+  if (data.trialStandSlots && typeof data.trialStandSlots === 'object') {
+    for (const prefab of TRIAL_PREFABS) {
+      const raw = data.trialStandSlots[prefab];
+      if (raw === null) continue;
+      if (!Array.isArray(raw)) continue;
+      const n = trialStandCount(prefab);
+      if (raw.length !== n) continue;
+      const cleaned = new Array(n).fill(null);
+      let ok = true;
+      for (let i = 0; i < n; i++) {
+        const v = raw[i];
+        if (v === null) { cleaned[i] = null; continue; }
+        if (typeof v !== 'string') { ok = false; break; }
+        // Snapshot library may not be loaded yet here — keep the slug as
+        // long as it's a string; reloadSnapshots later nulls out anything
+        // that doesn't resolve.
+        cleaned[i] = v;
+      }
+      if (ok) trialStandSlots[prefab] = cleaned;
+    }
+  }
+  if (Number.isInteger(data.trialLookStandIdx) && data.trialLookStandIdx >= 0) {
+    trialLookStandIdx = data.trialLookStandIdx;
+    refreshTrialLookCharActive();
+  } else if (data.trialLookStandIdx === null) {
+    trialLookStandIdx = null;
     refreshTrialLookCharActive();
   }
   // trialZoom is *derived* from (trialDistance, trialHeight) — restoring
@@ -1281,17 +1339,32 @@ function getCourtRenderer() {
   return _courtRendererPromise;
 }
 
-// Resolve `trialLookChar` (a character id like "ema") against the prefab's
-// stand index map. Returns 0 if the id is missing or stands out of the
-// reference trial — the user shouldn't be able to pick those (the dropdown
-// filters them) but be defensive against stale saved configs.
+// Stand-count for a prefab. The court prefab has 13 stands, court_final 14.
+// Used as the bound for every "is this stand index valid?" check and as the
+// length of the slot array. Pure function — safe to call before any module
+// loads.
+function trialStandCount(prefab) {
+  return prefab === 'court_final' ? 14 : 13;
+}
+
+// Live slot array for the active prefab. Lazy-seeded to an N-long array of
+// nulls on first access so an adv-only session doesn't allocate them. All
+// mutations go through this — there are no other writers — so the saved
+// config, the slot UI, and the look-pill row always agree on the same array.
+function currentStandSlots() {
+  if (!trialStandSlots[trialPrefab]) {
+    trialStandSlots[trialPrefab] = Array(trialStandCount(trialPrefab)).fill(null);
+  }
+  return trialStandSlots[trialPrefab];
+}
+
+// Camera look-target stand index. Returns 0 if `trialLookStandIdx` is null
+// (no look target, e.g. after a non-preset slider drag) so the camera still
+// has a sane angular reference to compute yaw from. The pill row will be
+// painted inactive in that state — the user has explicit feedback that no
+// preset is matched.
 function trialTargetIdx() {
-  if (!_courtModule) return 0;
-  const map = trialPrefab === 'court_final'
-    ? _courtModule.CHAR_IDX_COURT_FINAL
-    : _courtModule.CHAR_IDX_COURT;
-  const idx = map[trialLookChar];
-  return (typeof idx === 'number' && idx >= 0) ? idx : 0;
+  return typeof trialLookStandIdx === 'number' ? trialLookStandIdx : 0;
 }
 
 async function renderTrialScene() {
@@ -1359,68 +1432,70 @@ async function renderTrialScene() {
   return out;
 }
 
-// Snap trialLookChar to a stand that exists in the current prefab.
-// Pure state mutation — does not touch the DOM. The '' sentinel (set by
-// setTrialYawMult after a non-preset slider drag) is preserved so the
-// "no look character" state survives prefab switches and reloads.
+// Snap `trialLookStandIdx` to a stand that has a snapshot in the current
+// prefab. Pure state mutation — does not touch the DOM. The `null` sentinel
+// (set by setTrialYawMult after a non-preset slider drag) is preserved so
+// the "no look target" state survives prefab switches and reloads.
 //
 // Called from populateTrialLookCharSelect (so a re-paint always lands on a
-// valid pill); decoupled into its own helper so any future caller that
-// needs a valid trialLookChar before populate has run (e.g. one that calls
-// trialTargetIdx() directly) can do so explicitly.
+// real pill). Picks the lowest-index filled stand as the snap target — this
+// is "Stand 0" when populated, otherwise the next-lowest non-null.
 function ensureTrialLookCharValidForPrefab() {
-  if (!_courtModule) return;
-  if (trialLookChar === '') return;
-  const map = trialPrefab === 'court_final'
-    ? _courtModule.CHAR_IDX_COURT_FINAL
-    : _courtModule.CHAR_IDX_COURT;
-  const idx = map[trialLookChar];
-  if (typeof idx === 'number' && idx >= 0) return;
-  // Pick the entry with the lowest valid stand index — typically Ema (0).
-  let pick = null, pickIdx = Infinity;
-  for (const [n, i] of Object.entries(map)) {
-    if (i >= 0 && i < pickIdx) { pick = n; pickIdx = i; }
+  if (trialLookStandIdx === null) return;
+  const slots = currentStandSlots();
+  if (typeof trialLookStandIdx === 'number'
+      && trialLookStandIdx >= 0
+      && trialLookStandIdx < slots.length
+      && slots[trialLookStandIdx] !== null) {
+    return;
   }
-  if (pick) trialLookChar = pick;
+  // Lowest-index filled stand wins. If everything is empty, fall back to
+  // null — the look pill row will be empty and composition pills disabled.
+  let pick = null;
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] !== null) { pick = i; break; }
+  }
+  trialLookStandIdx = pick;
 }
 
-// Populate the look-character preset row from CHAR_IDX_*. Filters out
-// entries with idx<0 (characters absent from the reference trial). Sorted
-// by stand index so the row reads "Ema, Hanna, Sherry, ..." left-to-right
-// in clockwise stand order around the court. Each button click snaps yaw
-// mult to that character's stand position via applyYawMultFromTemplate
-// (one-way snap — subsequent slider drags are not tracked back into the
-// pill).
+// Populate the look-character preset row from the current prefab's stand
+// slots. One pill per filled stand (slug !== null), sorted by index so the
+// row reads "Stand 0, Stand 1, ..." left-to-right matching clockwise stand
+// order around the court. Pill label is "Stand <i>: <snap.name>" so the
+// user can tell at a glance which snapshot is the look target. Clicking a
+// pill snaps yaw mult to that stand's angular position via
+// applyYawMultFromTemplate (one-way snap — subsequent slider drags are not
+// tracked back into the pill).
 async function populateTrialLookCharSelect() {
-  const mod = await getCourtModule();
+  await getCourtModule();
   // Snap before painting so the active class lands on a real pill. Mutates
-  // trialLookChar; safe to run again at any later call site.
+  // trialLookStandIdx; safe to run again at any later call site.
   ensureTrialLookCharValidForPrefab();
-  const map = trialPrefab === 'court_final' ? mod.CHAR_IDX_COURT_FINAL : mod.CHAR_IDX_COURT;
+  const slots = currentStandSlots();
   const wrap = document.getElementById('trialLookCharPresets');
+  if (!wrap) return;
   wrap.innerHTML = '';
-  const entries = Object.entries(map)
-    .filter(([, idx]) => idx >= 0)
-    .sort((a, b) => a[1] - b[1]);
-  for (const [name] of entries) {
+  for (let i = 0; i < slots.length; i++) {
+    const slug = slots[i];
+    if (!slug) continue;
+    const snap = snapshots.get(slug);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'layer-btn';
-    btn.dataset.look = name;
-    btn.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    btn.dataset.look = String(i);
+    btn.textContent  = `Stand ${i}` + (snap ? `: ${snap.name || snap.slug}` : '');
     btn.addEventListener('click', () => {
-      trialLookChar = name;
-      // applyYawMultFromTemplate routes through setTrialYawMult, which
-      // reconciles both the look-char and composition pills — including the
-      // case where trialComposition was '' (deselected after a non-preset
-      // slider drag), in which case the resolved yaw lands on a Center
-      // preset and Center reactivates.
+      trialLookStandIdx = i;
       applyYawMultFromTemplate();
       scheduleRender();
       scheduleSceneConfigSave();
     });
     wrap.appendChild(btn);
   }
+  // The stand rows in the new "Stands" group highlight the active stand;
+  // keep them in step on every look-char repaint so the two views never
+  // disagree about which stand is selected for the camera.
+  populateTrialStandsUI();
   refreshTrialLookCharActive();
 }
 
@@ -1428,21 +1503,138 @@ function refreshTrialLookCharActive() {
   const wrap = document.getElementById('trialLookCharPresets');
   if (!wrap) return;
   for (const b of wrap.querySelectorAll('.layer-btn')) {
-    b.classList.toggle('active', b.dataset.look === trialLookChar);
+    b.classList.toggle('active', Number(b.dataset.look) === trialLookStandIdx);
   }
-  // Composition pills depend on look char — see refreshTrialCompositionActive.
-  // Pairing the call here means every look-char update keeps composition in
-  // step automatically.
+  // Composition pills depend on having a look target — see
+  // refreshTrialCompositionActive. Pairing the call here means every
+  // look-target update keeps composition in step automatically.
   refreshTrialCompositionActive();
 }
 
+// Paint the per-stand row UI (the new "Stands" group at the top of the
+// trial-mode groups stack). One row per stand; each shows either a thumbnail
+// + snapshot name when a slug is assigned, or a dim "empty" placeholder.
+// Clicking a row makes that stand "active" — see selectTrialStand.
+//
+// Re-rendered from scratch on every slot change so the active highlight, the
+// thumbnail visibility, and the row content always reflect the live state.
+// Cheap — 13–14 rows, no images decoded (the <img>.src is just the snapshot's
+// existing blobUrl).
+function populateTrialStandsUI() {
+  const wrap = document.getElementById('trialStandsList');
+  if (!wrap) return;
+  const slots = currentStandSlots();
+  wrap.innerHTML = '';
+  for (let i = 0; i < slots.length; i++) {
+    const slug = slots[i];
+    const snap = slug ? snapshots.get(slug) : null;
+    const row = document.createElement('div');
+    row.className = 'stand-slot'
+      + (slug ? '' : ' stand-slot-empty')
+      + (trialSelectedStand === i ? ' active' : '');
+    row.dataset.standIdx = String(i);
+    if (snap) {
+      row.innerHTML = `
+        <span class="stand-slot-idx">Stand ${i}</span>
+        <img class="stand-slot-thumb" alt="">
+        <span class="stand-slot-name"></span>
+        <button class="stand-slot-remove" type="button" aria-label="Remove" title="Remove">&times;</button>
+      `;
+      const img = row.querySelector('.stand-slot-thumb');
+      if (snap.blobUrl) img.src = snap.blobUrl;
+      row.querySelector('.stand-slot-name').textContent = snap.name || snap.slug;
+      // Per-row remove. Clearing a stand also selects it so the next
+      // library click lands at the just-emptied spot — keeps the flow
+      // moving in the common "swap this character out" case.
+      row.querySelector('.stand-slot-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        trialSelectedStand = i;
+        clearActiveStand();
+      });
+    } else {
+      row.innerHTML = `
+        <span class="stand-slot-idx">Stand ${i}</span>
+        <span class="stand-slot-placeholder">—</span>
+      `;
+    }
+    row.addEventListener('click', () => selectTrialStand(i));
+    wrap.appendChild(row);
+  }
+}
+
+// Make stand `i` active. Empty stands become a snapshot-drop target (next
+// library click lands there); filled stands highlight in the library too
+// (via the "On stand X" annotation in refreshSnapshotList). Idempotent —
+// clicking the same stand twice keeps it active (per the option-A UX
+// decision).
+function selectTrialStand(i) {
+  trialSelectedStand = i;
+  populateTrialStandsUI();
+  refreshSnapshotList();      // update "On stand X" annotations + selection
+}
+
+// Drop the slug currently in stand `dst` into stand `src`, and put whatever
+// was at `src` (possibly null) into `dst`. Swap is the universal move op:
+// the inspector's "Stand" select uses it directly, and the snapshot-library
+// click handler reduces to "swap with whichever stand previously held this
+// slug (if any) and the active stand". Side-effects: repaints all panels.
+function swapTrialStands(src, dst) {
+  if (src === dst) return;
+  const slots = currentStandSlots();
+  const tmp = slots[src];
+  slots[src] = slots[dst];
+  slots[dst] = tmp;
+}
+
+// Place `slug` at the active stand. If the slug is already on a different
+// stand, swap so the user doesn't end up with two stands referencing the
+// same slug (the renderer would draw the same character twice). If the
+// active stand was already filled, the displaced slug returns to wherever
+// the new one came from (i.e. an actual swap) — feels natural and avoids
+// the "where did my old character go?" surprise.
+function assignSnapshotToActiveStand(slug) {
+  if (trialSelectedStand === null) return false;
+  const slots = currentStandSlots();
+  const i = trialSelectedStand;
+  const existing = slots.indexOf(slug);
+  if (existing === i) return false;     // already there, nothing to do
+  if (existing >= 0) {
+    swapTrialStands(existing, i);
+  } else {
+    slots[i] = slug;
+  }
+  // Repaint everything that depends on the slot map.
+  populateTrialLookCharSelect();        // refreshes look pills + slot rows
+  refreshSnapshotList();
+  applyYawMultFromTemplate();
+  scheduleRender();
+  scheduleSceneConfigSave();
+  return true;
+}
+
+// Clear the active stand (set its slot to null). If the active stand was
+// the look-camera target, snap to the next-lowest filled stand. UI state
+// stays consistent — trialSelectedStand keeps pointing at the now-empty
+// stand, ready to receive a fresh snapshot pick.
+function clearActiveStand() {
+  if (trialSelectedStand === null) return;
+  const slots = currentStandSlots();
+  if (slots[trialSelectedStand] === null) return;
+  slots[trialSelectedStand] = null;
+  populateTrialLookCharSelect();
+  refreshSnapshotList();
+  applyYawMultFromTemplate();
+  scheduleRender();
+  scheduleSceneConfigSave();
+}
+
 function refreshTrialCompositionActive() {
-  // Composition is a delta to the looked-at character's stand position
-  // (compShift in {0, +0.1, -0.1}). Without a look character there's no
-  // base to shift from, so disable the pills entirely. When disabled, no
-  // pill is marked active — the user can't pick a composition until they
-  // pick a character first.
-  const disabled = trialLookChar === '';
+  // Composition is a delta to the looked-at stand's angular position
+  // (compShift in {0, +0.1, -0.1}). Without a look stand there's no base to
+  // shift from, so disable the pills entirely. When disabled, no pill is
+  // marked active — the user can't pick a composition until they pick a
+  // stand first.
+  const disabled = trialLookStandIdx === null;
   for (const b of document.querySelectorAll('#trialCompositionPresets .layer-btn')) {
     b.classList.toggle('active', !disabled && b.dataset.comp === trialComposition);
     b.disabled = disabled;
@@ -1461,20 +1653,20 @@ function refreshTrialSubtypeActive() {
   }
 }
 
-// Find the (look char, composition) preset combo that produces yaw `v`, or
+// Find the (stand idx, composition) preset combo that produces yaw `v`, or
 // null if `v` doesn't match any. Each yaw value is uniquely produced by at
 // most one (idx, comp) pair: the three composition shifts (0, +0.1, -0.1)
 // are distinct and all stand indices are distinct. Tolerance handles float
 // error from 0.1 (e.g. 1 + 0.1 ≠ exactly 1.1 in IEEE 754).
+//
+// Only stands with a snapshot assigned are considered — an empty stand has
+// nothing to "look at", so its angular position isn't a meaningful preset.
 function findYawMultPreset(v) {
-  if (!_courtModule) return null;
-  const map = trialPrefab === 'court_final'
-    ? _courtModule.CHAR_IDX_COURT_FINAL
-    : _courtModule.CHAR_IDX_COURT;
-  for (const [name, idx] of Object.entries(map)) {
-    if (idx < 0) continue;
+  const slots = currentStandSlots();
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] === null) continue;
     for (const [comp, shift] of Object.entries(TRIAL_COMPOSITIONS)) {
-      if (Math.abs(v - (idx + shift)) < 1e-6) return { lookChar: name, composition: comp };
+      if (Math.abs(v - (i + shift)) < 1e-6) return { standIdx: i, composition: comp };
     }
   }
   return null;
@@ -1489,8 +1681,8 @@ function findYawMultPreset(v) {
 function setTrialYawMult(v) {
   trialYawMult = v;
   const preset = findYawMultPreset(v);
-  trialLookChar    = preset ? preset.lookChar    : '';
-  trialComposition = preset ? preset.composition : '';
+  trialLookStandIdx = preset ? preset.standIdx    : null;
+  trialComposition  = preset ? preset.composition : '';
   refreshTrialLookCharActive();
   refreshTrialCompositionActive();
 }
@@ -1968,9 +2160,19 @@ function refreshSnapshotList() {
     return;
   }
 
+  // In trial mode, the "placed" annotation comes from trialStandSlots
+  // (which stand holds this slug, if any), and clicking a row routes to
+  // assignSnapshotToActiveStand rather than addOrSelectPlacement. The
+  // snapshot library element is shared between modes — same DOM, mode-
+  // aware behaviour.
+  const trialMode = sceneType === 'trial';
+  const trialSlots = trialMode ? currentStandSlots() : null;
   for (const snap of filtered) {
-    const placed = !!placementBySlug(snap.slug);
-    const selected = placed && selectedSlug === snap.slug;
+    const trialStandFor = trialMode ? trialSlots.indexOf(snap.slug) : -1;
+    const placed   = trialMode ? (trialStandFor >= 0) : !!placementBySlug(snap.slug);
+    const selected = trialMode
+      ? (trialStandFor >= 0 && trialStandFor === trialSelectedStand)
+      : (placed && selectedSlug === snap.slug);
     const row = document.createElement('div');
     row.className = 'snapshot-item'
       + (placed ? ' is-placed' : '')
@@ -1988,16 +2190,28 @@ function refreshSnapshotList() {
     `;
     row.querySelector('.snapshot-thumb').src = snap.blobUrl;
     row.querySelector('.snapshot-name').textContent = snap.name || snap.slug;
-    row.querySelector('.snapshot-time').textContent = relativeTime(snap.createdAt);
+    // In trial mode the "time" line doubles as the stand assignment readout
+    // when placed, so the user can see at a glance which stand has this
+    // snapshot without scrolling the Stands group.
+    const timeEl = row.querySelector('.snapshot-time');
+    if (trialMode && trialStandFor >= 0) {
+      timeEl.textContent = `On stand ${trialStandFor}`;
+    } else {
+      timeEl.textContent = relativeTime(snap.createdAt);
+    }
+    const onActivate = () => {
+      if (trialMode) assignSnapshotToActiveStand(snap.slug);
+      else           addOrSelectPlacement(snap.slug);
+    };
     row.addEventListener('click', (e) => {
       if (e.target.closest('.snapshot-delete')) return;
       if (e.target.closest('.snapshot-rename')) return;
-      addOrSelectPlacement(snap.slug);
+      onActivate();
     });
     row.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        addOrSelectPlacement(snap.slug);
+        onActivate();
       }
     });
     row.querySelector('.snapshot-rename').addEventListener('click', (e) => {
@@ -2083,8 +2297,20 @@ async function reloadSnapshots() {
   const beforeSelected = selectedSlug;
   placements = placements.filter(p => snapshots.has(p.slug));
   if (selectedSlug && !snapshots.has(selectedSlug)) selectedSlug = null;
+  // Apply the same orphan drop to the trial stand slots. Each prefab has its
+  // own slot array; for any slug in a slot that no longer exists in
+  // snapshots, set that slot to null. Skip prefab maps that were never
+  // initialised (still null sentinels).
+  for (const prefab of TRIAL_PREFABS) {
+    const slots = trialStandSlots[prefab];
+    if (!slots) continue;
+    for (let i = 0; i < slots.length; i++) {
+      if (slots[i] !== null && !snapshots.has(slots[i])) slots[i] = null;
+    }
+  }
   refreshSnapshotList();
   refreshInspector();
+  populateTrialStandsUI();
   refreshPlacementOverlays();
   if (placements.length !== before) scheduleRender();
   else if (snapshots.size > 0)      scheduleRender();  // freshly-loaded blob URLs need a re-decode
@@ -2271,10 +2497,11 @@ async function exportPng() {
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
   if (sceneType === 'trial') {
-    // After a non-preset slider drag, trialLookChar / trialComposition can be
-    // '' and trialZoom can be null — substitute 'custom' so the filename
-    // doesn't produce empty fragments or the literal 'null'.
-    const lookFrag = trialLookChar    || 'custom';
+    // After a non-preset slider drag, trialLookStandIdx / trialComposition
+    // can be null/'' and trialZoom can be null — substitute 'custom' so the
+    // filename doesn't produce empty fragments or the literal 'null'.
+    const lookFrag = (trialLookStandIdx !== null && trialLookStandIdx !== undefined)
+      ? `stand${trialLookStandIdx}` : 'custom';
     const compFrag = trialComposition || 'custom';
     const zoomFrag = trialZoom != null ? trialZoom : 'custom';
     // For the 'adv' subtype, include the trial-side author in the filename
@@ -2383,6 +2610,10 @@ function showModal(message) {
     sceneType = e.target.value;
     applySidebarVisibility();
     if (sceneType === 'trial') await ensureTrialUIInit();
+    // Snapshot library is shared across modes — repaint so trial vs adv
+    // annotations ("On stand X" vs the relative-time line) and click
+    // routing reflect the new mode.
+    refreshSnapshotList();
     scheduleRender();
     scheduleSceneConfigSave();
   };
@@ -2407,14 +2638,16 @@ function showModal(message) {
   document.getElementById('trialPrefab').onchange = async (e) => {
     if (!TRIAL_PREFABS.has(e.target.value)) return;
     trialPrefab = e.target.value;
-    // Repopulate the look-character pill row — court has 13 entries while
-    // court_final has 14, with different mappings (Hiro = stand 8 in
-    // court_final but absent in court). populateTrialLookCharSelect calls
-    // ensureTrialLookCharValidForPrefab internally, so the look-char will
-    // be snapped to a valid stand for the new prefab once the await
-    // resolves.
+    // Different prefab → different stand-slot array (independent per
+    // prefab). Clear the active selection since indices > new prefab's N
+    // would be out of range. populateTrialLookCharSelect repaints the look
+    // pill row + the Stands group via its callees.
+    trialSelectedStand = null;
     await populateTrialLookCharSelect();
-    // The look-char index → yaw mapping is prefab-dependent, so re-snap.
+    refreshSnapshotList();      // "On stand X" annotations are per-prefab
+    // The look-target → yaw mapping is prefab-independent (just standIdx +
+    // composition), but the look target itself may have flipped to a
+    // different stand or to null. Re-snap so yaw lands on the new target.
     applyYawMultFromTemplate();
     scheduleRender();
     scheduleSceneConfigSave();
@@ -2587,7 +2820,12 @@ function showModal(message) {
       // placards, character labels) a sane starting point.
       setLocale('ko');
       trialPrefab       = 'court';
-      trialLookChar     = 'ema';
+      // Drop both stand-slot maps — lazy-seed will populate them as empty
+      // arrays on next access. The user can re-place snapshots from a clean
+      // slate, matching the "Reset all customizations" intent.
+      trialStandSlots   = { court: null, court_final: null };
+      trialSelectedStand = null;
+      trialLookStandIdx = null;
       trialComposition  = 'center';
       trialZoom         = 1;
       trialRollDeg      = 0;

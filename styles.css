@@ -70,6 +70,68 @@ body {
   cursor: pointer;
 }
 
+/* Trial scene per-stand placement rows. Each row is "Stand <i> | thumb | name"
+   when filled, or "Stand <i> | —" when empty. Clicking a row makes it the
+   active drop target for the next snapshot library click; the .active class
+   surfaces that state. */
+.stand-list { display: flex; flex-direction: column; gap: 4px; }
+.stand-slot {
+  display: grid;
+  grid-template-columns: 72px 40px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+.stand-slot:hover { border-color: #555; }
+.stand-slot.active {
+  border-color: var(--active);
+  background: var(--active-bg);
+}
+.stand-slot-idx { color: var(--text-muted); font-size: 13px; }
+.stand-slot-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--bg-card);
+}
+.stand-slot-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stand-slot-empty {
+  grid-template-columns: 72px 1fr;
+}
+.stand-slot-placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+/* Per-row remove (×). Stays subtle until hovered so it doesn't compete
+   visually with the row's main content. Stops click propagation in JS to
+   avoid re-selecting the row right before clearing it. */
+.stand-slot-remove {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.stand-slot-remove:hover {
+  color: #ff8266;
+  border-color: var(--border);
+}
+
 /* Preset buttons */
 .section-label {
   font-size: 14px;
