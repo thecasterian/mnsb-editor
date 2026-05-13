@@ -51,6 +51,40 @@ const STAND_Y = 2.4;
 const STAND_W = 3.4;
 const STAND_H = 2.8;
 
+// --- Character placement constants (System_Subroutine.BeginTrial) ---
+//
+// Resolved from the @char ModifyCharacterExtended commands in BeginTrial:
+//   position: (16·sin(idx·2π/N), 5, 16·cos(idx·2π/N))
+//   rotation: (_, 360°/N · idx, _)
+//   scale:    (0.25, 0.25, 1)
+// PIXELS_TO_UNITS is Unity's default SpriteRenderer m_PixelsToUnits (snapshots
+// come in pixel-space; divide by 100 to get the world-meter dimensions an
+// untransformed actor would render at, before characterScale multiplies in).
+const CHARACTER_DISTANCE   = 16;
+// Naninovel's BeginTrial sets `@char position:_,characterPositionY,_` with
+// `characterPositionY = stageOffsetY + 5` → actor transform.position.y = 5.
+const CHARACTER_POSITION_Y = 5;
+const CHARACTER_SCALE      = 0.25;
+const PIXELS_TO_UNITS      = 100;
+// Naninovel's `Naninovel.RenderCanvas` MonoBehaviour on each character
+// bundle's root holds Size = (15, 30), Offset = (0, 0) — uniform across all
+// 13 main-cast bundles. The character is offscreen-rendered to a render
+// texture, then displayed on a quad of these mesh-local dimensions. The
+// quad's vertical extent (30 m mesh-local × 0.25 actor scale = 7.5 m world)
+// is how the rig — which spans far more than 7.5 m in world coords once
+// Angle01's intrinsic_scale is applied — fits visually on stage.
+const RENDER_CANVAS_HEIGHT = 30;
+// Default per-character pivot.y. Naninovel's CharacterMetadata stores a
+// per-character `Pivot` (Vector2) in [0..1] coordinates over the render
+// canvas. pivot.y < 0.5 anchors the actor near the canvas top (transform
+// position is "lower" in the canvas); pivot.y > 0.5 anchors near the bottom.
+// For the main cast pivot.y ranges 0.655..0.75 — the displayed character
+// hangs DOWN from the actor transform position (world y=5). Per-character
+// values are loaded from scene/authors.json via scene.js and passed in via
+// setCharacters records; this default applies only when no per-character
+// pivot is supplied.
+const DEFAULT_ACTOR_PIVOT_Y = 0.5;
+
 // --- Material tints (URP `_BaseColor` per .mat file, LINEAR RGB) ---
 //
 // Verbatim from the prefab .mat YAML files. Used as MeshStandardMaterial
@@ -661,6 +695,163 @@ function buildStands(N, t) {
   return group;
 }
 
+// --- Character billboards ---
+//
+// Each character is a textured plane parked at its stand's world position.
+// The actor is a 2D sprite in 3D space (Naninovel actor convention) — not a
+// 3D model — so a flat PlaneGeometry textured with the snapshot PNG matches
+// what the runtime draws.
+//
+// Orientation: PlaneGeometry's default +Z normal points away from origin if
+// we just translate it. We want the textured face toward the courtroom
+// centre (where the camera orbits), so rotate Y by θ + π. Same magnitude as
+// the lectern rotation; opposite hemisphere on the face normal.
+//
+// Sizing: world dims = (snapshot px / PIXELS_TO_UNITS) · CHARACTER_SCALE · intrinsicScale.
+// `intrinsic_scale` lives on a CHILD Transform (`Angle01`) inside the rig, not
+// on the root. The script's `@char scale:0.25,0.25,1` only sets the ROOT's
+// localScale — the inner Angle01 retains its pre-baked 0.6 (or per-character
+// equivalent). So the effective combined scale at the leaf is 0.25 × 0.6 in
+// Ema's case.
+//
+// Pivot: per the bundle Transform tree, Naninovel's layered-character actor
+// uses the rig root's origin (Unity (0,0,0)) as the pivot, and the bundle's
+// auto-grown canvas is symmetric around that point — leaves extend equally
+// up and down. So the canvas-pixel pivot is at (canvas_w/2, canvas_h/2), and
+// for tight-cropped snapshots the pivot lands approximately at the snapshot
+// centre. Placing the plane centre at world y=5 (= characterPositionY)
+// reproduces the runtime placement.
+
+// Build a THREE.Texture from an HTMLImageElement that's already decoded.
+// Cached per `image.src` so re-renders (e.g. camera-only changes) don't
+// re-upload to the GPU. The cache lives on the CourtRenderer instance —
+// see _charTextureCache.
+function buildCharTexture(image) {
+  const tex = new THREE.Texture(image);
+  // NoColorSpace: GPU samples raw sRGB byte values without decoding to
+  // linear. The renderer's outputColorSpace is LinearSRGBColorSpace, so
+  // MeshBasic writes whatever it sampled straight to the framebuffer
+  // unchanged; the canvas then displays those bytes as sRGB. Matches the
+  // floor/walls/step convention (see PYTHON_LIT_FS docs above) and means
+  // the character renders exactly as the composited snapshot PNG would
+  // appear in a browser — no implicit gamma darkening that could read as
+  // a lighting effect.
+  tex.colorSpace = THREE.NoColorSpace;
+  // Snapshots are large (often 2560×1440); turn on anisotropy so glancing
+  // angles (camera at low pitch grazing the side characters) don't smear.
+  tex.anisotropy = 8;
+  // Linear sampling on both axes — the snapshot is already anti-aliased,
+  // we just want clean bilinear interpolation on the GPU.
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipMapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+// Build a single character billboard at stand `idx` of an N-stand prefab.
+// `snapWidth` / `snapHeight` are pixel dims of the snapshot PNG; the world
+// size is derived per the constants above. `pivotX` / `pivotY` locate the
+// Naninovel rig pivot inside the snapshot (PIL Y-down pixel coordinates) —
+// the plane is translated so that pixel lands at world y=CHARACTER_POSITION_Y,
+// reproducing the runtime @char position anchor regardless of tight-crop
+// asymmetry. Returns a Mesh ready to add to the scene.
+function buildCharacterBillboard(N, idx, texture, snapWidth, snapHeight, intrinsicScale, pivotX, pivotY, actorPivot) {
+  const theta = (2 * Math.PI * idx) / N;
+  const wWorld = (snapWidth  / PIXELS_TO_UNITS) * CHARACTER_SCALE * intrinsicScale;
+  const hWorld = (snapHeight / PIXELS_TO_UNITS) * CHARACTER_SCALE * intrinsicScale;
+
+  // Plane centre Y: derived from Naninovel's per-character CharacterMetadata
+  // pivot. The runtime displays the rig on a 30 m mesh-local render-canvas
+  // quad scaled by characterScale=0.25 (= 7.5 m world height). With pivot.y
+  // ∈ [0..1] over that quad, the centre lands at:
+  //   planeCenterY = characterPositionY + (0.5 − pivot.y) · canvasH · scale
+  //                = 5 + (0.5 − pivot.y) · 30 · 0.25
+  //                = 5 + 7.5 · (0.5 − pivot.y)
+  // For Ema (pivot.y = 0.695): 5 + 7.5·(−0.195) = 3.54.
+  // For Hanna (pivot.y = 0.655): 3.84. Per-character variation directly
+  // explains the empirically-tuned offsets — each character's foot anchor is
+  // baked into its CharacterMetadata via this single number.
+  const actorPivotY = (Array.isArray(actorPivot) && Number.isFinite(actorPivot[1]))
+    ? actorPivot[1]
+    : DEFAULT_ACTOR_PIVOT_Y;
+  const actorPivotX = (Array.isArray(actorPivot) && Number.isFinite(actorPivot[0]))
+    ? actorPivot[0]
+    : 0.5;
+  const planeCenterY = CHARACTER_POSITION_Y
+    + (0.5 - actorPivotY) * RENDER_CANVAS_HEIGHT * CHARACTER_SCALE;
+
+  // Snapshot-internal pivot offset (in mesh-local) — corrects for asymmetric
+  // tight-crop within the snapshot. Defaults to snapshot centre when the
+  // character editor didn't record pivotX/pivotY. PlaneGeometry's UV maps
+  // PIL y=0 (top) to mesh +y/2 and PIL y=snapHeight to mesh -y/2.
+  const worldPerPxY = hWorld / snapHeight;
+  const pivotMeshY  = (snapHeight / 2 - pivotY) * worldPerPxY;
+  const worldPerPxX = wWorld / snapWidth;
+  const pivotMeshX  = (pivotX - snapWidth  / 2) * worldPerPxX;
+  // The actor-pivot-derived planeCenterY accounts for the rig's overall
+  // vertical anchor; the snapshot pivot then nudges by any remaining
+  // tight-crop asymmetry. The horizontal actor-pivot offset (actorPivotX)
+  // is applied along the stand's tangent below.
+  const planeCenterY_corrected = planeCenterY - pivotMeshY;
+
+  const geo = new THREE.PlaneGeometry(wWorld, hWorld);
+  // MeshBasicMaterial: no scene lighting. The character editor's composited
+  // snapshots already bake in the desired colour; applying the courtroom's
+  // SpotLight + hemisphere ambient on top would tint them dark/red and the
+  // dim spotlight cone would only catch a couple of characters cleanly. The
+  // game itself doesn't run the actors through the perspective stage's
+  // SpotLight either — they read as pre-lit silhouettes against the lit
+  // backdrop, which is the effect MeshBasic reproduces.
+  const mat = new THREE.MeshBasicMaterial({
+    map:         texture,
+    transparent: true,
+    // alphaTest discards fully-transparent texels so the wall behind shows
+    // through cleanly, without the order-dependent depth artefacts that
+    // pure `transparent` blending would introduce when characters at
+    // different stands occlude each other.
+    alphaTest:   0.01,
+    side:        THREE.DoubleSide,
+    depthWrite:  true,
+  });
+
+  const mesh = new THREE.Mesh(geo, mat);
+  // Stand position is on the (+sin θ, +cos θ) ring at radius CHARACTER_DISTANCE.
+  // Under rotation.y = θ, mesh-local +X maps to world (cos θ, 0, −sin θ). To
+  // make the pivot pixel land at the stand's world position, the plane centre
+  // must be shifted by −(pivotMeshX·cos θ, 0, −pivotMeshX·sin θ) from the
+  // stand position (since the pivot is at mesh-local +pivotMeshX from the
+  // plane centre, the plane centre is at −pivotMeshX from the pivot).
+  // Horizontal actor-pivot offset: applied along the stand's tangent
+  // (perpendicular to its outward radial), same axis as pivotMeshX.
+  // For RenderCanvas width 15 with @char scale 0.25 → 3.75 m world,
+  // (0.5 − actorPivotX) × 3.75 gives the world-space shift along tangent.
+  const actorPivotMeshX = (0.5 - actorPivotX) * 15 /* RenderCanvas Size.x */ * CHARACTER_SCALE;
+  const totalTangent = pivotMeshX - actorPivotMeshX;
+  mesh.position.set(
+    CHARACTER_DISTANCE * Math.sin(theta) - totalTangent * Math.cos(theta),
+    planeCenterY_corrected,
+    CHARACTER_DISTANCE * Math.cos(theta) + totalTangent * Math.sin(theta),
+  );
+  // Naninovel's character actor convention: the sprite's "front" faces local
+  // −Z. PlaneGeometry's textured face is +Z (the front face); we want the
+  // BACK of the plane (mesh local −Z) to be the visible side from the
+  // courtroom-origin direction (where the camera orbits). Rotating Y by θ
+  // maps local −Z to the inward radial (−sin θ, 0, −cos θ), so the
+  // character "faces" the origin per Naninovel's convention.
+  //
+  // The plane's textured face (+Z) then points outward (away from origin).
+  // With side=DoubleSide, Three.js renders both faces using the same UVs —
+  // the back-face view samples the texture mirrored, which after
+  // renderTrialScene's global `scale(-1, 1)` mirror (Three.js RH → Unity LH
+  // convention) un-mirrors back to a correct character orientation. An
+  // earlier `θ + π` rotation reversed both steps and yielded a final
+  // horizontally-flipped character.
+  mesh.rotation.y = theta;
+  mesh.name = `char-${idx}`;
+  return mesh;
+}
+
 // --- Camera ---
 //
 // Naninovel's camera at radius D, height H, facing radially OUTWARD at the
@@ -794,6 +985,18 @@ export class CourtRenderer {
     this._textures = null;
     this._sceneMeshes = null;
     this._loaded = false;
+    // Character billboards: a single Group that we replace the children of
+    // on every setCharacters call. Held outside _sceneMeshes so a prefab
+    // switch (which rebuilds the static geometry) doesn't blow away the
+    // character placements; setCharacters is the only mutator of this
+    // group's contents.
+    this._charactersGroup = new THREE.Group();
+    this._charactersGroup.name = 'characters';
+    this._scene.add(this._charactersGroup);
+    // Texture cache keyed by HTMLImageElement.src (object URLs over the
+    // snapshot blobs — unique per snapshot for the lifetime of the page).
+    // Lets repeated renders of the same snapshot reuse the GPU upload.
+    this._charTextureCache = new Map();
   }
 
   async load(buildVersion) {
@@ -905,6 +1108,59 @@ export class CourtRenderer {
     return setCameraFromOpts(this._camera, this._prefab, opts);
   }
 
+  /**
+   * Replace the character billboards. `chars` is an array of records:
+   *   { idx, image, snapWidth, snapHeight, intrinsicScale, pivotX, pivotY }
+   * where `image` is a decoded HTMLImageElement (or anything THREE.Texture
+   * accepts), and idx is the stand index (0..N-1). `pivotX`/`pivotY` locate
+   * the Naninovel rig pivot in the snapshot's PIL pixel coordinates;
+   * defaults to the snapshot's geometric centre when omitted (the legacy
+   * behaviour for snapshots written before pivot tracking landed). Records
+   * with idx out of range or with no `image` are silently skipped.
+   *
+   * Replaces the children of the persistent _charactersGroup — geometries
+   * are disposed each call (cheap to rebuild — N quads), but textures live
+   * in _charTextureCache so re-renders don't re-upload to the GPU.
+   */
+  setCharacters(chars) {
+    const grp = this._charactersGroup;
+    // Dispose previous billboards' geometries + materials. Textures are NOT
+    // disposed here — the cache owns them so they survive across calls.
+    for (const child of grp.children) {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+    }
+    grp.clear();
+
+    if (!Array.isArray(chars)) return;
+
+    for (const ch of chars) {
+      if (!ch || !ch.image) continue;
+      const idx = ch.idx;
+      if (!Number.isInteger(idx) || idx < 0 || idx >= this._N) continue;
+      const w = Number(ch.snapWidth);
+      const h = Number(ch.snapHeight);
+      if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) continue;
+      const intrinsicScale = Number.isFinite(ch.intrinsicScale) && ch.intrinsicScale > 0
+        ? ch.intrinsicScale : 1.0;
+      const pivotX = Number.isFinite(ch.pivotX) ? ch.pivotX : w / 2;
+      const pivotY = Number.isFinite(ch.pivotY) ? ch.pivotY : h / 2;
+      // Per-character actor pivot from Naninovel CharacterMetadata, looked
+      // up by character id in scene.js. Undefined → DEFAULT_ACTOR_PIVOT_Y
+      // (0.5) for the rare snapshot whose source character lacks metadata.
+      const actorPivot = Array.isArray(ch.actorPivot) ? ch.actorPivot : null;
+
+      const key = ch.image.src;
+      let tex = this._charTextureCache.get(key);
+      if (!tex) {
+        tex = buildCharTexture(ch.image);
+        this._charTextureCache.set(key, tex);
+      }
+      const mesh = buildCharacterBillboard(this._N, idx, tex, w, h, intrinsicScale, pivotX, pivotY, actorPivot);
+      grp.add(mesh);
+    }
+  }
+
   render() {
     this._renderer.render(this._scene, this._camera);
   }
@@ -933,6 +1189,14 @@ export class CourtRenderer {
       for (const tex of Object.values(this._textures)) tex.dispose?.();
       this._textures = null;
     }
+    // Character billboards: dispose every cached texture + clear group.
+    for (const child of this._charactersGroup.children) {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+    }
+    this._charactersGroup.clear();
+    for (const tex of this._charTextureCache.values()) tex.dispose();
+    this._charTextureCache.clear();
     this._renderer.dispose();
     this._loaded = false;
   }

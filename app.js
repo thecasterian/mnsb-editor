@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and app.js in index.html.
-const BUILD_VERSION = '20260508a';
+const BUILD_VERSION = '20260514a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the scene editor. Dynamic
@@ -1188,6 +1188,12 @@ async function renderDiced() {
 // Crop a canvas to its alpha bbox plus a transparent margin, so the exported
 // PNG hugs the character but keeps a uniform border on all sides. Empty input
 // is returned unchanged.
+// Tight-crop a canvas to its non-transparent bbox + a uniform margin.
+// Returns the cropped canvas plus the bbox offset so callers can translate
+// coordinates from the source frame to the cropped frame:
+//   cropped_x = source_x - bbox.minX + margin
+//   cropped_y = source_y - bbox.minY + margin
+// (Used by makeSnapshotCanvas to track the rig pivot through the crop.)
 function tightCrop(srcCanvas, margin = 10) {
   const w = srcCanvas.width, h = srcCanvas.height;
   const data = srcCanvas.getContext('2d').getImageData(0, 0, w, h).data;
@@ -1203,12 +1209,12 @@ function tightCrop(srcCanvas, margin = 10) {
       }
     }
   }
-  if (maxX < 0) return srcCanvas;
+  if (maxX < 0) return { canvas: srcCanvas, minX: 0, minY: 0, margin: 0 };
   const out = document.createElement('canvas');
   out.width = (maxX - minX + 1) + margin * 2;
   out.height = (maxY - minY + 1) + margin * 2;
   out.getContext('2d').drawImage(srcCanvas, margin - minX, margin - minY);
-  return out;
+  return { canvas: out, minX, minY, margin };
 }
 
 // Shared composite path for both Export PNG and Send to Scene. Returns the
@@ -1222,7 +1228,13 @@ async function makeSnapshotCanvas() {
     full.width = img.width;
     full.height = img.height;
     full.getContext('2d').drawImage(img, 0, 0);
-    return { canvas: tightCrop(full), variant: activePose };
+    // Naninovel's Sprites actor (used by diced NPCs) defaults the sprite's
+    // m_Pivot to (0.5, 0.5) — geometric centre of the padded m_Rect. Tight-
+    // cropping translates that pixel into the cropped frame.
+    const { canvas, minX, minY, margin } = tightCrop(full);
+    const pivotX = full.width  / 2 - minX + margin;
+    const pivotY = full.height / 2 - minY + margin;
+    return { canvas, variant: activePose, pivotX, pivotY };
   }
   const activeLayers = layersInfo
     .filter(l => activeState[l.name])
@@ -1231,7 +1243,14 @@ async function makeSnapshotCanvas() {
   const canvasW = layersInfo[0]._canvasW || 2500;
   const canvasH = layersInfo[0]._canvasH || 5000;
   const full = await compositeToCanvas(activeLayers, canvasW, canvasH);
-  return { canvas: tightCrop(full), variant: detectActivePreset() };
+  // Layered characters: the rig root's local origin (Naninovel's @char
+  // position anchor) lands at the canvas geometric centre, because the
+  // bundle's auto-grown bbox is symmetric around the root in both axes.
+  // Tight-cropping shifts that pixel into the cropped frame.
+  const { canvas, minX, minY, margin } = tightCrop(full);
+  const pivotX = canvasW / 2 - minX + margin;
+  const pivotY = canvasH / 2 - minY + margin;
+  return { canvas, variant: detectActivePreset(), pivotX, pivotY };
 }
 
 // Mirror of updateUI()'s preset-active rule, returning the preset name (or
@@ -1317,6 +1336,12 @@ document.getElementById('sendBtn').onclick = async () => {
     charType,
     width:  snap.canvas.width,
     height: snap.canvas.height,
+    // Rig pivot in cropped pixel coordinates (PIL Y-down). The scene
+    // editor's 3D trial render uses this to plant the snapshot's pivot at
+    // Naninovel's `characterPositionY = 5 m` instead of treating the
+    // snapshot's geometric centre as the pivot.
+    pivotX: snap.pivotX,
+    pivotY: snap.pivotY,
     blob,
     createdAt: new Date().toISOString(),
   };

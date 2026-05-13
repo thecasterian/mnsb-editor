@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260511g';
+const BUILD_VERSION = '20260514e';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -207,6 +207,12 @@ let selectedSlug = null;
 // have no prefab Transform → 1.0. Used to compose with placement.scale so
 // placement.scale=1.0 means "as the game renders at script_scale=1.0".
 let intrinsicScales = new Map();
+// character id → [pivot_x, pivot_y] (Vector2 from Naninovel CharacterMetadata).
+// Populated from scene/authors.json. Used by the trial 3D renderer to position
+// each character's display quad on the world Y axis — pivot.y is the load-
+// bearing field. See scene_court.js's buildCharacterBillboard for the formula
+// `planeCenterY = characterPositionY + (0.5 − pivot.y) · canvasSize.y · @charScale.y`.
+let characterPivots = new Map();
 // Lower-cased query for the snapshot library filter. Empty = no filter.
 // Matches against name + character + variant. Updated by the search input.
 let snapshotSearchQuery = '';
@@ -605,9 +611,23 @@ async function loadStaticData() {
   sceneMeta   = await sceneRes.json();
 
   intrinsicScales = new Map();
+  characterPivots = new Map();
   for (const c of (charsConfig.characters || [])) {
     const s = Number(c.intrinsic_scale);
     intrinsicScales.set(c.id, Number.isFinite(s) && s > 0 ? s : 1);
+    // Per-character pivot from Naninovel's CharacterMetadata (Vector2 in
+    // resources.assets). Used by the trial-scene 3D renderer to plant each
+    // character's display quad at the correct world y — pivot.y in [0..1]
+    // controls how much of the quad sits below the actor's transform.position
+    // (= world y=5 in trial scenes), and per-character values vary from 0.52
+    // (Warden) to 0.75 (Leia), translating to ~1 m of vertical spread on stage.
+    if (Array.isArray(c.pivot) && c.pivot.length === 2) {
+      const px = Number(c.pivot[0]);
+      const py = Number(c.pivot[1]);
+      if (Number.isFinite(px) && Number.isFinite(py)) {
+        characterPivots.set(c.id, [px, py]);
+      }
+    }
   }
 
   // Fail-loud validator: every toggle key referenced by the metadata must
@@ -1370,6 +1390,35 @@ function trialTargetIdx() {
 async function renderTrialScene() {
   const r = await getCourtRenderer();
   if (r.prefab !== trialPrefab) r.setPrefab(trialPrefab);
+  // Resolve the stand slot map → character billboard records the renderer
+  // expects. Snapshots whose image isn't decoded yet are awaited in parallel
+  // so the first render of a fresh slot map still produces all billboards
+  // in a single pass (no half-empty intermediate frame).
+  const slots = currentStandSlots();
+  const charPromises = [];
+  for (let i = 0; i < slots.length; i++) {
+    const slug = slots[i];
+    if (!slug) continue;
+    const snap = snapshots.get(slug);
+    if (!snap) continue;
+    charPromises.push((async () => ({
+      idx:            i,
+      image:          await loadSnapshotImage(snap),
+      snapWidth:      snap.width,
+      snapHeight:     snap.height,
+      intrinsicScale: intrinsicScaleFor(snap),
+      // pivotX/pivotY undefined → renderer falls back to snapshot centre.
+      // Old snapshots written before pivot tracking land in this branch.
+      pivotX:         snap.pivotX,
+      pivotY:         snap.pivotY,
+      // Naninovel CharacterMetadata.Pivot — per-character (px, py) in [0..1].
+      // Drives the world Y of the displayed quad on the perspective stage.
+      // Undefined → renderer uses CHARACTER_POSITION_Y as-is (legacy path).
+      actorPivot:     characterPivots.get(snap.character),
+    }))());
+  }
+  const chars = await Promise.all(charPromises);
+  r.setCharacters(chars);
   // Pass direct values — yawMultiplier / distance / height override the
   // setCamera derivations from targetIdx / zoom / composition. Dropdowns
   // (Look character / Composition / Zoom) feed these via snap-to-preset
@@ -1769,18 +1818,28 @@ function applyZoomFromTemplate() {
 //   - data-trial-subtype: trial-only rows that further depend on which
 //     subtype (adv vs debate) is active — e.g. the overlay toggle group
 //     only makes sense for the 'adv' subtype.
-// The passes layer on top of each other: a row stays hidden if any axis
-// fails. We don't un-hide in later passes, so scene-type=adv elements
-// stay hidden under all trial-only checks regardless of subtype value.
+// Each element's visibility is recomputed from scratch every call: an
+// element is visible iff ALL gates it carries are satisfied. The previous
+// "layered passes" implementation got a row stuck hidden the moment any
+// pass set el.hidden=true, because the next call's guard (`if (!el.hidden)`)
+// then refused to consider it for un-hiding — so toggling Advanced on after
+// switching scene types couldn't reveal the data-trial-advanced rows.
 function applySidebarVisibility() {
-  for (const el of document.querySelectorAll('[data-scene-type]')) {
-    el.hidden = el.dataset.sceneType !== sceneType;
-  }
-  for (const el of document.querySelectorAll('[data-trial-advanced]')) {
-    if (!el.hidden) el.hidden = !trialAdvancedMode;
-  }
-  for (const el of document.querySelectorAll('[data-trial-subtype]')) {
-    if (!el.hidden) el.hidden = el.dataset.trialSubtype !== trialSubtype;
+  const gated = document.querySelectorAll(
+    '[data-scene-type], [data-trial-advanced], [data-trial-subtype]',
+  );
+  for (const el of gated) {
+    let visible = true;
+    if (el.dataset.sceneType && el.dataset.sceneType !== sceneType) {
+      visible = false;
+    }
+    if (el.hasAttribute('data-trial-advanced') && !trialAdvancedMode) {
+      visible = false;
+    }
+    if (el.dataset.trialSubtype && el.dataset.trialSubtype !== trialSubtype) {
+      visible = false;
+    }
+    el.hidden = !visible;
   }
 }
 

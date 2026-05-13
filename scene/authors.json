@@ -9,7 +9,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마</size></voffset>"
       },
-      "intrinsic_scale": 0.6
+      "intrinsic_scale": 0.6,
+      "pivot": [
+        0.5,
+        0.695
+      ]
     },
     {
       "id": "Hiro",
@@ -20,7 +24,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>二</size></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=4><size=118>希</size><space=4><voffset=-2><size=75>羅</size></voffset>",
         "ko": "<color=%COLOR%><size=136>니</size></color><space=4><voffset=-2><size=73>카이도</size></voffset><space=4><size=118>히</size><space=4><voffset=-2><size=75>로</size></voffset>"
       },
-      "intrinsic_scale": 0.75
+      "intrinsic_scale": 0.75,
+      "pivot": [
+        0.58,
+        0.695
+      ]
     },
     {
       "id": "Meruru",
@@ -31,7 +39,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>冰</size></color><space=4><voffset=-2><size=73>上</size></voffset><space=4><size=118>梅</size><space=4><voffset=-2><size=75>露露</size></voffset>",
         "ko": "<color=%COLOR%><size=136>히</size></color><space=4><voffset=-2><size=73>카미</size></voffset><space=4><size=118>메</size><space=4><voffset=-2><size=75>루루</size></voffset>"
       },
-      "intrinsic_scale": 0.75
+      "intrinsic_scale": 0.75,
+      "pivot": [
+        0.501,
+        0.676
+      ]
     },
     {
       "id": "Hanna",
@@ -42,7 +54,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=4><size=118>漢</size><space=4><voffset=-2><size=75>娜</size></voffset>",
         "ko": "<color=%COLOR%><size=136>토</size></color><space=4><voffset=-2><size=73>노</size></voffset><space=4><size=118>한</size><space=4><voffset=-2><size=75>나</size></voffset>"
       },
-      "intrinsic_scale": 0.54
+      "intrinsic_scale": 0.54,
+      "pivot": [
+        0.5,
+        0.655
+      ]
     },
     {
       "id": "Sherry",
@@ -53,7 +69,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>橘</size></color><space=4><size=118>雪</size><space=4><voffset=-2><size=75>莉</size></voffset>",
         "ko": "<color=%COLOR%><size=136>타</size></color><space=4><voffset=-2><size=73>치바나</size></voffset><space=4><size=118>셰</size><space=4><voffset=-2><size=75>리</size></voffset>"
       },
-      "intrinsic_scale": 0.6
+      "intrinsic_scale": 0.6,
+      "pivot": [
+        0.5,
+        0.655
+      ]
     },
     {
       "id": "AnAn",
@@ -64,7 +84,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-2><size=73>目</size></voffset><space=4><size=118>安</size><space=4><voffset=-2><size=75>安</size></voffset>",
         "ko": "<color=%COLOR%><size=136>나</size></color><space=4><voffset=-2><size=73>츠메</size></voffset><space=4><size=118>안</size><space=4><voffset=-2><size=75>안</size></voffset>"
       },
-      "intrinsic_scale": 0.6
+      "intrinsic_scale": 0.6,
+      "pivot": [
+        0.5,
+        0.69
+      ]
     },
     {
       "id": "Leia",
@@ -75,7 +99,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><size=118>蕾</size><space=4><voffset=-2><size=75>雅</size></voffset>",
         "ko": "<color=%COLOR%><size=136>하</size></color><space=4><voffset=-2><size=73>스미</size></voffset><space=4><size=118>레</size><space=4><voffset=-2><size=75>이아</size></voffset>"
       },
-      "intrinsic_scale": 0.75
+      "intrinsic_scale": 0.75,
+      "pivot": [
+        0.5,
+        0.75
+      ]
     },
     {
       "id": "Coco",
@@ -86,7 +114,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>澤</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=4><size=118>可</size><space=4><voffset=-2><size=75>可</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>와타리</size></voffset><space=4><size=118>코</size><space=4><voffset=-2><size=75>코</size></voffset>"
       },
-      "intrinsic_scale": 0.6
+      "intrinsic_scale": 0.6,
+      "pivot": [
+        0.5,
+        0.695
+      ]
     },
     {
       "id": "Miria",
@@ -97,7 +129,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><size=118>米</size><space=4><voffset=-2><size=75>莉亞</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>에키</size></voffset><space=4><size=118>미</size><space=4><voffset=-2><size=75>리아</size></voffset>"
       },
-      "intrinsic_scale": 0.66
+      "intrinsic_scale": 0.66,
+      "pivot": [
+        0.5,
+        0.685
+      ]
     },
     {
       "id": "Margo",
@@ -108,7 +144,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>寶</size></color><space=4><voffset=-2><size=73>生</size></voffset><space=4><size=118>瑪</size><space=4><voffset=-2><size=75>格</size></voffset>",
         "ko": "<color=%COLOR%><size=136>호</size></color><space=4><voffset=-2><size=73>쇼</size></voffset><space=4><size=118>마</size><space=4><voffset=-2><size=75>고</size></voffset>"
       },
-      "intrinsic_scale": 0.642
+      "intrinsic_scale": 0.642,
+      "pivot": [
+        0.5,
+        0.685
+      ]
     },
     {
       "id": "Noah",
@@ -119,7 +159,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-2><size=73>崎</size></voffset><space=4><size=118>諾</size><space=4><voffset=-2><size=75>亞</size></voffset>",
         "ko": "<color=%COLOR%><size=136>죠</size></color><space=4><voffset=-2><size=73>가사키</size></voffset><space=4><size=118>노</size><space=4><voffset=-2><size=75>아</size></voffset>"
       },
-      "intrinsic_scale": 0.588
+      "intrinsic_scale": 0.588,
+      "pivot": [
+        0.5,
+        0.7
+      ]
     },
     {
       "id": "Nanoka",
@@ -130,7 +174,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>黑</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=4><size=118>奈</size><space=4><voffset=-2><size=75>葉香</size></voffset>",
         "ko": "<color=%COLOR%><size=136>쿠</size></color><space=4><voffset=-2><size=73>로베</size></voffset><space=4><size=118>나</size><space=4><voffset=-2><size=75>노카</size></voffset>"
       },
-      "intrinsic_scale": 0.75
+      "intrinsic_scale": 0.75,
+      "pivot": [
+        0.46,
+        0.655
+      ]
     },
     {
       "id": "Alisa",
@@ -141,7 +189,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=4><size=118>亞</size><space=4><voffset=-2><size=75>里沙</size></voffset>",
         "ko": "<color=%COLOR%><size=136>시</size></color><space=4><voffset=-2><size=73>토</size></voffset><space=4><size=118>아</size><space=4><voffset=-2><size=75>리사</size></voffset>"
       },
-      "intrinsic_scale": 0.6
+      "intrinsic_scale": 0.6,
+      "pivot": [
+        0.5,
+        0.705
+      ]
     },
     {
       "id": "Yuki",
@@ -152,7 +204,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>月</size></color><space=4><voffset=-2><size=73>代</size></voffset><space=4><size=118>雪</size>",
         "ko": "<color=%COLOR%><size=136>츠</size></color><space=4><voffset=-2><size=73>키시로</size></voffset><space=4><size=118>유</size><space=4><voffset=-2><size=75>키</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.485,
+        0.675
+      ]
     },
     {
       "id": "Warden",
@@ -163,7 +219,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>典</size></color><space=4><voffset=-2><size=73>獄長</size></voffset>",
         "ko": "<color=%COLOR%><size=136>교</size></color><space=4><voffset=-2><size=73>도소장</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.485,
+        0.52
+      ]
     },
     {
       "id": "Jailer",
@@ -174,19 +234,31 @@
         "zh-Hant": "<color=%COLOR%><size=136>看</size></color><space=4><voffset=-2><size=73>守</size></voffset>",
         "ko": "<color=%COLOR%><size=136>간</size></color><space=4><voffset=-2><size=73>수</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.42,
+        0.59
+      ]
     },
     {
       "id": "JailerB",
       "nameColor_hex": "#B4B1C6",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.49,
+        0.625
+      ]
     },
     {
       "id": "JailerC",
       "nameColor_hex": "#B4B1C6",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.44,
+        0.7
+      ]
     },
     {
       "id": "CreatureEma",
@@ -197,7 +269,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.498,
+        0.739
+      ]
     },
     {
       "id": "CreatureHiro",
@@ -208,7 +284,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>二</size></color><space=4><voffset=-2><size=73>階堂</size></voffset><space=4><size=118>希</size><space=4><voffset=-2><size=75>羅</size></voffset>",
         "ko": "<color=%COLOR%><size=136>니</size></color><space=4><voffset=-2><size=73>카이도</size></voffset><space=4><size=118>히</size><space=4><voffset=-2><size=75>로</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.492,
+        0.74
+      ]
     },
     {
       "id": "CreatureMeruru",
@@ -219,7 +299,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>冰</size></color><space=4><voffset=-2><size=73>上</size></voffset><space=4><size=118>梅</size><space=4><voffset=-2><size=75>露露</size></voffset>",
         "ko": "<color=%COLOR%><size=136>히</size></color><space=4><voffset=-2><size=73>카미</size></voffset><space=4><size=118>메</size><space=4><voffset=-2><size=75>루루</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.485,
+        0.715
+      ]
     },
     {
       "id": "CreatureHanna",
@@ -230,7 +314,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>遠</size></color><space=4><voffset=-2><size=73>野</size></voffset><space=4><size=118>漢</size><space=4><voffset=-2><size=75>娜</size></voffset>",
         "ko": "<color=%COLOR%><size=136>토</size></color><space=4><voffset=-2><size=73>노</size></voffset><space=4><size=118>한</size><space=4><voffset=-2><size=75>나</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.496,
+        0.703
+      ]
     },
     {
       "id": "CreatureSherry",
@@ -241,7 +329,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>橘</size></color><space=4><size=118>雪</size><space=4><voffset=-2><size=75>莉</size></voffset>",
         "ko": "<color=%COLOR%><size=136>타</size></color><space=4><voffset=-2><size=73>치바나</size></voffset><space=4><size=118>셰</size><space=4><voffset=-2><size=75>리</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.475,
+        0.694
+      ]
     },
     {
       "id": "CreatureAnAn",
@@ -252,7 +344,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>夏</size></color><space=4><voffset=-2><size=73>目</size></voffset><space=4><size=118>安</size><space=4><voffset=-2><size=75>安</size></voffset>",
         "ko": "<color=%COLOR%><size=136>나</size></color><space=4><voffset=-2><size=73>츠메</size></voffset><space=4><size=118>안</size><space=4><voffset=-2><size=75>안</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.473,
+        0.68
+      ]
     },
     {
       "id": "CreatureLeia",
@@ -263,7 +359,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>蓮</size></color><space=4><voffset=-2><size=73>見</size></voffset><space=4><size=118>蕾</size><space=4><voffset=-2><size=75>雅</size></voffset>",
         "ko": "<color=%COLOR%><size=136>하</size></color><space=4><voffset=-2><size=73>스미</size></voffset><space=4><size=118>레</size><space=4><voffset=-2><size=75>이아</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.506,
+        0.742
+      ]
     },
     {
       "id": "CreatureCoco",
@@ -274,7 +374,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>澤</size></color><space=4><voffset=-2><size=73>渡</size></voffset><space=4><size=118>可</size><space=4><voffset=-2><size=75>可</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>와타리</size></voffset><space=4><size=118>코</size><space=4><voffset=-2><size=75>코</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.484,
+        0.736
+      ]
     },
     {
       "id": "CreatureMiria",
@@ -285,7 +389,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>佐</size></color><space=4><voffset=-2><size=73>伯</size></voffset><space=4><size=118>米</size><space=4><voffset=-2><size=75>莉亞</size></voffset>",
         "ko": "<color=%COLOR%><size=136>사</size></color><space=4><voffset=-2><size=73>에키</size></voffset><space=4><size=118>미</size><space=4><voffset=-2><size=75>리아</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.495,
+        0.707
+      ]
     },
     {
       "id": "CreatureMargo",
@@ -296,7 +404,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>寶</size></color><space=4><voffset=-2><size=73>生</size></voffset><space=4><size=118>瑪</size><space=4><voffset=-2><size=75>格</size></voffset>",
         "ko": "<color=%COLOR%><size=136>호</size></color><space=4><voffset=-2><size=73>쇼</size></voffset><space=4><size=118>마</size><space=4><voffset=-2><size=75>고</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.501,
+        0.715
+      ]
     },
     {
       "id": "CreatureNoah",
@@ -307,7 +419,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>城</size></color><space=4><voffset=-2><size=73>崎</size></voffset><space=4><size=118>諾</size><space=4><voffset=-2><size=75>亞</size></voffset>",
         "ko": "<color=%COLOR%><size=136>죠</size></color><space=4><voffset=-2><size=73>가사키</size></voffset><space=4><size=118>노</size><space=4><voffset=-2><size=75>아</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.502,
+        0.735
+      ]
     },
     {
       "id": "CreatureNanoka",
@@ -318,7 +434,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>黑</size></color><space=4><voffset=-2><size=73>部</size></voffset><space=4><size=118>奈</size><space=4><voffset=-2><size=75>葉香</size></voffset>",
         "ko": "<color=%COLOR%><size=136>쿠</size></color><space=4><voffset=-2><size=73>로베</size></voffset><space=4><size=118>나</size><space=4><voffset=-2><size=75>노카</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.488,
+        0.69
+      ]
     },
     {
       "id": "CreatureAlisa",
@@ -329,7 +449,11 @@
         "zh-Hant": "<color=%COLOR%><size=136>紫</size></color><space=4><voffset=-2><size=73>藤</size></voffset><space=4><size=118>亞</size><space=4><voffset=-2><size=75>里沙</size></voffset>",
         "ko": "<color=%COLOR%><size=136>시</size></color><space=4><voffset=-2><size=73>토</size></voffset><space=4><size=118>아</size><space=4><voffset=-2><size=75>리사</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.495,
+        0.746
+      ]
     },
     {
       "id": "Unknown",
@@ -340,7 +464,11 @@
         "zh-Hant": "<size=136>？</size><space=-22><voffset=-2><size=73>？？</size></voffset></cspace>",
         "ko": "<cspace=-1><space=44><size=136>？</size><space=-40><voffset=-2><size=73>？？</size></voffset></cspace>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "EmaFake",
@@ -351,55 +479,91 @@
         "zh-Hant": "<size=136>櫻</size></color><space=4><voffset=-2><size=73>羽</size></voffset><space=4><size=118>艾</size><space=4><voffset=-2><size=75>瑪？</size></voffset>",
         "ko": "<size=136>사</size></color><space=4><voffset=-2><size=73>쿠라바</size></voffset><space=4><size=118>에</size><space=4><voffset=-2><size=75>마？</size></voffset>"
       },
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "StrayNarehate",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "WitchCandidate1",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "WitchCandidate2",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "WitchCandidate3",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "Narehate",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "Rabbit",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "Girl",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     },
     {
       "id": "BigWitch",
       "nameColor_hex": "#FFFFFF",
       "tagged_name": {},
-      "intrinsic_scale": 1.0
+      "intrinsic_scale": 1.0,
+      "pivot": [
+        0.5,
+        0.0
+      ]
     }
   ]
 }
