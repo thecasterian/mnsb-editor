@@ -95,8 +95,8 @@ const DEFAULT_ACTOR_PIVOT_Y = 0.5;
 // 1.0 = prefab albedo). Drop below 1 to darken a surface without changing
 // the lighting; useful for balancing against the SpotLight intensity if
 // any single surface reads too bright after a renderer change.
-const TINT_FLOOR = [0.847, 0.118, 0.130];
-const TINT_STEP  = [0.22, 0.073, 0.067];   // Court_Step.mat  — dark brown stone
+const TINT_FLOOR = [1.0,   0.142, 0.156];
+const TINT_STEP  = [0.317, 0.103, 0.096];   // Court_Step.mat  — dark brown stone
 const TINT_STAND = [1.0,   1.0,   1.0  ];   // Court_Stand.mat — uniform dim
 const TINT_WALLS = [1.0,   1.0,   1.0  ];   // Court_Wall*.mat — no tint
 

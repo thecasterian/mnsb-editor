@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260514e';
+const BUILD_VERSION = '20260514f';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -830,20 +830,32 @@ async function renderBackground(filePath, dst) {
 
 // --- Layer rendering ---
 
-// NamePlateBase ships with a deliberately translucent main fill (peak α≈87%,
-// RGB near-black) — designed to sit softly over NormalPrinter_Screen with the
-// dialog frame bleeding through. In our linear-space blend, against a possibly
-// brighter scene BG that reads thinner than the in-game look. Boost α by
-// 255/221 so the dominant 87% peak saturates to fully opaque; the secondary
-// 61% inner-ring peak only rises to ~70% (stays soft) and AA edges scale
-// gently. Other layers pass through untouched.
-const NAMEPLATE_ALPHA_BOOST = 255 / 221;
+// Per-layer α multipliers, applied at composite time. Each entry boosts a
+// layer's alpha to compensate for blending against our 3D court being brighter
+// than the game's actual court — same darkening shape in linear space, but
+// landing closer to the in-game look. The boost factor for each layer is
+// chosen so the layer's *peak* α saturates to 1.0; the gradient and AA edges
+// scale proportionally (and clamp at 1).
+//
+//   - NamePlateBase    — peak α≈87% (221/255), boosted to 255/221.
+//     Translucent main fill, designed to sit softly over NormalPrinter_Screen
+//     with the dialog frame bleeding through. The secondary 61% inner-ring
+//     peak only rises to ~70% so it stays soft.
+//   - NormalPrinter_Screen — peak α≈75% (192/255), boosted to 255/192.
+//     Pure-black vertical gradient (transparent at top → ~75% opaque at
+//     bottom). RGB is already 0, so α is the only lever — boosting saturates
+//     the dialog-band base to a true black while preserving the soft top
+//     fade. Other layers pass through untouched.
+const LAYER_ALPHA_BOOST = {
+  NamePlateBase:        255 / 221,
+  NormalPrinter_Screen: 255 / 192,
+};
 
 async function renderLayer(layer, dst) {
   const [tw, th] = layer.size;
   if (tw <= 0 || th <= 0) return;
   let sprite = await spriteAtSize(`${SCENE_ADV_ROOT}/${layer.file}`, tw, th);
-  const boostA = layer.name === 'NamePlateBase' ? NAMEPLATE_ALPHA_BOOST : 1;
+  const boostA = LAYER_ALPHA_BOOST[layer.name] || 1;
   const c = layer.color;
   const needsTint = c && !(c[0] === 1 && c[1] === 1 && c[2] === 1 && c[3] === 1);
   if (needsTint || boostA !== 1) {
