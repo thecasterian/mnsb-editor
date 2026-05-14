@@ -985,6 +985,26 @@ body.scene-editor .preview-container { cursor: default; }
   pointer-events: none;
 }
 
+/* Scene editor (both adv and trial): the preview canvas fits the available
+   area, preserving its 2560×1440 aspect ratio. The browser's intrinsic-ratio
+   handling for replaced elements does the right thing when both width and
+   height are auto with max-* constraints. The character editor preview
+   stays on the default `display: inline-block` shrink-wrap so its zoom/pan
+   transform behaves correctly. */
+body.scene-editor .preview-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body.scene-editor .preview-container canvas {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
 .zoom-controls {
   position: absolute;
   bottom: 16px;

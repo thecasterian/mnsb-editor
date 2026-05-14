@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260514j';
+const BUILD_VERSION = '20260514l';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -2404,6 +2404,12 @@ function refreshPlacementOverlays() {
   }
   const displayRatio = canvas.clientHeight / CANVAS_H;
   if (!Number.isFinite(displayRatio) || displayRatio <= 0) return;
+  // `.preview-container` is flex-centered on the scene editor, so the canvas
+  // no longer sits at the container's top-left when the container is taller
+  // or wider than the canvas. Add the canvas's offset so overlays track the
+  // canvas's actual on-screen position instead of the container's origin.
+  const offsetX = canvas.offsetLeft;
+  const offsetY = canvas.offsetTop;
 
   const old = new Map();
   for (const el of previewContainer.querySelectorAll('.placement-overlay')) {
@@ -2429,8 +2435,8 @@ function refreshPlacementOverlays() {
     const s = intrinsicScaleFor(snap) * p.scale;
     const w = snap.width  * s * displayRatio;
     const h = snap.height * s * displayRatio;
-    el.style.left   = `${p.x * displayRatio}px`;
-    el.style.top    = `${p.y * displayRatio}px`;
+    el.style.left   = `${offsetX + p.x * displayRatio}px`;
+    el.style.top    = `${offsetY + p.y * displayRatio}px`;
     el.style.width  = `${w}px`;
     el.style.height = `${h}px`;
     el.classList.toggle('is-selected', p.slug === selectedSlug);
@@ -2464,6 +2470,12 @@ function attachPlacementOverlayHandlers(el) {
     if (!placement) return;
     const canvas = document.getElementById('previewContainer').querySelector('canvas');
     const displayRatio = canvas ? canvas.clientHeight / CANVAS_H : 1;
+    // Canvas offset within `.preview-container` — non-zero because the
+    // container flex-centers the canvas. Capture once at drag start so the
+    // live overlay position math below stays consistent with what
+    // refreshPlacementOverlays would render.
+    const offsetX = canvas ? canvas.offsetLeft : 0;
+    const offsetY = canvas ? canvas.offsetTop  : 0;
     drag = {
       pointerId:    e.pointerId,
       startClientX: e.clientX,
@@ -2471,6 +2483,8 @@ function attachPlacementOverlayHandlers(el) {
       startPlaceX:  placement.x,
       startPlaceY:  placement.y,
       displayRatio,
+      offsetX,
+      offsetY,
     };
     _dragInProgress = true;
   }
@@ -2488,8 +2502,8 @@ function attachPlacementOverlayHandlers(el) {
     // Update the dragged overlay's position directly. Avoid the full overlay
     // refresh (which would appendChild this captured element on every move
     // and can implicitly release pointer capture — see selectAndStartDrag).
-    el.style.left = `${placement.x * drag.displayRatio}px`;
-    el.style.top  = `${placement.y * drag.displayRatio}px`;
+    el.style.left = `${drag.offsetX + placement.x * drag.displayRatio}px`;
+    el.style.top  = `${drag.offsetY + placement.y * drag.displayRatio}px`;
     schedulePlacementsSave();
     // No scheduleRender during drag — canvas re-renders take ~100 ms and
     // produce visible lag. The CSS overlay tracks the cursor live; the
@@ -2539,8 +2553,10 @@ async function drawPreview() {
   }
   // Discard if a newer render started while we were compositing.
   if (seq !== renderSeq) return;
-  canvas.style.height = '720px';
-  canvas.style.width = 'auto';
+  // Canvas display size is governed entirely by the `body.scene-editor
+  // .preview-container canvas` rule (fits the available preview area while
+  // preserving the 2560×1440 aspect). No inline width/height — letting CSS
+  // win means the canvas reflows automatically on viewport resize.
   // Swap the canvas in place rather than replaceChildren so placement overlay
   // divs (and any captured pointer for an in-flight drag) survive the render.
   const previewContainer = document.getElementById('previewContainer');
@@ -3005,6 +3021,13 @@ function showModal(message) {
       loadSceneConfig();
     }
   });
+
+  // Canvas display size is viewport-relative (CSS `max-width/height: 100%`
+  // on `body.scene-editor .preview-container canvas`), so the displayRatio
+  // and the canvas's offset within the container both change when the
+  // viewport resizes. Refresh overlays so they keep tracking the canvas.
+  // No-op for trial — refreshPlacementOverlays early-returns there.
+  window.addEventListener('resize', refreshPlacementOverlays);
 
   // Inspector controls. Each writes to the selected placement, refreshes the
   // overlay (selection outline tracks geometry live), and saves. Whether we
