@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260514f';
+const BUILD_VERSION = '20260514j';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -46,7 +46,7 @@ const AUTHOR_ORDER = [
 const DEFAULT_AUTHOR = "Sherry";
 
 // --- App state ---
-const LOCALES = new Set(['ko', 'ja', 'zh-Hans', 'zh-Hant']);
+const LOCALES = new Set(['ko', 'ja', 'zh-Hans']);
 const SCENE_TYPES = new Set(['adv', 'trial']);
 let sceneType = 'adv';              // one of SCENE_TYPES — drives field visibility + render dispatch
 let locale = 'ko';                  // one of LOCALES
@@ -118,9 +118,9 @@ let trialDistance = 10;
 let trialHeight   = 5.2;
 let trialRollDeg  = 0;               // free numeric, no preset shortcut
 let trialPitchDeg = 0;
-// Advanced mode gates the three direct-camera sliders (yaw multiplier,
-// distance, height) that live under the Look character / Zoom groups.
-// Roll and Pitch have their own groups and stay visible in either mode.
+// Advanced mode gates the direct-camera controls: the yaw multiplier /
+// distance / height sliders under the Look character / Zoom groups, and
+// the standalone Roll and Pitch groups below them.
 let trialAdvancedMode = false;
 
 // Trial scenes carry one of two "subtypes" inside the courtroom:
@@ -517,13 +517,12 @@ function loadSceneConfig({ render = true } = {}) {
   syncZoomPillFromDH();
 
   if (LOCALES.has(data.locale)) {
-    if (data.locale !== locale) {
-      locale = data.locale;
-      for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
-        b.classList.toggle('active', b.dataset.locale === locale);
-      }
-      populateAuthorSelect();
+    const changed = data.locale !== locale;
+    locale = data.locale;
+    for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
+      b.classList.toggle('active', b.dataset.locale === locale);
     }
+    if (changed) populateAuthorSelect();
   }
 
   if (typeof data.bgPath === 'string' || data.bgPath === null) {
@@ -887,18 +886,13 @@ async function renderLayer(layer, dst) {
 // exact, matching compose_ui_panel.py's substitution policy.
 //
 // Chinese: the game ships only one Chinese font — Source Han Serif SC
-// (general-fonts-sourcehanserifsc_assets_all.bundle) — and uses it for both
-// zh-Hans and zh-Hant. Noto Serif SC is the same typeface (Adobe + Google
-// jointly developed Source Han Serif; Google rebrands it as Noto Serif), so
-// we use it as the primary for both Chinese locales. Shared codepoints will
-// render with Mainland glyph forms in zh-Hant text — matching what the game
-// itself displays. The two locales then differ only by source-string
-// character variants (e.g. 樱 vs 櫻), not by font glyph forms.
+// (general-fonts-sourcehanserifsc_assets_all.bundle). Noto Serif SC is the
+// same typeface (Adobe + Google jointly developed Source Han Serif; Google
+// rebrands it as Noto Serif), so we use it as the primary.
 const FONT_FAMILY = {
   ko:        '"Noto Serif KR", "Noto Serif JP", "Noto Serif CJK KR", "Noto Serif CJK JP", serif',
   ja:        '"Noto Serif JP", "Noto Serif KR", "Noto Serif CJK JP", "Noto Serif CJK KR", serif',
   'zh-Hans': '"Noto Serif SC", "Noto Serif CJK SC", "Noto Serif JP", serif',
-  'zh-Hant': '"Noto Serif SC", "Noto Serif CJK SC", "Noto Serif JP", serif',
 };
 
 // Bump the requested weight one CSS step. The game ships Tsukushi Mincho
@@ -1824,9 +1818,9 @@ function applyZoomFromTemplate() {
 
 // Toggle each section in the sidebar along three axes:
 //   - data-scene-type: must match the active sceneType (adv vs trial).
-//   - data-trial-advanced: trial-only sub-rows (yaw mult / distance /
-//     height sliders) shown only when advanced mode is on. Roll and Pitch
-//     have their own groups and don't carry this attribute.
+//   - data-trial-advanced: trial-only controls shown only when advanced
+//     mode is on. Covers both the sub-rows under Look/Zoom (yaw mult /
+//     distance / height sliders) and the standalone Roll and Pitch groups.
 //   - data-trial-subtype: trial-only rows that further depend on which
 //     subtype (adv vs debate) is active — e.g. the overlay toggle group
 //     only makes sense for the 'adv' subtype.
@@ -2696,10 +2690,10 @@ function showModal(message) {
       header.parentElement.classList.toggle('collapsed');
     });
   }
-  // Advanced toggle gates the three direct-camera sliders (yaw mult,
-  // distance, height) that live as data-trial-advanced sub-rows under the
-  // Look character / Zoom groups. No scheduleRender — visibility doesn't
-  // change the camera, just what the user can see in the panel.
+  // Advanced toggle gates the direct-camera controls: the yaw mult /
+  // distance / height sub-rows under Look character / Zoom, plus the
+  // standalone Roll and Pitch groups. No scheduleRender — visibility
+  // doesn't change the camera, just what the user can see in the panel.
   document.getElementById('trialAdvancedToggle').onclick = (e) => {
     trialAdvancedMode = !trialAdvancedMode;
     e.currentTarget.classList.toggle('active', trialAdvancedMode);
