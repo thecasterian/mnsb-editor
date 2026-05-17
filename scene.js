@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260514l';
+const BUILD_VERSION = '20260515e';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -163,6 +163,10 @@ let trialShowAutoToggle = true;
 let trialShowMenuButton = true;
 let trialShowBookButton = true;
 let trialShowAuthorPlate = true;
+// Debate-subtype book-button flag, independent of trialShowBookButton so the
+// user can keep the button on in trial-adv while hiding it in trial-debate
+// (and vice versa). Routed by TOGGLE_FLAGS.showBookButton on trialSubtype.
+let trialDebateShowBookButton = true;
 // Trial-side AuthorLabel + MessageLabel content. Separate from the adv-side
 // `authorId` / `messageText` so a user can pose a trial line ("Objection!")
 // without overwriting the adv preview's dialog, and vice versa.
@@ -170,6 +174,14 @@ let trialShowAuthorPlate = true;
 // populateAuthorSelects); resolved properly once charsConfig loads.
 let trialAuthorId    = '';
 let trialMessageText = '';
+
+// Debate-subtype state. trialDebateText is the testimony body (use '<br>' for
+// line breaks, matching Naninovel's @printDebate convention); X/Y are the
+// script's ScenePosition (percent of canvas, top-left origin), with defaults
+// matching the most common in-game value (pos:70,50 — right side, middle).
+let trialDebateText = '';
+let trialDebatePosX = 70;
+let trialDebatePosY = 50;
 
 // Resolve the "active" author / message based on sceneType, so the shared
 // text-rendering path in renderTextLeaf doesn't need to know about subtypes.
@@ -185,7 +197,14 @@ function activeMessageText() { return sceneType === 'trial' ? trialMessageText :
 const TOGGLE_FLAGS = {
   showAutoToggle:  () => (sceneType === 'trial' ? trialShowAutoToggle : showAutoToggle),
   showMenuButton:  () => (sceneType === 'trial' ? trialShowMenuButton : showMenuButton),
-  showBookButton:  () => (sceneType === 'trial' ? trialShowBookButton : showBookButton),
+  // showBookButton has three live backings: adv scene (showBookButton),
+  // trial-adv (trialShowBookButton), trial-debate (trialDebateShowBookButton).
+  // Splitting by subtype lets a user hide the book in debate without losing
+  // their adv-side overlay state.
+  showBookButton:  () => {
+    if (sceneType !== 'trial') return showBookButton;
+    return trialSubtype === 'debate' ? trialDebateShowBookButton : trialShowBookButton;
+  },
   showAuthorPlate: () => (sceneType === 'trial' ? trialShowAuthorPlate : showAuthorPlate),
 };
 
@@ -328,6 +347,10 @@ function saveSceneConfig() {
       trialSubtype,
       trialAuthorId,
       trialMessageText,
+      // Debate-subtype state (text + ScenePosition X/Y).
+      trialDebateText,
+      trialDebatePosX,
+      trialDebatePosY,
       // trialLookStandIdx replaces the older trialLookChar (character-id-keyed)
       // — see the state declaration for why. Saved as an integer or null.
       trialLookStandIdx,
@@ -346,6 +369,7 @@ function saveSceneConfig() {
       trialShowMenuButton,
       trialShowBookButton,
       trialShowAuthorPlate,
+      trialDebateShowBookButton,
     }));
   } catch (e) {
     console.error('Failed to save scene config:', e);
@@ -398,10 +422,11 @@ function loadSceneConfig({ render = true } = {}) {
   // Restore trial-side overlay toggles. Each writes its module-level flag and
   // syncs the corresponding checkbox; doesn't touch the adv-side toggles.
   const trialToggleRestores = [
-    ['trialShowAutoToggle',  'toggleTrialAutoToggle',  (v) => { trialShowAutoToggle  = v; }],
-    ['trialShowMenuButton',  'toggleTrialMenuButton',  (v) => { trialShowMenuButton  = v; }],
-    ['trialShowBookButton',  'toggleTrialBookButton',  (v) => { trialShowBookButton  = v; }],
-    ['trialShowAuthorPlate', 'toggleTrialAuthorPlate', (v) => { trialShowAuthorPlate = v; }],
+    ['trialShowAutoToggle',       'toggleTrialAutoToggle',      (v) => { trialShowAutoToggle       = v; }],
+    ['trialShowMenuButton',       'toggleTrialMenuButton',      (v) => { trialShowMenuButton       = v; }],
+    ['trialShowBookButton',       'toggleTrialBookButton',      (v) => { trialShowBookButton       = v; }],
+    ['trialShowAuthorPlate',      'toggleTrialAuthorPlate',     (v) => { trialShowAuthorPlate      = v; }],
+    ['trialDebateShowBookButton', 'toggleTrialDebateBookButton', (v) => { trialDebateShowBookButton = v; }],
   ];
   for (const [field, elId, set] of trialToggleRestores) {
     if (typeof data[field] === 'boolean') {
@@ -561,6 +586,22 @@ function loadSceneConfig({ render = true } = {}) {
   if (typeof data.trialMessageText === 'string' && document.activeElement !== trialMsgEl) {
     trialMessageText = data.trialMessageText;
     if (trialMsgEl) trialMsgEl.value = trialMessageText;
+  }
+
+  // Debate text/X/Y — same active-element guard for the textarea so cross-tab
+  // sync doesn't clobber in-progress typing.
+  const debateTextEl = document.getElementById('trialDebateInput');
+  if (typeof data.trialDebateText === 'string' && document.activeElement !== debateTextEl) {
+    trialDebateText = data.trialDebateText;
+    if (debateTextEl) debateTextEl.value = trialDebateText;
+  }
+  if (Number.isFinite(data.trialDebatePosX)) {
+    trialDebatePosX = data.trialDebatePosX;
+    syncDebatePosUI('x');
+  }
+  if (Number.isFinite(data.trialDebatePosY)) {
+    trialDebatePosY = data.trialDebatePosY;
+    syncDebatePosUI('y');
   }
 
   if (render) scheduleRender();
@@ -915,10 +956,11 @@ async function ensureFontsLoaded() {
   const variants = [];
   for (const fam of ['Noto Serif KR', 'Noto Serif JP', 'Noto Serif SC']) {
     for (const sz of [48, 136]) {
-      // 500 covers the +100 bump from the default 400 prefab weight; 800
-      // covers the bump from the rare 700 case. Both must also appear in the
-      // Google Fonts <link> in scene.html, otherwise the browser substitutes
-      // faux-bold and metrics drift.
+      // 500 covers the +100 bump from the default 400 prefab weight; 700
+      // covers the debate-text 600 bump (Bold); 800 covers the bump from
+      // the rare 700 case. All must also appear in the Google Fonts <link>
+      // in scene.html, otherwise the browser substitutes faux-bold and
+      // metrics drift.
       for (const wt of [400, 500, 700, 800]) variants.push(`${wt} ${sz}px "${fam}"`);
     }
   }
@@ -1452,13 +1494,6 @@ async function renderTrialScene() {
   mctx.scale(-1, 1);
   mctx.drawImage(_courtCanvas, 0, 0);
 
-  // 'debate' subtype renders bare 3D — its overlay set (DebateUI,
-  // ChoiceButtons, ChoiceEvidence, etc.) lives in a separate not-yet-
-  // extracted prefab tree, so for now this path just returns the
-  // courtroom without overlays. The pill UI still exists so existing
-  // sessions don't lose the subtype value across reloads.
-  if (trialSubtype !== 'adv') return mirror;
-
   // 'adv' subtype: composite the same NormalPrinter/AutoToggle/ControlPanel/
   // WitchBookButtonUI overlays the Adv scene uses, on top of the courtroom
   // render. The trial 3D output is the new "background" for the existing
@@ -1469,14 +1504,38 @@ async function renderTrialScene() {
   // TOGGLE_FLAGS routes each adv-side toggle name through a sceneType-aware
   // getter, so the prefab loop transparently reads from the trialShow* state
   // when sceneType === 'trial' without any prefab-data changes.
+  //
+  // 'debate' subtype: just the testimony text on top of bare 3D. No
+  // DebateUI/ChoiceButton overlays in v1 — those live in a separate
+  // not-yet-implemented prefab pass. See renderDebateText for the
+  // ScenePosition → canvas mapping.
+  if (trialSubtype !== 'adv' && trialSubtype !== 'debate') return mirror;
+
   await ensureFontsLoaded();
   const dst = imageDataToLinear(mctx.getImageData(0, 0, CANVAS_W, CANVAS_H));
 
-  for (const prefab of sceneMeta.prefabs) {
-    if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
-    for (const [, kind, item] of selectPrefabItems(prefab)) {
-      if (kind === 'layer') await renderLayer(item, dst);
-      else                  await renderTextLeaf(item, dst);
+  if (trialSubtype === 'adv') {
+    for (const prefab of sceneMeta.prefabs) {
+      if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
+      for (const [, kind, item] of selectPrefabItems(prefab)) {
+        if (kind === 'layer') await renderLayer(item, dst);
+        else                  await renderTextLeaf(item, dst);
+      }
+    }
+  } else {
+    // Debate subtype: tilted testimony text + the WitchBookButtonUI overlay.
+    // The book button is the only adv-overlay element that makes sense in
+    // debate (no dialog frame, so no Author/AutoToggle/Menu). It rides on
+    // the same prefab pipeline as the trial-adv path; TOGGLE_FLAGS routes
+    // `showBookButton` to `trialDebateShowBookButton` based on trialSubtype.
+    await renderDebateText(dst);
+    for (const prefab of sceneMeta.prefabs) {
+      if (prefab.name !== 'WitchBookButtonUI') continue;
+      if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
+      for (const [, kind, item] of selectPrefabItems(prefab)) {
+        if (kind === 'layer') await renderLayer(item, dst);
+        else                  await renderTextLeaf(item, dst);
+      }
     }
   }
 
@@ -1485,6 +1544,189 @@ async function renderTrialScene() {
   out.height = CANVAS_H;
   out.getContext('2d').putImageData(linearToImageData(dst, CANVAS_W, CANVAS_H), 0, 0);
   return out;
+}
+
+// Render the debate-subtype testimony text on top of the 3D courtroom.
+// Numbers ported straight from the DebatePrinter prefab in
+// naninovel-textprinters_assets_all.bundle: font_size 96, Left/Middle align,
+// 20-px top/bottom margin, no wrap, overflow allowed.
+//
+// ScenePosition → canvas mapping (empirical, validated against two in-game
+// screenshots at pos:70,50):
+//   • (X%, Y%) is the centre of the printer rect, top-left origin.
+//   • Effective rect width 1024 px (matches measured text-left at x=1280
+//     when X=70 → rect_centre_x=1792 → rect_left=1280).
+//   • size_y is the canvas height so v_align:'Middle' centres the block on
+//     rect_centre_y regardless of line count (renderPlainText's middle-align
+//     formula puts the block in the centre of the rect).
+const DEBATE_RECT_W = 1024;
+// Outline_Shadow material constants, ported from TsukushiMincho@Outline_Shadow
+// (the m_sharedMaterial on DebatePrinter.MessageLabel_1..8). TMP's normalised
+// shader inputs don't translate to pixel sizes directly (depends on
+// _GradientScale of the SDF atlas, ~9 in stock fonts); empirical values below
+// match the visible outline/shadow extent in the in-game screenshots at
+// font_size=96.
+//   _OutlineWidth   0.20    → ~3 px black stroke around each glyph
+//   _UnderlayOffset (+1, -1)→ 4 px down-right shadow on screen (Unity Y-up)
+//   _UnderlaySoftness 0.5   → 4 px blur on the shadow
+//   _UnderlayColor  rgba(0,0,0,0.5) → 50%-opacity black underlay
+const DEBATE_OUTLINE_PX     = 4;
+const DEBATE_SHADOW_OFFSET  = 7;
+const DEBATE_SHADOW_BLUR_PX = 7;
+const DEBATE_SHADOW_ALPHA   = 1.0;
+
+async function renderDebateText(dst) {
+  if (!trialDebateText) return;
+  const text = trialDebateText.replace(/<br\s*\/?>/gi, '\n');
+  if (!text) return;
+  const cx = (trialDebatePosX / 100) * CANVAS_W;
+  const cy = (trialDebatePosY / 100) * CANVAS_H;
+  const fontSize = 96;
+  // DebatePrinter declares font_weight=400, but the in-game render reads as
+  // visibly heavier than the standard text leaves — the Tsukushi Mincho face
+  // plus the Outline_Shadow material together push the perceived stroke
+  // weight up. Pass 600 here (bumped to 700 / Bold by fontString) to land
+  // closer to that in-game look without changing the shared TMP bump policy.
+  const fStr = fontString(fontSize, 600, false);
+  _MEAS_CTX.font = fStr;
+  const lines = text.split('\n');
+  const m0   = _MEAS_CTX.measureText(lines[0] || ' ');
+  const fbA  = m0.fontBoundingBoxAscent  ?? fontSize * 0.85;
+  const fbD  = m0.fontBoundingBoxDescent ?? fontSize * 0.20;
+  const lh   = fbA + fbD;
+  const blkH = lines.length * lh;
+  const maxW = Math.max(0, ...lines.map(l => _MEAS_CTX.measureText(l).width));
+  // Layout: pivot rect width 1024, Left h_align (text left = rect left),
+  // Middle v_align (block vertically centred on cy).
+  const ax            = cx - DEBATE_RECT_W / 2;
+  const firstBaseline = cy - blkH / 2 + fbA;
+  // Pad bbox for outline + shadow extent. Shadow offset extends to one side,
+  // blur to both — symmetric pad sized to whichever is larger.
+  const pad = Math.max(DEBATE_OUTLINE_PX + 2,
+                       DEBATE_SHADOW_BLUR_PX + DEBATE_SHADOW_OFFSET + 2);
+  const bbox = {
+    x: Math.floor(ax - pad),
+    y: Math.floor(firstBaseline - fbA - pad),
+    w: Math.ceil(maxW + pad * 2),
+    h: Math.ceil(blkH + pad * 2),
+  };
+  if (bbox.w <= 0 || bbox.h <= 0) return;
+
+  // Shadow canvas: text in semi-transparent black, then re-blitted through a
+  // CSS blur filter to soften the edges. Drawn first so the outlined glyph
+  // composites on top of it.
+  const shadowRaw = document.createElement('canvas');
+  shadowRaw.width = bbox.w; shadowRaw.height = bbox.h;
+  const sctx = shadowRaw.getContext('2d');
+  sctx.font = fStr;
+  sctx.textAlign = 'left';
+  sctx.textBaseline = 'alphabetic';
+  sctx.fillStyle = `rgba(0, 0, 0, ${DEBATE_SHADOW_ALPHA})`;
+  for (let i = 0; i < lines.length; i++) {
+    sctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lh);
+  }
+  let shadowCanvas = shadowRaw;
+  if (DEBATE_SHADOW_BLUR_PX > 0) {
+    const blurred = document.createElement('canvas');
+    blurred.width = bbox.w; blurred.height = bbox.h;
+    const bctx = blurred.getContext('2d');
+    bctx.filter = `blur(${DEBATE_SHADOW_BLUR_PX / 2}px)`;
+    bctx.drawImage(shadowRaw, 0, 0);
+    shadowCanvas = blurred;
+  }
+
+  // Main canvas: black stroke (outline) underneath, white fill on top. The
+  // round line-join + miterLimit keep sharp kanji corners from spiking past
+  // the outline width; matches TMP's stock outline shader behaviour.
+  const mainCanvas = document.createElement('canvas');
+  mainCanvas.width = bbox.w; mainCanvas.height = bbox.h;
+  const mctx2 = mainCanvas.getContext('2d');
+  mctx2.font = fStr;
+  mctx2.textAlign = 'left';
+  mctx2.textBaseline = 'alphabetic';
+  mctx2.lineWidth = DEBATE_OUTLINE_PX * 2;   // strokeText centres stroke on glyph edge
+  mctx2.lineJoin  = 'round';
+  mctx2.miterLimit = 2;
+  mctx2.strokeStyle = 'rgba(0, 0, 0, 1)';
+  mctx2.fillStyle   = 'rgba(255, 255, 255, 1)';
+  for (let i = 0; i < lines.length; i++) {
+    const x = ax - bbox.x;
+    const y = firstBaseline - bbox.y + i * lh;
+    mctx2.strokeText(lines[i], x, y);
+    mctx2.fillText  (lines[i], x, y);
+  }
+
+  // Composite shadow (offset) onto dst first, then outlined fill on top. Both
+  // rotate around the text pivot (cx, cy) to follow the camera roll — the in-
+  // game DebatePrinter sits in the camera's screen-space UI layer, so it tilts
+  // with rollDeg rather than staying screen-upright. Canvas2D's rotate(θ) is
+  // CW-positive under Y-down, which matches the direction the text tilts on
+  // screen for positive rollDeg, so the angle is used as-is.
+  //
+  // Each canvas is drawn at its unrotated dest position inside a rotated 2D
+  // context, which makes the shadow's +SHADOW_OFFSET vector rotate with the
+  // text — mirroring TMP's _UnderlayOffset, which lives in the SDF atlas's
+  // local (glyph) frame.
+  const angleRad = trialRollDeg * Math.PI / 180;
+  blitRotatedCanvas(dst, shadowCanvas,
+                    bbox.x + DEBATE_SHADOW_OFFSET, bbox.y + DEBATE_SHADOW_OFFSET,
+                    cx, cy, angleRad);
+  blitRotatedCanvas(dst, mainCanvas, bbox.x, bbox.y, cx, cy, angleRad);
+}
+
+// Composite `srcCanvas` onto `dst` (linear-space full-canvas buffer) after
+// rotating by `angleRad` around the pivot point (pivotX, pivotY) in canvas
+// coords. (dstX, dstY) is where the source's top-left would land in the
+// unrotated frame; the rotation is applied around the pivot afterwards.
+//
+// Allocates a tmp Canvas2D sized to the rotated source's bounding box, so cost
+// stays proportional to the text plate, not the full 2560×1440 canvas.
+function blitRotatedCanvas(dst, srcCanvas, dstX, dstY, pivotX, pivotY, angleRad) {
+  const srcW = srcCanvas.width;
+  const srcH = srcCanvas.height;
+  let minX, minY, maxX, maxY;
+  if (angleRad === 0) {
+    minX = dstX; minY = dstY; maxX = dstX + srcW; maxY = dstY + srcH;
+  } else {
+    const c = Math.cos(angleRad), s = Math.sin(angleRad);
+    const corners = [
+      [dstX,        dstY       ],
+      [dstX + srcW, dstY       ],
+      [dstX,        dstY + srcH],
+      [dstX + srcW, dstY + srcH],
+    ];
+    minX = Infinity; minY = Infinity; maxX = -Infinity; maxY = -Infinity;
+    for (const [x, y] of corners) {
+      const dx = x - pivotX, dy = y - pivotY;
+      const rx = pivotX + dx * c - dy * s;
+      const ry = pivotY + dx * s + dy * c;
+      if (rx < minX) minX = rx;
+      if (ry < minY) minY = ry;
+      if (rx > maxX) maxX = rx;
+      if (ry > maxY) maxY = ry;
+    }
+    minX = Math.floor(minX) - 1;       // 1-px safety margin for resampling AA
+    minY = Math.floor(minY) - 1;
+    maxX = Math.ceil(maxX)  + 1;
+    maxY = Math.ceil(maxY)  + 1;
+  }
+  const tmpW = maxX - minX;
+  const tmpH = maxY - minY;
+  if (tmpW <= 0 || tmpH <= 0) return;
+  const tmp = document.createElement('canvas');
+  tmp.width  = tmpW;
+  tmp.height = tmpH;
+  const tctx = tmp.getContext('2d');
+  // Transform stack: shift origin so the pivot lands at (pivotX-minX, pivotY
+  // -minY) in tmp coords, then rotate around that origin, then undo the pivot
+  // shift so drawImage(srcCanvas, dstX, dstY) maps as if drawing on the full
+  // canvas before rotation.
+  tctx.translate(pivotX - minX, pivotY - minY);
+  tctx.rotate(angleRad);
+  tctx.translate(-pivotX, -pivotY);
+  tctx.drawImage(srcCanvas, dstX, dstY);
+  const lin = imageDataToLinear(tctx.getImageData(0, 0, tmpW, tmpH));
+  compositeLinear(dst, lin, tmpW, tmpH, minX, minY);
 }
 
 // Snap `trialLookStandIdx` to a stand that has a snapshot in the current
@@ -1792,8 +2034,33 @@ function syncTrialPairUI(rangeId, numId, value, decimals = 2) {
 function syncYawMultUI()  { syncTrialPairUI('trialYawMultRange',  'trialYawMultNum',  trialYawMult,  2); }
 function syncDistanceUI() { syncTrialPairUI('trialDistanceRange', 'trialDistanceNum', trialDistance, 1); }
 function syncHeightUI()   { syncTrialPairUI('trialHeightRange',   'trialHeightNum',   trialHeight,   2); }
-function syncRollUI()     { syncTrialPairUI('trialRollRange',     'trialRollNum',     trialRollDeg,  1); }
-function syncPitchUI()    { syncTrialPairUI('trialPitchRange',    'trialPitchNum',    trialPitchDeg, 1); }
+function syncRollUI() {
+  syncTrialPairUI('trialRollRange', 'trialRollNum', trialRollDeg, 1);
+  refreshTrialRollActive();
+}
+function syncPitchUI() {
+  syncTrialPairUI('trialPitchRange', 'trialPitchNum', trialPitchDeg, 1);
+  refreshTrialRollActive();
+}
+// Highlight whichever Left/Center/Right camera-tilt preset (roll = −4 / 0 /
+// +4, with pitch = 0) matches the current camera state. Off-preset values on
+// either axis — including a non-zero pitch dragged in Advanced mode — leave
+// every pill inactive, mirroring how the Look/Composition/Zoom pills go off
+// when their advanced sliders diverge.
+function refreshTrialRollActive() {
+  const wrap = document.getElementById('trialRollPresets');
+  if (!wrap) return;
+  const pitchAtPreset = Math.abs(trialPitchDeg) < 1e-6;
+  for (const b of wrap.querySelectorAll('.layer-btn')) {
+    const rollMatch = Math.abs(Number(b.dataset.roll) - trialRollDeg) < 1e-6;
+    b.classList.toggle('active', rollMatch && pitchAtPreset);
+  }
+}
+// Debate ScenePosition X/Y pair — integer percent, no decimals.
+function syncDebatePosUI(axis) {
+  if (axis === 'x') syncTrialPairUI('trialDebatePosXRange', 'trialDebatePosXNum', trialDebatePosX, 0);
+  else              syncTrialPairUI('trialDebatePosYRange', 'trialDebatePosYNum', trialDebatePosY, 0);
+}
 
 // Snap helpers — called from Look character / Composition / Zoom onclick to
 // reset the direct camera params to whatever the template implies. Routed
@@ -2681,6 +2948,12 @@ function showModal(message) {
   populateBgSelect();
   populateAuthorSelect();
   document.getElementById('messageInput').value = messageText;
+  // Seed debate inputs from defaults (loadSceneConfig will overwrite if a
+  // saved record exists). The slider+number pairs go through syncDebatePosUI
+  // so both halves of each pair show identical values.
+  document.getElementById('trialDebateInput').value = trialDebateText;
+  syncDebatePosUI('x');
+  syncDebatePosUI('y');
   // Initial sidebar visibility: defaults to sceneType='adv', so Adv fields
   // visible and Trial fields hidden until either the user picks 'Trial' from
   // the dropdown or loadSceneConfig restores a saved 'trial' state.
@@ -2782,10 +3055,11 @@ function showModal(message) {
   // in renderTrialScene routes through TOGGLE_FLAGS, which routes the four
   // toggle names through sceneType-aware getters).
   const trialOverlayBindings = [
-    ['toggleTrialAuthorPlate', (v) => { trialShowAuthorPlate = v; }],
-    ['toggleTrialAutoToggle',  (v) => { trialShowAutoToggle  = v; }],
-    ['toggleTrialMenuButton',  (v) => { trialShowMenuButton  = v; }],
-    ['toggleTrialBookButton',  (v) => { trialShowBookButton  = v; }],
+    ['toggleTrialAuthorPlate',      (v) => { trialShowAuthorPlate       = v; }],
+    ['toggleTrialAutoToggle',       (v) => { trialShowAutoToggle        = v; }],
+    ['toggleTrialMenuButton',       (v) => { trialShowMenuButton        = v; }],
+    ['toggleTrialBookButton',       (v) => { trialShowBookButton        = v; }],
+    ['toggleTrialDebateBookButton', (v) => { trialDebateShowBookButton  = v; }],
   ];
   for (const [id, set] of trialOverlayBindings) {
     const el = document.getElementById(id);
@@ -2830,8 +3104,37 @@ function showModal(message) {
   bindTrialSliderPair('trialYawMultRange',  'trialYawMultNum',  2, setTrialYawMult);
   bindTrialSliderPair('trialDistanceRange', 'trialDistanceNum', 1, setTrialDistance);
   bindTrialSliderPair('trialHeightRange',   'trialHeightNum',   2, setTrialHeight);
-  bindTrialSliderPair('trialRollRange',     'trialRollNum',     1, (v) => { trialRollDeg  = v; });
-  bindTrialSliderPair('trialPitchRange',    'trialPitchNum',    1, (v) => { trialPitchDeg = v; });
+  // Roll and Pitch share the Tilt group's preset pill row, so both setters
+  // refresh the pill highlight after mutating their axis. Without this, the
+  // pills would stay marked active after a slider drag moves either axis off
+  // its preset value — the bindTrialSliderPair pipeline only calls the setter
+  // (not syncRollUI / syncPitchUI), so the refresh has to happen inside the
+  // setter itself, just like setTrialYawMult/Distance/Height do for their
+  // pills.
+  bindTrialSliderPair('trialRollRange',     'trialRollNum',     1, (v) => { trialRollDeg  = v; refreshTrialRollActive(); });
+  bindTrialSliderPair('trialPitchRange',    'trialPitchNum',    1, (v) => { trialPitchDeg = v; refreshTrialRollActive(); });
+  // Debate ScenePosition X/Y. Integer percent (decimals=0); shares the same
+  // drag/type delay defaults as the camera sliders.
+  bindTrialSliderPair('trialDebatePosXRange', 'trialDebatePosXNum', 0, (v) => { trialDebatePosX = v; });
+  bindTrialSliderPair('trialDebatePosYRange', 'trialDebatePosYNum', 0, (v) => { trialDebatePosY = v; });
+  // Camera Tilt preset pills (Left/Center/Right → roll −4/0/+4, pitch 0).
+  // Click snaps both axes' slider+number pairs to the preset, refreshes the
+  // active pill (via syncRollUI), and re-renders. The pitch reset matters
+  // because refreshTrialRollActive only marks a pill active when pitch is at
+  // its preset value too — without zeroing pitch here a stale advanced-mode
+  // pitch drag would leave every pill inactive after a click.
+  for (const b of document.querySelectorAll('#trialRollPresets .layer-btn')) {
+    b.addEventListener('click', () => {
+      const v = Number(b.dataset.roll);
+      if (!Number.isFinite(v)) return;
+      trialRollDeg  = v;
+      trialPitchDeg = 0;
+      syncRollUI();    // refreshes the active pill (sees the cleared pitch)
+      syncPitchUI();   // re-syncs the pitch slider/num to 0
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+  }
   document.getElementById('bgSelect').onchange = (e) => {
     bgPath = e.target.value || null;
     scheduleRender();
@@ -2868,6 +3171,17 @@ function showModal(message) {
     scheduleSceneConfigSave();
   };
   trialMessageInput.onchange = () => scheduleRender();
+
+  // Debate testimony textarea. Same coalesced-render shape as the message
+  // textareas above. Visible only when trialSubtype === 'debate'.
+  const trialDebateInput = document.getElementById('trialDebateInput');
+  trialDebateInput.oninput = (e) => {
+    trialDebateText = e.target.value;
+    scheduleRender(400);
+    scheduleSceneConfigSave();
+  };
+  trialDebateInput.onchange = () => scheduleRender();
+
   for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
     b.addEventListener('click', () => {
       setLocale(b.dataset.locale);
@@ -2918,7 +3232,8 @@ function showModal(message) {
       trialSubtype = 'adv';
       refreshTrialSubtypeActive();
       trialShowAuthorPlate = trialShowAutoToggle = trialShowMenuButton = trialShowBookButton = true;
-      for (const id of ['toggleTrialAuthorPlate', 'toggleTrialAutoToggle', 'toggleTrialMenuButton', 'toggleTrialBookButton']) {
+      trialDebateShowBookButton = true;
+      for (const id of ['toggleTrialAuthorPlate', 'toggleTrialAutoToggle', 'toggleTrialMenuButton', 'toggleTrialBookButton', 'toggleTrialDebateBookButton']) {
         const el = document.getElementById(id);
         if (el) el.checked = true;
       }
@@ -2930,6 +3245,13 @@ function showModal(message) {
       populateAuthorSelect();   // repopulates both selects; the trial one
                                 // ends up on DEFAULT_AUTHOR for active locale
       document.getElementById('trialMessageInput').value = '';
+      // Debate state back to defaults (empty text, pos:70,50).
+      trialDebateText = '';
+      trialDebatePosX = 70;
+      trialDebatePosY = 50;
+      document.getElementById('trialDebateInput').value = '';
+      syncDebatePosUI('x');
+      syncDebatePosUI('y');
       // All trial groups default expanded — clear any user-toggled .collapsed.
       for (const g of document.querySelectorAll('#groups .group')) {
         g.classList.remove('collapsed');

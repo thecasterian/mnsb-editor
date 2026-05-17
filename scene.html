@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260514l">
+<link rel="stylesheet" href="styles.css?v=20260515e">
 </head>
 <body class="scene-editor">
 
@@ -83,7 +83,7 @@
     <div class="section-label">Subtype</div>
     <div class="layer-row" id="trialSubtypePresets">
       <button class="layer-btn active" type="button" data-subtype="adv">Adv</button>
-      <button class="layer-btn"        type="button" data-subtype="debate" disabled>Debate</button>
+      <button class="layer-btn"        type="button" data-subtype="debate">Debate</button>
     </div>
   </div>
 
@@ -129,6 +129,38 @@
     </label>
   </div>
 
+  <div class="field" data-scene-type="trial" data-trial-subtype="debate">
+    <div class="section-label">Overlays</div>
+    <label class="switch">
+      <span>Witch Book</span>
+      <input type="checkbox" id="toggleTrialDebateBookButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-subtype="debate">
+    <div class="section-label">Debate text</div>
+    <textarea class="text-input" id="trialDebateInput" rows="4" placeholder="Testimony"></textarea>
+  </div>
+
+  <div class="field" data-scene-type="trial" data-trial-subtype="debate">
+    <div class="section-label">Position</div>
+    <div class="trial-slider">
+      <div class="trial-slider-label">X (%)</div>
+      <div class="inspector-row">
+        <input class="inspector-range" type="range" id="trialDebatePosXRange" min="0" max="100" step="1" value="70">
+        <input class="inspector-num inspector-scale-num" type="number" id="trialDebatePosXNum" min="0" max="100" step="1" value="70">
+      </div>
+    </div>
+    <div class="trial-slider">
+      <div class="trial-slider-label">Y (%)</div>
+      <div class="inspector-row">
+        <input class="inspector-range" type="range" id="trialDebatePosYRange" min="0" max="100" step="1" value="50">
+        <input class="inspector-num inspector-scale-num" type="number" id="trialDebatePosYNum" min="0" max="100" step="1" value="50">
+      </div>
+    </div>
+  </div>
+
   <button class="advanced-toggle" id="trialAdvancedToggle" type="button" data-scene-type="trial">Advanced</button>
 
   <div id="groups" data-scene-type="trial">
@@ -170,14 +202,14 @@
         </div>
         <div class="group-divider" data-trial-advanced></div>
         <div class="trial-slider" data-trial-advanced>
-          <div class="trial-slider-label">Distance (m)</div>
+          <div class="trial-slider-label">Distance</div>
           <div class="inspector-row">
             <input class="inspector-range" type="range" id="trialDistanceRange" min="4" max="15" step="0.1" value="10" list="trialDistanceTicks">
             <input class="inspector-num inspector-scale-num" type="number" id="trialDistanceNum" step="0.1" value="10">
           </div>
         </div>
         <div class="trial-slider" data-trial-advanced>
-          <div class="trial-slider-label">Height (m)</div>
+          <div class="trial-slider-label">Height</div>
           <div class="inspector-row">
             <input class="inspector-range" type="range" id="trialHeightRange" min="5" max="6" step="0.01" value="5.2" list="trialHeightTicks">
             <input class="inspector-num inspector-scale-num" type="number" id="trialHeightNum" step="0.01" value="5.2">
@@ -186,28 +218,31 @@
       </div>
     </div>
 
-    <div class="group" data-trial-advanced>
+    <div class="group">
       <div class="group-header">
-        <span>Roll (°)</span>
+        <span>Tilt</span>
         <span class="arrow">▼</span>
       </div>
       <div class="group-options group-options-stack">
-        <div class="inspector-row">
-          <input class="inspector-range" type="range" id="trialRollRange" min="-10" max="10" step="0.1" value="0" list="trialRollTicks">
-          <input class="inspector-num inspector-scale-num" type="number" id="trialRollNum" step="0.1" value="0">
+        <div class="layer-row" id="trialRollPresets">
+          <button class="layer-btn"        type="button" data-roll="-4">Left</button>
+          <button class="layer-btn active" type="button" data-roll="0">Center</button>
+          <button class="layer-btn"        type="button" data-roll="4">Right</button>
         </div>
-      </div>
-    </div>
-
-    <div class="group" data-trial-advanced>
-      <div class="group-header">
-        <span>Pitch (°)</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="group-options group-options-stack">
-        <div class="inspector-row">
-          <input class="inspector-range" type="range" id="trialPitchRange" min="-4" max="4" step="0.1" value="0" list="trialPitchTicks">
-          <input class="inspector-num inspector-scale-num" type="number" id="trialPitchNum" step="0.1" value="0">
+        <div class="group-divider" data-trial-advanced></div>
+        <div class="trial-slider" data-trial-advanced>
+          <div class="trial-slider-label">Roll (°)</div>
+          <div class="inspector-row">
+            <input class="inspector-range" type="range" id="trialRollRange" min="-10" max="10" step="0.1" value="0" list="trialRollTicks">
+            <input class="inspector-num inspector-scale-num" type="number" id="trialRollNum" step="0.1" value="0">
+          </div>
+        </div>
+        <div class="trial-slider" data-trial-advanced>
+          <div class="trial-slider-label">Pitch (°)</div>
+          <div class="inspector-row">
+            <input class="inspector-range" type="range" id="trialPitchRange" min="-4" max="4" step="0.1" value="0" list="trialPitchTicks">
+            <input class="inspector-num inspector-scale-num" type="number" id="trialPitchNum" step="0.1" value="0">
+          </div>
         </div>
       </div>
     </div>
@@ -244,7 +279,7 @@
     <option value="5.9"></option><option value="6.0"></option>
   </datalist>
   <datalist id="trialRollTicks">
-    <option value="-5"></option><option value="0"></option><option value="5"></option>
+    <option value="-4"></option><option value="0"></option><option value="4"></option>
   </datalist>
   <datalist id="trialPitchTicks">
     <option value="-2"></option><option value="0"></option><option value="2"></option>
@@ -363,6 +398,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260514l"></script>
+<script type="module" src="scene.js?v=20260515e"></script>
 </body>
 </html>

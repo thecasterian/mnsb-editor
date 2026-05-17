@@ -567,8 +567,12 @@ body {
 /* `.field { display: block }` would otherwise out-specificity the user-agent
    `[hidden] { display: none }` rule, leaving sceneType-gated trial/adv fields
    visible after their `hidden` attribute is set. Pin the hidden state with a
-   matching-specificity selector. */
+   matching-specificity selector. Same problem hits `.inspector-row { display:
+   flex }` — the trial-scene Roll slider row carries `data-trial-advanced`
+   directly (no .trial-slider wrapper) and would stay visible in non-advanced
+   mode without this rule. */
 .field[hidden] { display: none; }
+.inspector-row[hidden] { display: none; }
 /* When a .field stacks multiple .switch toggles (e.g. the Overlays group),
    give them a small inter-switch gap so they don't sit flush against each
    other. The first switch keeps the section-label's existing 6px margin. */
