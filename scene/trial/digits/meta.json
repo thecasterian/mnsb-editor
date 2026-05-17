@@ -1,0 +1,182 @@
+{
+  "atlas": "TrialsClockFont",
+  "atlas_native_em": 64,
+  "sprites": [
+    {
+      "tag": "0",
+      "file": "0.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "1",
+      "file": "1.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "2",
+      "file": "2.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "3",
+      "file": "3.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "4",
+      "file": "4.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "5",
+      "file": "5.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "6",
+      "file": "6.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "7",
+      "file": "7.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "8",
+      "file": "8.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": "9",
+      "file": "9.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -8.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 44.0
+      },
+      "scale": 1.0
+    },
+    {
+      "tag": ":",
+      "file": "colon.png",
+      "rect": [
+        64,
+        64
+      ],
+      "metrics": {
+        "width": 64.0,
+        "height": 64.0,
+        "horizontalBearingX": -16.0,
+        "horizontalBearingY": 56.0,
+        "horizontalAdvance": 28.0
+      },
+      "scale": 1.0
+    }
+  ]
+}

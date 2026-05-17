@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260515e';
+const BUILD_VERSION = '20260515o';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -25,9 +25,13 @@ const CANVAS_H = 1440;
 //   scene/authors.json — slim author metadata (id, nameColor_hex,
 //                         tagged_name) baked from characters/configuration.json
 //                         by build_scene_authors.py.
-const SCENE_ROOT     = 'scene';
-const SCENE_ADV_ROOT = `${SCENE_ROOT}/adv`;
-const SCENE_BG_ROOT  = `${SCENE_ROOT}/backgrounds`;
+const SCENE_ROOT       = 'scene';
+const SCENE_ADV_ROOT   = `${SCENE_ROOT}/adv`;
+const SCENE_BG_ROOT    = `${SCENE_ROOT}/backgrounds`;
+// Trial-only HUD prefabs (currently just DebateUI: clock + fast-skip button).
+// Lives in its own sub-root because the trial bundle and the adv bundle are
+// extracted by different scripts and ship disjoint sprite sets.
+const SCENE_TRIAL_ROOT = `${SCENE_ROOT}/trial`;
 
 // Allowlist + display order for the Author dropdown. Mirrors app.js's
 // CHARACTERS array (layered main cast + Warden/Yuki) minus the Jailer*,
@@ -135,6 +139,13 @@ const TRIAL_SUBTYPES = new Set(['adv', 'debate']);
 let trialSubtype = 'adv';
 
 let sceneMeta = null;               // scene/adv/meta.json: { canvas_size, prefabs: [...] }
+let trialMeta = null;               // scene/trial/meta.json: trial-only HUD prefabs (DebateUI etc.)
+// TMP TrialsClockFont sprite atlas (digits 0-9 + colon) for the debate
+// timer. Each entry: { tag, file, rect:[W,H], metrics:{width,height,
+// horizontalBearingX, horizontalBearingY, horizontalAdvance}, scale }.
+// `byTag` is a derived Map for O(1) lookup per character at render time.
+let trialDigitsMeta  = null;
+let trialDigitsByTag = null;
 let charsConfig = null;
 let bgMeta = null;
 let renderSeq = 0;
@@ -167,6 +178,36 @@ let trialShowAuthorPlate = true;
 // user can keep the button on in trial-adv while hiding it in trial-debate
 // (and vice versa). Routed by TOGGLE_FLAGS.showBookButton on trialSubtype.
 let trialDebateShowBookButton = true;
+// Debate-only HUD toggles (DebateUI prefab from scene/trial/meta.json).
+//   trialDebateShowClock         → ClockBase (sidebar switch)
+//   trialDebateShowFastButton    → FastButtonBase + FastIcon visibility
+//                                  (sidebar switch)
+//   trialDebateFastIconActive    → FastIcon color state, click-toggled in
+//                                  the preview:
+//                                    true  (active)   → yellow [1.0, 0.941, 0.502, 1]
+//                                    false (inactive) → white  [1.0, 1.0, 1.0, 0.753]
+// The two colors come straight from the prefab: the yellow is FastIcon's
+// own `m_Color`; the white-with-alpha lives on a second MonoBehaviour
+// attached to the same GameObject (an `IgnoreCasterColor`-style component)
+// the game's runtime swaps in when auto-skip is off.
+let trialDebateShowClock      = true;
+let trialDebateShowFastButton = true;
+// Default inactive (white-faded) — matches the game's idle state when
+// auto-skip isn't engaged. User clicks the button in the preview to switch
+// to the yellow "active" tint.
+let trialDebateFastIconActive = false;
+const FAST_ICON_INACTIVE_COLOR = [1.0, 1.0, 1.0, 0.7529411911964417];
+// Timer text displayed inside the ClockBase plate. In-game this is a TMP
+// sprite-tag countdown rendered via the TrialsClockFont digit atlas. We
+// don't simulate the countdown — every render re-rolls a fresh random
+// "MM:SS:SSS" string so the editor's debate preview reads as a live timer
+// without the user having to type anything (or stare at a frozen value).
+function randomTimerText() {
+  const mm  = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+  const ss  = String(Math.floor(Math.random() *  60)).padStart(2, '0');
+  const sss = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  return `${mm}:${ss}:${sss}`;
+}
 // Trial-side AuthorLabel + MessageLabel content. Separate from the adv-side
 // `authorId` / `messageText` so a user can pose a trial line ("Objection!")
 // without overwriting the adv preview's dialog, and vice versa.
@@ -370,6 +411,9 @@ function saveSceneConfig() {
       trialShowBookButton,
       trialShowAuthorPlate,
       trialDebateShowBookButton,
+      trialDebateShowClock,
+      trialDebateShowFastButton,
+      trialDebateFastIconActive,
     }));
   } catch (e) {
     console.error('Failed to save scene config:', e);
@@ -425,9 +469,24 @@ function loadSceneConfig({ render = true } = {}) {
     ['trialShowAutoToggle',       'toggleTrialAutoToggle',      (v) => { trialShowAutoToggle       = v; }],
     ['trialShowMenuButton',       'toggleTrialMenuButton',      (v) => { trialShowMenuButton       = v; }],
     ['trialShowBookButton',       'toggleTrialBookButton',      (v) => { trialShowBookButton       = v; }],
-    ['trialShowAuthorPlate',      'toggleTrialAuthorPlate',     (v) => { trialShowAuthorPlate      = v; }],
-    ['trialDebateShowBookButton', 'toggleTrialDebateBookButton', (v) => { trialDebateShowBookButton = v; }],
+    ['trialShowAuthorPlate',       'toggleTrialAuthorPlate',      (v) => { trialShowAuthorPlate       = v; }],
+    ['trialDebateShowBookButton',  'toggleTrialDebateBookButton',  (v) => { trialDebateShowBookButton  = v; }],
+    ['trialDebateShowClock',       'toggleTrialDebateClock',       (v) => { trialDebateShowClock       = v; }],
+    ['trialDebateShowFastButton',  'toggleTrialDebateFastButton',  (v) => { trialDebateShowFastButton  = v; }],
   ];
+  // FastIcon active/inactive: click-toggled in the preview, no checkbox.
+  // Migration from the intermediate tri-state `trialDebateFastIconState`
+  // ('active'|'inactive'|'hidden'): map the show-flag from !=='hidden' and
+  // active from ==='active'. Old boolean `trialDebateShowFastButton` is
+  // handled via the regular trialToggleRestores loop above.
+  if (typeof data.trialDebateFastIconActive === 'boolean') {
+    trialDebateFastIconActive = data.trialDebateFastIconActive;
+  } else if (typeof data.trialDebateFastIconState === 'string') {
+    trialDebateShowFastButton = data.trialDebateFastIconState !== 'hidden';
+    trialDebateFastIconActive = data.trialDebateFastIconState === 'active';
+    const el = document.getElementById('toggleTrialDebateFastButton');
+    if (el) el.checked = trialDebateShowFastButton;
+  }
   for (const [field, elId, set] of trialToggleRestores) {
     if (typeof data[field] === 'boolean') {
       set(data[field]);
@@ -641,14 +700,19 @@ function loadPlacements({ preserveSelection = false } = {}) {
 // --- Static data load ---
 
 async function loadStaticData() {
-  const [charRes, bgRes, sceneRes] = await Promise.all([
+  const [charRes, bgRes, sceneRes, trialRes, digitsRes] = await Promise.all([
     fetch(assetUrl(`${SCENE_ROOT}/authors.json`)),
     fetch(assetUrl(`${SCENE_BG_ROOT}/meta.json`)),
     fetch(assetUrl(`${SCENE_ADV_ROOT}/meta.json`)),
+    fetch(assetUrl(`${SCENE_TRIAL_ROOT}/meta.json`)),
+    fetch(assetUrl(`${SCENE_TRIAL_ROOT}/digits/meta.json`)),
   ]);
-  charsConfig = await charRes.json();
-  bgMeta      = await bgRes.json();
-  sceneMeta   = await sceneRes.json();
+  charsConfig      = await charRes.json();
+  bgMeta           = await bgRes.json();
+  sceneMeta        = await sceneRes.json();
+  trialMeta        = await trialRes.json();
+  trialDigitsMeta  = await digitsRes.json();
+  trialDigitsByTag = new Map((trialDigitsMeta.sprites || []).map(s => [s.tag, s]));
 
   intrinsicScales = new Map();
   characterPivots = new Map();
@@ -891,10 +955,83 @@ const LAYER_ALPHA_BOOST = {
   NormalPrinter_Screen: 255 / 192,
 };
 
-async function renderLayer(layer, dst) {
+// Render the trial debate timer using TMP TrialsClockFont sprite glyphs.
+//
+// The text leaf in scene/trial/meta.json carries TMP `<sprite name="X">`
+// tags ("03:53:645" via digit sprites + colon); we translate each character
+// of the user's free-text input to the corresponding atlas glyph and lay
+// them out using the glyph metrics (bearing, advance), mirroring what TMP
+// would do at runtime. Characters not present in the atlas are skipped —
+// safe enough since the only meaningful glyphs here are 0-9 and ":".
+//
+// Coordinate convention (matches `m_HorizontalBearingY` semantics):
+//   scale       = fontSize × m_Scale / PRIMARY_FONT_POINT_SIZE
+//   render_w/h  = m_Width / m_Height × scale
+//   bearing_x   = m_HorizontalBearingX × scale
+//   bearing_y   = m_HorizontalBearingY × scale  (px above baseline)
+//   advance     = m_HorizontalAdvance × scale
+//   draw_x_tl   = pen_x + bearing_x
+//   draw_y_tl   = baseline_y − bearing_y         (PIL Y-down)
+//   pen_x      += advance
+//
+// The primary font asset's FaceInfo anchors both the sprite glyph size and
+// the line's vertical position. These use *different* metric fields:
+//
+//   • Sprite glyph SIZE  → `font_size / ascentLine`   (visual cap-match)
+//     Empirically tuned: atlas rect (64) was 40% oversized; pointSize (90)
+//     was 25% undersized; ascentLine (79.2) lands at the in-game size.
+//
+//   • Line BASELINE (v_align=Top) → ry + ascentLine × (font_size / pointSize)
+//     TMP's line-metric formula: line top sits at ry, baseline at
+//     ry + line_ascent. `line_ascent` uses `font_size / pointSize` as
+//     elementScale (not the cap-match factor) — that's TMP's nominal scale
+//     for everything-else-but-the-visible-glyph (bounds, line height,
+//     baseline offset). Using the glyph's own `bearingY × glyph_scale` for
+//     the baseline misaligns when those two scales diverge, as they do
+//     here.
+//
+// Primary font for the trial label is TsukushiMincho (pointSize=90,
+// ascentLine=79.2). Stays the anchor across locales — Korean/Chinese
+// builds attach fallback fonts for non-Japanese glyphs but keep TMP's
+// metric reference.
+const TIMER_PRIMARY_FONT_POINT_SIZE = 90;
+const TIMER_PRIMARY_FONT_ASCENT_PX  = 79.2;
+async function renderTimerSprites(labelRec, dst, text) {
+  if (!text || !trialDigitsMeta || !trialDigitsByTag) return;
+  const [rx, ry] = labelRec.pos;
+  const [rw]     = labelRec.size;
+  const fontSize = labelRec.font_size || 52;
+  const glyphs   = [];
+  for (const ch of [...text]) {
+    const sp = trialDigitsByTag.get(ch);
+    if (sp) glyphs.push(sp);
+  }
+  if (glyphs.length === 0) return;
+  const scaleFor = (g) => fontSize * (g.scale || 1) / TIMER_PRIMARY_FONT_ASCENT_PX;
+  const totalAdvance = glyphs.reduce((acc, g) => acc + g.metrics.horizontalAdvance * scaleFor(g), 0);
+  const blockX = rx + (rw - totalAdvance) / 2;
+  // Baseline uses the *line-metric* scale (font_size / pointSize), not the
+  // glyph's own bearing — see the constants block for why these diverge.
+  const lineAscentPx = TIMER_PRIMARY_FONT_ASCENT_PX * fontSize / TIMER_PRIMARY_FONT_POINT_SIZE;
+  const baselineY = ry + lineAscentPx;
+
+  let penX = blockX;
+  for (const g of glyphs) {
+    const s     = scaleFor(g);
+    const w     = Math.max(1, Math.round(g.metrics.width  * s));
+    const h     = Math.max(1, Math.round(g.metrics.height * s));
+    const dx    = Math.round(penX + g.metrics.horizontalBearingX * s);
+    const dy    = Math.round(baselineY - g.metrics.horizontalBearingY * s);
+    const sprite = await spriteAtSize(`${SCENE_TRIAL_ROOT}/digits/${g.file}`, w, h);
+    compositeLinear(dst, sprite, w, h, dx, dy);
+    penX += g.metrics.horizontalAdvance * s;
+  }
+}
+
+async function renderLayer(layer, dst, root = SCENE_ADV_ROOT) {
   const [tw, th] = layer.size;
   if (tw <= 0 || th <= 0) return;
-  let sprite = await spriteAtSize(`${SCENE_ADV_ROOT}/${layer.file}`, tw, th);
+  let sprite = await spriteAtSize(`${root}/${layer.file}`, tw, th);
   const boostA = LAYER_ALPHA_BOOST[layer.name] || 1;
   const c = layer.color;
   const needsTint = c && !(c[0] === 1 && c[1] === 1 && c[2] === 1 && c[3] === 1);
@@ -1523,11 +1660,15 @@ async function renderTrialScene() {
       }
     }
   } else {
-    // Debate subtype: tilted testimony text + the WitchBookButtonUI overlay.
-    // The book button is the only adv-overlay element that makes sense in
-    // debate (no dialog frame, so no Author/AutoToggle/Menu). It rides on
-    // the same prefab pipeline as the trial-adv path; TOGGLE_FLAGS routes
-    // `showBookButton` to `trialDebateShowBookButton` based on trialSubtype.
+    // Debate subtype: tilted testimony text + the WitchBookButtonUI overlay
+    // (from scene/adv) + the DebateUI HUD layers (from scene/trial). The
+    // book button is the only adv-overlay element that makes sense in debate
+    // (no dialog frame, so no Author/AutoToggle/Menu); the DebateUI HUD
+    // adds the clock plate and the fast-skip button. Both ride on the same
+    // prefab pipeline as the trial-adv path; per-layer gating for the
+    // DebateUI prefab is hardcoded here rather than via items_toggle because
+    // ClockBase and FastButtonBase share the "Wrapper" group, so a
+    // prefix-based gate can't separate them.
     await renderDebateText(dst);
     for (const prefab of sceneMeta.prefabs) {
       if (prefab.name !== 'WitchBookButtonUI') continue;
@@ -1535,6 +1676,44 @@ async function renderTrialScene() {
       for (const [, kind, item] of selectPrefabItems(prefab)) {
         if (kind === 'layer') await renderLayer(item, dst);
         else                  await renderTextLeaf(item, dst);
+      }
+    }
+    const debateUI = trialMeta?.prefabs?.find(p => p.name === 'DebateUI');
+    if (debateUI) {
+      // Merge layers + texts in shared `order` so the timer Label (order=1)
+      // composites between ClockBase (0) and FastButtonBase (2). The label
+      // record's text is a TMP sprite-tag countdown ("03:53:645" via digit
+      // sprites); we override it with the user's free-text input rendered
+      // through the standard plain-text path, since the digit sprite atlas
+      // isn't extracted.
+      const layers = debateUI.layers || [];
+      const texts  = debateUI.texts  || [];
+      const items  = [];
+      layers.forEach((l, i) => items.push([l.order ?? i,                'layer', l]));
+      texts .forEach((t, i) => items.push([t.order ?? layers.length + i, 'text',  t]));
+      items.sort((a, b) => a[0] - b[0]);
+      for (const [, kind, item] of items) {
+        if (kind === 'layer') {
+          if (item.name === 'ClockBase'      && !trialDebateShowClock)      continue;
+          if (item.name === 'FastButtonBase' && !trialDebateShowFastButton) continue;
+          if (item.name === 'FastIcon') {
+            if (!trialDebateShowFastButton) continue;
+            if (!trialDebateFastIconActive) {
+              // Spread to a shallow copy so the meta record's `color` field
+              // stays the activated yellow on the next render.
+              await renderLayer({ ...item, color: FAST_ICON_INACTIVE_COLOR }, dst, SCENE_TRIAL_ROOT);
+              continue;
+            }
+          }
+          await renderLayer(item, dst, SCENE_TRIAL_ROOT);
+        } else {
+          if (item.go === 'Label' && !trialDebateShowClock) continue;
+          // Label is a TMP sprite-tag countdown rendered via the
+          // TrialsClockFont digit atlas. We re-roll a fresh MM:SS:SSS
+          // string per render so the editor preview reads as a live timer
+          // without the user having to maintain a value.
+          await renderTimerSprites(item, dst, randomTimerText());
+        }
       }
     }
   }
@@ -3060,6 +3239,8 @@ function showModal(message) {
     ['toggleTrialMenuButton',       (v) => { trialShowMenuButton        = v; }],
     ['toggleTrialBookButton',       (v) => { trialShowBookButton        = v; }],
     ['toggleTrialDebateBookButton', (v) => { trialDebateShowBookButton  = v; }],
+    ['toggleTrialDebateClock',      (v) => { trialDebateShowClock       = v; }],
+    ['toggleTrialDebateFastButton', (v) => { trialDebateShowFastButton  = v; }],
   ];
   for (const [id, set] of trialOverlayBindings) {
     const el = document.getElementById(id);
@@ -3232,8 +3413,13 @@ function showModal(message) {
       trialSubtype = 'adv';
       refreshTrialSubtypeActive();
       trialShowAuthorPlate = trialShowAutoToggle = trialShowMenuButton = trialShowBookButton = true;
-      trialDebateShowBookButton = true;
-      for (const id of ['toggleTrialAuthorPlate', 'toggleTrialAutoToggle', 'toggleTrialMenuButton', 'toggleTrialBookButton', 'toggleTrialDebateBookButton']) {
+      trialDebateShowBookButton = trialDebateShowClock = trialDebateShowFastButton = true;
+      trialDebateFastIconActive = false;
+      for (const id of [
+        'toggleTrialAuthorPlate', 'toggleTrialAutoToggle', 'toggleTrialMenuButton',
+        'toggleTrialBookButton',
+        'toggleTrialDebateBookButton', 'toggleTrialDebateClock', 'toggleTrialDebateFastButton',
+      ]) {
         const el = document.getElementById(id);
         if (el) el.checked = true;
       }
@@ -3245,7 +3431,8 @@ function showModal(message) {
       populateAuthorSelect();   // repopulates both selects; the trial one
                                 // ends up on DEFAULT_AUTHOR for active locale
       document.getElementById('trialMessageInput').value = '';
-      // Debate state back to defaults (empty text, pos:70,50).
+      // Debate state back to defaults (empty text, pos:70,50). Timer text
+      // is re-rolled randomly every render, so no state to reset here.
       trialDebateText = '';
       trialDebatePosX = 70;
       trialDebatePosY = 50;
@@ -3350,6 +3537,32 @@ function showModal(message) {
   // viewport resizes. Refresh overlays so they keep tracking the canvas.
   // No-op for trial — refreshPlacementOverlays early-returns there.
   window.addEventListener('resize', refreshPlacementOverlays);
+
+  // Debate FastButton click → toggle FastIcon active ↔ inactive. Hit-tests
+  // the FastButtonBase rect in canvas coords. Sidebar's "Fast button"
+  // switch handles hidden vs visible (so when hidden, the button isn't
+  // there to click — we early-return on !trialDebateShowFastButton).
+  // Bound to the *container* because the canvas element is swapped on
+  // every render — per-canvas listeners would leak.
+  document.getElementById('previewContainer').addEventListener('click', (e) => {
+    if (sceneType !== 'trial' || trialSubtype !== 'debate') return;
+    if (!trialDebateShowFastButton) return;
+    const canvas = e.currentTarget.querySelector('canvas');
+    if (!canvas || !trialMeta) return;
+    const debateUI = trialMeta.prefabs?.find(p => p.name === 'DebateUI');
+    const base     = debateUI?.layers?.find(l => l.name === 'FastButtonBase');
+    if (!base) return;
+    const rect   = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const scaleY = CANVAS_H / rect.height;
+    const cx = (e.clientX - rect.left) * scaleX;
+    const cy = (e.clientY - rect.top)  * scaleY;
+    if (cx < base.pos[0] || cx >= base.pos[0] + base.size[0]) return;
+    if (cy < base.pos[1] || cy >= base.pos[1] + base.size[1]) return;
+    trialDebateFastIconActive = !trialDebateFastIconActive;
+    scheduleRender();
+    scheduleSceneConfigSave();
+  });
 
   // Inspector controls. Each writes to the selected placement, refreshes the
   // overlay (selection outline tracks geometry live), and saves. Whether we

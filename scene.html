@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260515e">
+<link rel="stylesheet" href="styles.css?v=20260515o">
 </head>
 <body class="scene-editor">
 
@@ -132,11 +132,22 @@
   <div class="field" data-scene-type="trial" data-trial-subtype="debate">
     <div class="section-label">Overlays</div>
     <label class="switch">
+      <span>Clock</span>
+      <input type="checkbox" id="toggleTrialDebateClock" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
+      <span>Fast button</span>
+      <input type="checkbox" id="toggleTrialDebateFastButton" checked>
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <label class="switch">
       <span>Witch Book</span>
       <input type="checkbox" id="toggleTrialDebateBookButton" checked>
       <span class="switch-track"><span class="switch-knob"></span></span>
     </label>
   </div>
+
 
   <div class="field" data-scene-type="trial" data-trial-subtype="debate">
     <div class="section-label">Debate text</div>
@@ -398,6 +409,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260515e"></script>
+<script type="module" src="scene.js?v=20260515o"></script>
 </body>
 </html>
