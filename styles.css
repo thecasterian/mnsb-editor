@@ -628,6 +628,31 @@ body {
   border-color: var(--active);
 }
 
+/* Preset-only wrap row under the debate testimony textarea: a row of
+   colored squares that each wrap the textarea's selection with
+   `<color=#xxxxxx>...</color>`. Each swatch hex is documented in the
+   scene.js comment block where the click handler lives. */
+.color-wrap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.color-preset-label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.color-swatch:hover { transform: scale(1.1); }
+
 /* Pre-render placeholder shown inside the preview before the first composite
    completes. Plain text — replaced by the canvas via replaceChildren. */
 .loading-msg {

@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260515o';
+const BUILD_VERSION = '20260518g';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -1169,13 +1169,57 @@ function renderPlainText(rec, dst, overrideText = null) {
 
   const fStr = fontString(fontSize, weight, italic);
   _MEAS_CTX.font = fStr;
-  const lines = s.split('\n');
+  const rawLines = s.split('\n');
+
+  // <color> support: when the input contains `<color=…>` tags, build per-line
+  // glyph arrays (tokenizeRich + parseColorToken stack) and use the tag-
+  // stripped text for layout and the shadow silhouette pass. Pure plain text
+  // skips this entirely and takes the existing fast path. Other TMP tags
+  // (<size>, <voffset>, <space>, <cspace>) are silently consumed by the
+  // tokenizer — same trade-off as the debate-text path: literal `<size>` in
+  // the textarea wouldn't render, but DebatePrinter/NormalPrinter messages
+  // don't carry those tags in any deployed content.
+  const hasColorTags = /<\/?color/i.test(s);
+  let plain, lineGlyphs, lineWidths;
+  if (hasColorTags) {
+    plain = [];
+    lineGlyphs = [];
+    lineWidths = [];
+    for (const line of rawLines) {
+      const colorStack = [color];
+      const glyphs = [];
+      let plainStr = '';
+      let cursorX = 0;
+      for (const tok of tokenizeRich(line)) {
+        if (tok.kind === 'open_color') {
+          const c = parseColorToken(tok.val);
+          colorStack.push(c || colorStack[colorStack.length - 1]);
+        } else if (tok.kind === 'close_color') {
+          if (colorStack.length > 1) colorStack.pop();
+        } else if (tok.kind === 'glyph') {
+          const w = _MEAS_CTX.measureText(tok.val).width;
+          glyphs.push({ ch: tok.val, x: cursorX, color: colorStack[colorStack.length - 1] });
+          plainStr += tok.val;
+          cursorX += w;
+        }
+      }
+      plain.push(plainStr);
+      lineGlyphs.push(glyphs);
+      lineWidths.push(cursorX);
+    }
+  } else {
+    plain = rawLines;
+    lineGlyphs = null;
+    lineWidths = rawLines.map(l => _MEAS_CTX.measureText(l).width);
+  }
+
+  const lines = plain;  // alias: downstream uses `lines` for measurement.
   const m0 = _MEAS_CTX.measureText(lines[0] || ' ');
   const fbAsc  = m0.fontBoundingBoxAscent  ?? fontSize * 0.85;
   const fbDesc = m0.fontBoundingBoxDescent ?? fontSize * 0.20;
   const lineHeight = fbAsc + fbDesc;
   const blockH = lines.length * lineHeight;
-  const widths = lines.map(l => _MEAS_CTX.measureText(l).width);
+  const widths = lineWidths;
   const maxW = Math.max(0, ...widths);
 
   const h = rec.h_align || 'Left';
@@ -1237,11 +1281,40 @@ function renderPlainText(rec, dst, overrideText = null) {
   const passes = !useShadow ? 1
     : isAuthor ? TEXT_SHADOW_PASSES_AUTHOR
               : TEXT_SHADOW_PASSES_MESSAGE;
+  // Shadow + base-color pass: line-based fillText using the tag-stripped
+  // text so the halo silhouette is a single uniform shape per line. When
+  // there are no color tags, this is the only pass needed — done.
   for (let pass = 0; pass < passes; pass++) {
     for (let i = 0; i < lines.length; i++) {
       ctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lineHeight);
     }
   }
+
+  // Per-glyph color pass (only when <color> tags present). The shadow has
+  // already been laid down by the pass above with the base color; here we
+  // paint each glyph's actual color on top without any shadow so colored
+  // spans replace the base-color foreground while the halo around them
+  // remains uniformly the shadow color.
+  if (lineGlyphs) {
+    ctx.shadowColor   = 'transparent';
+    ctx.shadowBlur    = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.textAlign = 'left';   // per-glyph fillText uses absolute x positions
+    for (let i = 0; i < lineGlyphs.length; i++) {
+      const lineW = lineWidths[i];
+      let lineStartX;
+      if (textAlign === 'center')      lineStartX = ax - lineW / 2;
+      else if (textAlign === 'right')  lineStartX = ax - lineW;
+      else                             lineStartX = ax;
+      const baseY = firstBaseline + i * lineHeight - bbox.y;
+      for (const g of lineGlyphs[i]) {
+        ctx.fillStyle = fillStyle(g.color);
+        ctx.fillText(g.ch, lineStartX + g.x - bbox.x, baseY);
+      }
+    }
+  }
+
   const lin = imageDataToLinear(ctx.getImageData(0, 0, bbox.w, bbox.h));
   compositeLinear(dst, lin, bbox.w, bbox.h, bbox.x, bbox.y);
 }
@@ -1768,13 +1841,51 @@ async function renderDebateText(dst) {
   // closer to that in-game look without changing the shared TMP bump policy.
   const fStr = fontString(fontSize, 600, false);
   _MEAS_CTX.font = fStr;
+
+  // Per-line walk: tokenize each line through the same TMP rich-text walker
+  // that AuthorLabel uses, advance an x cursor with measureText per glyph,
+  // and record `{ ch, x, color }`. `plain[i]` is the tag-stripped text used
+  // by the shadow pass (silhouette only — no per-span color) and by line-
+  // width measurement for the bbox.
   const lines = text.split('\n');
-  const m0   = _MEAS_CTX.measureText(lines[0] || ' ');
+  const lineGlyphs = [];
+  const plain = [];
+  const lineWidths = [];
+  const DEBATE_BASE_COLOR = [1, 1, 1, 1];
+  for (const line of lines) {
+    const colorStack = [DEBATE_BASE_COLOR];
+    const glyphs = [];
+    let plainStr = '';
+    let cursorX = 0;
+    for (const tok of tokenizeRich(line)) {
+      if (tok.kind === 'open_color') {
+        const c = parseColorToken(tok.val);
+        colorStack.push(c || colorStack[colorStack.length - 1]);
+      } else if (tok.kind === 'close_color') {
+        if (colorStack.length > 1) colorStack.pop();
+      } else if (tok.kind === 'glyph') {
+        const ch = tok.val;
+        const w = _MEAS_CTX.measureText(ch).width;
+        glyphs.push({ ch, x: cursorX, color: colorStack[colorStack.length - 1] });
+        plainStr += ch;
+        cursorX += w;
+      }
+      // <size>/<voffset>/<space>/<cspace> are not supported on the debate
+      // path — DebatePrinter is a uniform-size body of text, and recognising
+      // them here would silently swallow tags the user may have intended as
+      // literal punctuation.
+    }
+    lineGlyphs.push(glyphs);
+    plain.push(plainStr);
+    lineWidths.push(cursorX);
+  }
+
+  const m0   = _MEAS_CTX.measureText(plain[0] || ' ');
   const fbA  = m0.fontBoundingBoxAscent  ?? fontSize * 0.85;
   const fbD  = m0.fontBoundingBoxDescent ?? fontSize * 0.20;
   const lh   = fbA + fbD;
   const blkH = lines.length * lh;
-  const maxW = Math.max(0, ...lines.map(l => _MEAS_CTX.measureText(l).width));
+  const maxW = Math.max(0, ...lineWidths);
   // Layout: pivot rect width 1024, Left h_align (text left = rect left),
   // Middle v_align (block vertically centred on cy).
   const ax            = cx - DEBATE_RECT_W / 2;
@@ -1791,9 +1902,12 @@ async function renderDebateText(dst) {
   };
   if (bbox.w <= 0 || bbox.h <= 0) return;
 
-  // Shadow canvas: text in semi-transparent black, then re-blitted through a
-  // CSS blur filter to soften the edges. Drawn first so the outlined glyph
-  // composites on top of it.
+  // Shadow canvas: tag-stripped text in semi-transparent black, then re-
+  // blitted through a CSS blur filter to soften the edges. Drawn first so
+  // the outlined glyph composites on top of it. Color spans don't affect
+  // the shadow — it's a single black silhouette per line, matching the
+  // game's Outline_Shadow material (the underlay is a per-leaf shader prop,
+  // not per-span).
   const shadowRaw = document.createElement('canvas');
   shadowRaw.width = bbox.w; shadowRaw.height = bbox.h;
   const sctx = shadowRaw.getContext('2d');
@@ -1801,8 +1915,9 @@ async function renderDebateText(dst) {
   sctx.textAlign = 'left';
   sctx.textBaseline = 'alphabetic';
   sctx.fillStyle = `rgba(0, 0, 0, ${DEBATE_SHADOW_ALPHA})`;
-  for (let i = 0; i < lines.length; i++) {
-    sctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lh);
+  for (let i = 0; i < plain.length; i++) {
+    if (!plain[i]) continue;
+    sctx.fillText(plain[i], ax - bbox.x, firstBaseline - bbox.y + i * lh);
   }
   let shadowCanvas = shadowRaw;
   if (DEBATE_SHADOW_BLUR_PX > 0) {
@@ -1814,9 +1929,12 @@ async function renderDebateText(dst) {
     shadowCanvas = blurred;
   }
 
-  // Main canvas: black stroke (outline) underneath, white fill on top. The
-  // round line-join + miterLimit keep sharp kanji corners from spiking past
-  // the outline width; matches TMP's stock outline shader behaviour.
+  // Main canvas: per-glyph stroke (black) underneath, per-glyph fill (span
+  // color) on top. The round line-join + miterLimit keep sharp kanji corners
+  // from spiking past the outline width; matches TMP's stock outline shader
+  // behaviour. Stroking per-glyph rather than per-line means glyphs that
+  // touch (rare in Japanese, possible in Latin punctuation) get an isolated
+  // outline — invisible at 96 px Tsukushi Mincho but worth noting.
   const mainCanvas = document.createElement('canvas');
   mainCanvas.width = bbox.w; mainCanvas.height = bbox.h;
   const mctx2 = mainCanvas.getContext('2d');
@@ -1827,12 +1945,16 @@ async function renderDebateText(dst) {
   mctx2.lineJoin  = 'round';
   mctx2.miterLimit = 2;
   mctx2.strokeStyle = 'rgba(0, 0, 0, 1)';
-  mctx2.fillStyle   = 'rgba(255, 255, 255, 1)';
-  for (let i = 0; i < lines.length; i++) {
-    const x = ax - bbox.x;
+  const x0 = ax - bbox.x;
+  for (let i = 0; i < lineGlyphs.length; i++) {
     const y = firstBaseline - bbox.y + i * lh;
-    mctx2.strokeText(lines[i], x, y);
-    mctx2.fillText  (lines[i], x, y);
+    for (const g of lineGlyphs[i]) {
+      mctx2.strokeText(g.ch, x0 + g.x, y);
+    }
+    for (const g of lineGlyphs[i]) {
+      mctx2.fillStyle = fillStyle(g.color);
+      mctx2.fillText(g.ch, x0 + g.x, y);
+    }
   }
 
   // Composite shadow (offset) onto dst first, then outlined fill on top. Both
@@ -3362,6 +3484,55 @@ function showModal(message) {
     scheduleSceneConfigSave();
   };
   trialDebateInput.onchange = () => scheduleRender();
+
+  // Color swatches under each text input. Clicking a swatch wraps the
+  // textarea's current selection with `<color=#xxxxxx>...</color>` using
+  // that swatch's hex. With no selection, an empty tag pair is inserted
+  // at the caret. Focus stays in the textarea and the selection is left
+  // covering the wrapped substring (or sitting between the empty pair)
+  // so the user can keep typing without re-clicking. The renderer for
+  // each leaf (MessageLabel via renderPlainText, debate testimony via
+  // renderDebateText) parses the same `<color>` tag with stack semantics.
+  //
+  // The four hex codes surfaced are debate/trial-relevant colors found
+  // in the deployed game bundles:
+  //   #9c8eff — AnAn's accent (34 uses in act01_chapter02 trial scripts)
+  //   #6B85D0 — Yuki's accent (4 uses in act02_chapter06 trial scripts)
+  //   #ff0000 — "help me" scream scene (advbad chapter01, 84 uses)
+  //   #FF92B4 — testimony press-point color from the DebatePrinter TMP
+  //              style sheet ("Objection" style — runtime expansion of
+  //              `<link>`-marked press-points; we only mirror the color,
+  //              not the +0.25em size or -0.075em voffset)
+  // The three textareas share one wrap helper.
+  function bindColorSwatches(textarea, applyValue) {
+    const row = textarea.parentElement.querySelector('.color-wrap-row');
+    if (!row) return;
+    for (const sw of row.querySelectorAll('.color-swatch')) {
+      sw.onclick = () => {
+        const hex   = (sw.dataset.hex || '#ffffff').toLowerCase();
+        const open  = `<color=${hex}>`;
+        const close = `</color>`;
+        const v = textarea.value;
+        const s = textarea.selectionStart ?? v.length;
+        const e = textarea.selectionEnd   ?? v.length;
+        const before = v.slice(0, s);
+        const inside = v.slice(s, e);
+        const after  = v.slice(e);
+        const next   = before + open + inside + close + after;
+        textarea.value = next;
+        applyValue(next);
+        const innerStart = before.length + open.length;
+        const innerEnd   = innerStart + inside.length;
+        textarea.focus();
+        textarea.setSelectionRange(innerStart, innerEnd);
+        scheduleRender();
+        scheduleSceneConfigSave();
+      };
+    }
+  }
+  bindColorSwatches(messageInput,      (v) => { messageText      = v; });
+  bindColorSwatches(trialMessageInput, (v) => { trialMessageText = v; });
+  bindColorSwatches(trialDebateInput,  (v) => { trialDebateText  = v; });
 
   for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
     b.addEventListener('click', () => {
