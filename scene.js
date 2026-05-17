@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260518g';
+const BUILD_VERSION = '20260518l';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -1171,45 +1171,21 @@ function renderPlainText(rec, dst, overrideText = null) {
   _MEAS_CTX.font = fStr;
   const rawLines = s.split('\n');
 
-  // <color> support: when the input contains `<color=…>` tags, build per-line
-  // glyph arrays (tokenizeRich + parseColorToken stack) and use the tag-
-  // stripped text for layout and the shadow silhouette pass. Pure plain text
-  // skips this entirely and takes the existing fast path. Other TMP tags
-  // (<size>, <voffset>, <space>, <cspace>) are silently consumed by the
-  // tokenizer — same trade-off as the debate-text path: literal `<size>` in
-  // the textarea wouldn't render, but DebatePrinter/NormalPrinter messages
-  // don't carry those tags in any deployed content.
-  const hasColorTags = /<\/?color/i.test(s);
-  let plain, lineGlyphs, lineWidths;
-  if (hasColorTags) {
-    plain = [];
-    lineGlyphs = [];
-    lineWidths = [];
-    for (const line of rawLines) {
-      const colorStack = [color];
-      const glyphs = [];
-      let plainStr = '';
-      let cursorX = 0;
-      for (const tok of tokenizeRich(line)) {
-        if (tok.kind === 'open_color') {
-          const c = parseColorToken(tok.val);
-          colorStack.push(c || colorStack[colorStack.length - 1]);
-        } else if (tok.kind === 'close_color') {
-          if (colorStack.length > 1) colorStack.pop();
-        } else if (tok.kind === 'glyph') {
-          const w = _MEAS_CTX.measureText(tok.val).width;
-          glyphs.push({ ch: tok.val, x: cursorX, color: colorStack[colorStack.length - 1] });
-          plainStr += tok.val;
-          cursorX += w;
-        }
-      }
-      plain.push(plainStr);
-      lineGlyphs.push(glyphs);
-      lineWidths.push(cursorX);
-    }
+  // Tag-aware path: when the input contains `<color>`, `<b>`, or `<ruby>`,
+  // hand off to buildColoredLines to walk the text into per-glyph arrays
+  // plus per-line ruby runs. Pure plain text skips this and takes the
+  // original fast path. Other TMP tags (size/voffset/space/cspace) are
+  // silently consumed by the tokenizer — DebatePrinter / NormalPrinter
+  // source content never carries those in the message body.
+  const hasTags = /<\/?(color|b|ruby)\b/i.test(s);
+  let plain, lineGlyphs, lineWidths, lineRuby;
+  if (hasTags) {
+    ({ plain, lineGlyphs, lineWidths, lineRuby } =
+      buildColoredLines(rawLines, color, weight, fontSize, italic));
   } else {
     plain = rawLines;
     lineGlyphs = null;
+    lineRuby = null;
     lineWidths = rawLines.map(l => _MEAS_CTX.measureText(l).width);
   }
 
@@ -1257,11 +1233,35 @@ function renderPlainText(rec, dst, overrideText = null) {
   const pad = useShadow
     ? Math.max(4, Math.ceil(shadowBlur * 2 + shadowOffsetY))
     : 4;
+  // First-line ruby reaches above the body's normal top — reserve extra
+  // top so the reading isn't clipped (subsequent lines' ruby overlaps
+  // the line above; in-game addRubyLineHeight=false behaviour).
+  // First-line obj glyphs are 1.25× as tall, partially offset by the
+  // -0.075em downward voff. Reserve enough above to fit them, plus a
+  // matching tail at the bottom for last-line obj glyphs.
+  const firstLineHasRuby = lineRuby && lineRuby[0] && lineRuby[0].length > 0;
+  const firstLineHasObj  = lineGlyphs && lineGlyphs[0]  && lineGlyphs[0].some(g => g.obj);
+  const lastLineHasObj   = lineGlyphs && lineGlyphs[lineGlyphs.length - 1] &&
+                           lineGlyphs[lineGlyphs.length - 1].some(g => g.obj);
+  // Obj glyph above baseline = 1.25 × fbAsc; the downward voff shifts
+  // it back down. Net extra above = (OBJ_SIZE_SCALE - 1) × fbAsc -
+  // OBJ_VOFFSET_EM_DOWN × fontSize. Clamped to ≥ 0.
+  const objExtraTop = firstLineHasObj
+    ? Math.max(0, Math.ceil((OBJ_SIZE_SCALE - 1) * fbAsc - OBJ_VOFFSET_EM_DOWN * fontSize))
+    : 0;
+  const objExtraBot = lastLineHasObj
+    ? Math.max(0, Math.ceil((OBJ_SIZE_SCALE - 1) * fbDesc + OBJ_VOFFSET_EM_DOWN * fontSize))
+    : 0;
+  const rubyExtraTop = firstLineHasRuby
+    ? Math.max(0, Math.ceil(fontSize * RUBY_BBOX_TOP_RATIO))
+    : 0;
+  const extraTop = rubyExtraTop + objExtraTop;
+  const extraBot = objExtraBot;
   const bbox = {
     x: Math.floor(bx - pad),
-    y: Math.floor(firstBaseline - fbAsc - pad),
+    y: Math.floor(firstBaseline - fbAsc - pad - extraTop),
     w: Math.ceil(maxW + pad * 2),
-    h: Math.ceil(blockH + pad * 2),
+    h: Math.ceil(blockH + pad * 2 + extraTop + extraBot),
   };
   if (bbox.w <= 0 || bbox.h <= 0) return;
 
@@ -1281,36 +1281,77 @@ function renderPlainText(rec, dst, overrideText = null) {
   const passes = !useShadow ? 1
     : isAuthor ? TEXT_SHADOW_PASSES_AUTHOR
               : TEXT_SHADOW_PASSES_MESSAGE;
-  // Shadow + base-color pass: line-based fillText using the tag-stripped
-  // text so the halo silhouette is a single uniform shape per line. When
-  // there are no color tags, this is the only pass needed — done.
-  for (let pass = 0; pass < passes; pass++) {
-    for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lineHeight);
+  if (!lineGlyphs) {
+    // Fast path: no tags. Line-based shadow + base-color pass, exactly
+    // as before — a single uniform-weight halo per line.
+    for (let pass = 0; pass < passes; pass++) {
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], ax - bbox.x, firstBaseline - bbox.y + i * lineHeight);
+      }
     }
-  }
+  } else {
+    // Tag-aware path: render every glyph individually at its declared
+    // weight + size + color, with Canvas2D shadow enabled throughout so
+    // each glyph carries its own halo. Multiple passes still deepen the
+    // halo the same way the line-based path does. Drawing the shadow +
+    // color in ONE per-glyph pass (rather than line-based shadow + bold
+    // overpaint) is the only way to get a visibly thicker bold glyph or
+    // a visibly larger obj glyph — otherwise the line-based shadow
+    // would draw the area at base weight/size first and the overpaint
+    // could land identical pixels in the glyph interior.
+    ctx.textAlign = 'left';
+    const objFs    = Math.round(fontSize * OBJ_SIZE_SCALE);
+    const fStr00   = fStr;                                       // base, normal
+    const fStr01   = fontString(fontSize, 700, italic);          // base, bold
+    const fStr10   = fontString(objFs,    weight, italic);       // obj, normal
+    const fStr11   = fontString(objFs,    700, italic);          // obj, bold
+    const pickFont = (obj, bold) =>
+      obj ? (bold ? fStr11 : fStr10) : (bold ? fStr01 : fStr00);
+    for (let pass = 0; pass < passes; pass++) {
+      for (let i = 0; i < lineGlyphs.length; i++) {
+        const lineW = lineWidths[i];
+        let lineStartX;
+        if (textAlign === 'center')      lineStartX = ax - lineW / 2;
+        else if (textAlign === 'right')  lineStartX = ax - lineW;
+        else                             lineStartX = ax;
+        const baseY = firstBaseline + i * lineHeight - bbox.y;
+        for (const g of lineGlyphs[i]) {
+          ctx.font      = pickFont(g.obj, g.bold);
+          ctx.fillStyle = fillStyle(g.color);
+          ctx.fillText(g.ch, lineStartX + g.x - bbox.x, baseY + g.voff);
+        }
+      }
+    }
 
-  // Per-glyph color pass (only when <color> tags present). The shadow has
-  // already been laid down by the pass above with the base color; here we
-  // paint each glyph's actual color on top without any shadow so colored
-  // spans replace the base-color foreground while the halo around them
-  // remains uniformly the shadow color.
-  if (lineGlyphs) {
-    ctx.shadowColor   = 'transparent';
-    ctx.shadowBlur    = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.textAlign = 'left';   // per-glyph fillText uses absolute x positions
-    for (let i = 0; i < lineGlyphs.length; i++) {
+    // Ruby (furigana) pass: small reading text centered above each
+    // <ruby>…</ruby> body span. Drawn last so its halo composites on
+    // top of body content. Shadow stays enabled with size-scaled blur
+    // so the smaller reading gets a proportionally smaller halo.
+    const rubySize = Math.max(1, Math.round(fontSize * RUBY_SIZE_SCALE));
+    const rubyFStrNormal = fontString(rubySize, weight, italic);
+    const rubyFStrBold   = fontString(rubySize, 700,    italic);
+    const rubyVOffsetPx  = fontSize * RUBY_VOFFSET_EM;
+    if (useShadow) {
+      ctx.shadowBlur    = rubySize * blurRatio;
+      ctx.shadowOffsetY = isAuthor ? rubySize * TEXT_SHADOW_OFFSET_Y_RATIO_AUTHOR : 0;
+    }
+    for (let i = 0; i < lineRuby.length; i++) {
+      const runs = lineRuby[i];
+      if (!runs.length) continue;
       const lineW = lineWidths[i];
       let lineStartX;
       if (textAlign === 'center')      lineStartX = ax - lineW / 2;
       else if (textAlign === 'right')  lineStartX = ax - lineW;
       else                             lineStartX = ax;
-      const baseY = firstBaseline + i * lineHeight - bbox.y;
-      for (const g of lineGlyphs[i]) {
-        ctx.fillStyle = fillStyle(g.color);
-        ctx.fillText(g.ch, lineStartX + g.x - bbox.x, baseY);
+      const baseY = firstBaseline + i * lineHeight - bbox.y - rubyVOffsetPx;
+      for (const r of runs) {
+        ctx.font = r.bold ? rubyFStrBold : rubyFStrNormal;
+        ctx.fillStyle = fillStyle(r.color);
+        const rw = ctx.measureText(r.reading).width;
+        const bodyCenterX = lineStartX + (r.bodyStartX + r.bodyEndX) / 2 - bbox.x;
+        for (let pass = 0; pass < passes; pass++) {
+          ctx.fillText(r.reading, bodyCenterX - rw / 2, baseY);
+        }
       }
     }
   }
@@ -1327,7 +1368,14 @@ function renderPlainText(rec, dst, overrideText = null) {
 // no-op (matches TMP's parser). Used for the per-character AuthorLabel
 // rich-text shipped in characters/configuration.json's `tagged_name`.
 
-const TAG_RE = /<(\/?)(color|size|voffset|space|cspace)(?:=([^>]+))?>/g;
+// `b` and `ruby` join the alternation for the message/testimony renderers
+// (renderPlainText, renderDebateText). `b` is value-less; `ruby="reading"`
+// carries the furigana in a quoted attribute — consumers strip the quotes
+// when reading val. The non-greedy `[^>]*` (was `[^>]+`) lets `<ruby>`
+// without a value tokenize cleanly (no-op then; would only happen in
+// malformed input). AuthorLabel rich-text (renderRichText) still ignores
+// `open_b` / `open_ruby` tokens — those tags don't appear in tagged_name.
+const TAG_RE = /<(\/?)(color|size|voffset|space|cspace|b|ruby|obj)(?:=([^>]*))?>/g;
 
 function tokenizeRich(text) {
   const out = [];
@@ -1356,6 +1404,163 @@ function parseColorToken(s) {
   const a = parseInt(h.slice(6, 8), 16);
   if ([r, g, b, a].some(Number.isNaN)) return null;
   return [r / 255, g / 255, b / 255, a / 255];
+}
+
+// Ruby (furigana) constants. Both NormalPrinter.MessageLabel and
+// DebatePrinter.MessageLabel_1..8 declare identical TMP-side ruby settings
+// in their source MonoBehaviour: rubyVerticalOffset="0.875em",
+// rubySizeScale=0.4, addRubyLineHeight=false. Editor preview honours those
+// values literally: reading text is 40% of body size, its baseline sits
+// 0.875 × bodySize above the body baseline (positive = up), and the
+// surrounding line height is NOT inflated to accommodate ruby — exactly
+// matching the in-game look where ruby on line N overlaps with line N-1's
+// descender region.
+const RUBY_SIZE_SCALE      = 0.4;
+const RUBY_VOFFSET_EM      = 0.875;
+
+// Press-point (objection) constants. In the source scripts a press-point is
+// wrapped with `<link="Objection_XX">…</link>`; the DebatePrinter's
+// MessageLabel.linkTemplate rewrites it to `<style="Objection">…</style>`, and
+// the DebatePrinterStyleSheet (general-fonts-common bundle) expands the
+// Objection style to:
+//   <voffset=-0.075em><size=1.25em><#ff92b4>…</color></size></voffset>
+// In the editor we use a shorter custom tag `<obj>…</obj>` for the same effect.
+// The renderer applies all three sub-effects regardless of any attribute value.
+// #FF92B4 = 255/146/180; expressed via hex/255 so it lines up with the matching
+// swatch hex in scene.html and stays grep-able.
+const OBJ_COLOR           = [0xff / 255, 0x92 / 255, 0xb4 / 255, 1.0];
+const OBJ_SIZE_SCALE      = 1.25;
+// TMP `<voffset>` convention: positive = up (above baseline). The Objection
+// style uses -0.075em, i.e. baseline shifts down by 0.075em. We store the
+// downward pixel offset directly in glyph records (positive = down on canvas).
+const OBJ_VOFFSET_EM_DOWN = 0.075;
+// Conservative extra-top reservation for the bbox when the first line has
+// ruby: ruby baseline + ruby ascent - body ascent. Computed as a fraction
+// of body fontSize using rough fbAsc/fbDesc ratios (≈0.85 / 0.20 for Noto
+// Serif CJK at body sizes 48 / 96). Slightly over-reserves to avoid
+// clipping the small reading text at the canvas top.
+const RUBY_BBOX_TOP_RATIO  = RUBY_VOFFSET_EM + RUBY_SIZE_SCALE * 0.85 - 0.85;
+
+// Walk `rawLines` through tokenizeRich, building per-line per-glyph
+// arrays + per-line ruby runs. Color, bold, and ruby state are tracked
+// with stacks/single-slot — closing more tags than were opened is a no-op
+// (matches TMP). Other rich-text tags (size/voffset/space/cspace) are
+// silently consumed; that's the same trade-off the message renderers
+// have always had since DebatePrinter / NormalPrinter source content
+// never carries those in the message body.
+//
+// Returns:
+//   plain[i]      — tag-stripped body text for line i (used by the
+//                   shadow silhouette pass; excludes ruby readings)
+//   lineGlyphs[i] — array of { ch, x, color, bold } for line i's body
+//   lineWidths[i] — cursorX after consuming the last glyph (line width
+//                   in body coords; ruby reading width doesn't count)
+//   lineRuby[i]   — array of { reading, bodyStartX, bodyEndX, color,
+//                   bold } for line i (one per <ruby>…</ruby> span)
+function buildColoredLines(rawLines, baseColor, baseWeight, fontSize, italic) {
+  const plain = [];
+  const lineGlyphs = [];
+  const lineWidths = [];
+  const lineRuby = [];
+  // Four font-string variants cover the {base/obj} × {normal/bold} cube,
+  // which is the full set we need: <obj> is the only thing that changes
+  // size, and the bold stack only flips weight. measureText needs to see
+  // the same font that fillText will, so we pick from the same table.
+  const objFs    = Math.round(fontSize * OBJ_SIZE_SCALE);
+  const fStr00   = fontString(fontSize, baseWeight, italic);
+  const fStr01   = fontString(fontSize, 700,        italic);
+  const fStr10   = fontString(objFs,    baseWeight, italic);
+  const fStr11   = fontString(objFs,    700,        italic);
+  const objVoff  = fontSize * OBJ_VOFFSET_EM_DOWN;
+  const pickFont = (obj, bold) =>
+    obj ? (bold ? fStr11 : fStr10) : (bold ? fStr01 : fStr00);
+  for (const line of rawLines) {
+    const colorStack = [baseColor];
+    const boldStack  = [false];
+    let objDepth = 0;
+    const glyphs = [];
+    const rubyRuns = [];
+    let plainStr = '';
+    let cursorX = 0;
+    let rubyReading = null;
+    let rubyStartX = 0;
+    for (const tok of tokenizeRich(line)) {
+      switch (tok.kind) {
+        case 'open_color': {
+          const c = parseColorToken(tok.val);
+          colorStack.push(c || colorStack[colorStack.length - 1]);
+          break;
+        }
+        case 'close_color':
+          if (colorStack.length > 1) colorStack.pop();
+          break;
+        case 'open_b':  boldStack.push(true); break;
+        case 'close_b': if (boldStack.length > 1) boldStack.pop(); break;
+        case 'open_obj': {
+          // Apply DebatePrinterStyleSheet's "Objection" style internally:
+          // push pink color, mark obj active (1.25× size + downward voff).
+          // Nested objs are flattened: the size scale and voffset apply
+          // once regardless of depth.
+          objDepth++;
+          colorStack.push(OBJ_COLOR);
+          break;
+        }
+        case 'close_obj': {
+          if (objDepth > 0) {
+            objDepth--;
+            if (colorStack.length > 1) colorStack.pop();
+          }
+          break;
+        }
+        case 'open_ruby': {
+          // val arrives as `"こけ"` with quotes; strip them. Unquoted
+          // values (rare) pass through unchanged.
+          const v = tok.val || '';
+          rubyReading = v.replace(/^"(.*)"$/, '$1');
+          rubyStartX = cursorX;
+          break;
+        }
+        case 'close_ruby': {
+          if (rubyReading !== null && cursorX > rubyStartX) {
+            rubyRuns.push({
+              reading: rubyReading,
+              bodyStartX: rubyStartX,
+              bodyEndX: cursorX,
+              color: colorStack[colorStack.length - 1],
+              bold:  boldStack[boldStack.length - 1],
+            });
+          }
+          rubyReading = null;
+          break;
+        }
+        case 'glyph': {
+          const bold = boldStack[boldStack.length - 1];
+          const obj  = objDepth > 0;
+          _MEAS_CTX.font = pickFont(obj, bold);
+          const w = _MEAS_CTX.measureText(tok.val).width;
+          glyphs.push({
+            ch:    tok.val,
+            x:     cursorX,
+            color: colorStack[colorStack.length - 1],
+            bold,
+            obj,
+            voff:  obj ? objVoff : 0,   // positive = down on canvas
+          });
+          plainStr += tok.val;
+          cursorX += w;
+          break;
+        }
+        // open_size / open_voffset / open_cspace / close_*  and `space`
+        // are silently consumed — message-body renderers don't currently
+        // honour them. (renderRichText handles them on its own path.)
+      }
+    }
+    plain.push(plainStr);
+    lineGlyphs.push(glyphs);
+    lineWidths.push(cursorX);
+    lineRuby.push(rubyRuns);
+  }
+  return { plain, lineGlyphs, lineWidths, lineRuby };
 }
 
 // Capline cap-top reference. TMP positions the TMP_FontAsset's
@@ -1842,43 +2047,18 @@ async function renderDebateText(dst) {
   const fStr = fontString(fontSize, 600, false);
   _MEAS_CTX.font = fStr;
 
-  // Per-line walk: tokenize each line through the same TMP rich-text walker
-  // that AuthorLabel uses, advance an x cursor with measureText per glyph,
-  // and record `{ ch, x, color }`. `plain[i]` is the tag-stripped text used
-  // by the shadow pass (silhouette only — no per-span color) and by line-
-  // width measurement for the bbox.
-  const lines = text.split('\n');
-  const lineGlyphs = [];
-  const plain = [];
-  const lineWidths = [];
-  const DEBATE_BASE_COLOR = [1, 1, 1, 1];
-  for (const line of lines) {
-    const colorStack = [DEBATE_BASE_COLOR];
-    const glyphs = [];
-    let plainStr = '';
-    let cursorX = 0;
-    for (const tok of tokenizeRich(line)) {
-      if (tok.kind === 'open_color') {
-        const c = parseColorToken(tok.val);
-        colorStack.push(c || colorStack[colorStack.length - 1]);
-      } else if (tok.kind === 'close_color') {
-        if (colorStack.length > 1) colorStack.pop();
-      } else if (tok.kind === 'glyph') {
-        const ch = tok.val;
-        const w = _MEAS_CTX.measureText(ch).width;
-        glyphs.push({ ch, x: cursorX, color: colorStack[colorStack.length - 1] });
-        plainStr += ch;
-        cursorX += w;
-      }
-      // <size>/<voffset>/<space>/<cspace> are not supported on the debate
-      // path — DebatePrinter is a uniform-size body of text, and recognising
-      // them here would silently swallow tags the user may have intended as
-      // literal punctuation.
-    }
-    lineGlyphs.push(glyphs);
-    plain.push(plainStr);
-    lineWidths.push(cursorX);
-  }
+  // Tokenize through the shared TMP rich-text walker. Each line yields:
+  //   plain[i]      — tag-stripped body text (used by the shadow silhouette
+  //                   pass; ruby readings drawn separately below)
+  //   lineGlyphs[i] — body glyphs { ch, x, color, bold }
+  //   lineWidths[i] — line width in body coords
+  //   lineRuby[i]   — ruby runs { reading, bodyStartX, bodyEndX, color, bold }
+  // baseWeight 600 matches the existing visible-stroke calibration (see
+  // comment above the fStr definition).
+  const rawLines = text.split('\n');
+  const { plain, lineGlyphs, lineWidths, lineRuby } =
+    buildColoredLines(rawLines, [1, 1, 1, 1], 600, fontSize, false);
+  const lines = plain;
 
   const m0   = _MEAS_CTX.measureText(plain[0] || ' ');
   const fbA  = m0.fontBoundingBoxAscent  ?? fontSize * 0.85;
@@ -1894,13 +2074,42 @@ async function renderDebateText(dst) {
   // blur to both — symmetric pad sized to whichever is larger.
   const pad = Math.max(DEBATE_OUTLINE_PX + 2,
                        DEBATE_SHADOW_BLUR_PX + DEBATE_SHADOW_OFFSET + 2);
+  // Same bbox-extension logic as renderPlainText: ruby on the first
+  // line lifts the top by RUBY_BBOX_TOP_RATIO × fontSize; obj glyphs
+  // on the first / last lines need extra room above / below for the
+  // 1.25× height (offset partially by the +0.075em downward voff).
+  const firstLineHasRuby = lineRuby[0] && lineRuby[0].length > 0;
+  const firstLineHasObj  = lineGlyphs[0] && lineGlyphs[0].some(g => g.obj);
+  const lastLineHasObj   = lineGlyphs[lineGlyphs.length - 1] &&
+                           lineGlyphs[lineGlyphs.length - 1].some(g => g.obj);
+  const rubyExtraTop = firstLineHasRuby
+    ? Math.max(0, Math.ceil(fontSize * RUBY_BBOX_TOP_RATIO))
+    : 0;
+  const objExtraTop = firstLineHasObj
+    ? Math.max(0, Math.ceil((OBJ_SIZE_SCALE - 1) * fbA - OBJ_VOFFSET_EM_DOWN * fontSize))
+    : 0;
+  const objExtraBot = lastLineHasObj
+    ? Math.max(0, Math.ceil((OBJ_SIZE_SCALE - 1) * fbD + OBJ_VOFFSET_EM_DOWN * fontSize))
+    : 0;
+  const extraTop = rubyExtraTop + objExtraTop;
+  const extraBot = objExtraBot;
   const bbox = {
     x: Math.floor(ax - pad),
-    y: Math.floor(firstBaseline - fbA - pad),
+    y: Math.floor(firstBaseline - fbA - pad - extraTop),
     w: Math.ceil(maxW + pad * 2),
-    h: Math.ceil(blkH + pad * 2),
+    h: Math.ceil(blkH + pad * 2 + extraTop + extraBot),
   };
   if (bbox.w <= 0 || bbox.h <= 0) return;
+
+  // Per-line ruby constants. Reading text is RUBY_SIZE_SCALE × body size,
+  // baseline-offset RUBY_VOFFSET_EM × bodySize above the body baseline.
+  // Outline and shadow params scale with size so the ratios stay the same.
+  const rubySize           = Math.max(1, Math.round(fontSize * RUBY_SIZE_SCALE));
+  const rubyFStrNormal     = fontString(rubySize, 600, false);
+  const rubyFStrBold       = fontString(rubySize, 700, false);
+  const rubyVOffsetPx      = fontSize * RUBY_VOFFSET_EM;
+  const rubyOutlinePx      = Math.max(1, Math.round(DEBATE_OUTLINE_PX * RUBY_SIZE_SCALE));
+  const rubyShadowOffsetPx = DEBATE_SHADOW_OFFSET * RUBY_SIZE_SCALE;
 
   // Shadow canvas: tag-stripped text in semi-transparent black, then re-
   // blitted through a CSS blur filter to soften the edges. Drawn first so
@@ -1915,9 +2124,38 @@ async function renderDebateText(dst) {
   sctx.textAlign = 'left';
   sctx.textBaseline = 'alphabetic';
   sctx.fillStyle = `rgba(0, 0, 0, ${DEBATE_SHADOW_ALPHA})`;
-  for (let i = 0; i < plain.length; i++) {
-    if (!plain[i]) continue;
-    sctx.fillText(plain[i], ax - bbox.x, firstBaseline - bbox.y + i * lh);
+  // Per-glyph silhouette pass with bold + obj-aware font/voff, so the
+  // halo footprint matches the visible strokes. Drawing the silhouette
+  // as one line-based fillText at base weight/size would leave the
+  // bold or obj-enlarged strokes un-haloed where they extend past the
+  // base glyph.
+  const debateObjFs    = Math.round(fontSize * OBJ_SIZE_SCALE);
+  const debateFStr00   = fStr;                                  // base, normal
+  const debateFStr01   = fontString(fontSize,    700, false);   // base, bold
+  const debateFStr10   = fontString(debateObjFs, 600, false);   // obj,  normal
+  const debateFStr11   = fontString(debateObjFs, 700, false);   // obj,  bold
+  const debatePickFont = (obj, bold) =>
+    obj ? (bold ? debateFStr11 : debateFStr10) : (bold ? debateFStr01 : debateFStr00);
+  for (let i = 0; i < lineGlyphs.length; i++) {
+    const baseY = firstBaseline - bbox.y + i * lh;
+    for (const g of lineGlyphs[i]) {
+      sctx.font = debatePickFont(g.obj, g.bold);
+      sctx.fillText(g.ch, ax - bbox.x + g.x, baseY + g.voff);
+    }
+  }
+  // Ruby reading silhouettes — drawn here so they're blurred together
+  // with the body silhouette in the same pass below. Centered above
+  // their body span; positioned in pre-blur coords.
+  for (let i = 0; i < lineRuby.length; i++) {
+    const runs = lineRuby[i];
+    if (!runs.length) continue;
+    const baseY = firstBaseline - bbox.y + i * lh - rubyVOffsetPx;
+    for (const r of runs) {
+      sctx.font = r.bold ? rubyFStrBold : rubyFStrNormal;
+      const rw = sctx.measureText(r.reading).width;
+      const cx0 = ax - bbox.x + (r.bodyStartX + r.bodyEndX) / 2;
+      sctx.fillText(r.reading, cx0 - rw / 2, baseY);
+    }
   }
   let shadowCanvas = shadowRaw;
   if (DEBATE_SHADOW_BLUR_PX > 0) {
@@ -1934,7 +2172,9 @@ async function renderDebateText(dst) {
   // from spiking past the outline width; matches TMP's stock outline shader
   // behaviour. Stroking per-glyph rather than per-line means glyphs that
   // touch (rare in Japanese, possible in Latin punctuation) get an isolated
-  // outline — invisible at 96 px Tsukushi Mincho but worth noting.
+  // outline — invisible at 96 px Tsukushi Mincho but worth noting. Bold-
+  // aware: each glyph swaps between the base 600-weight font and a 700-
+  // weight bold variant depending on its `<b>` state.
   const mainCanvas = document.createElement('canvas');
   mainCanvas.width = bbox.w; mainCanvas.height = bbox.h;
   const mctx2 = mainCanvas.getContext('2d');
@@ -1945,15 +2185,36 @@ async function renderDebateText(dst) {
   mctx2.lineJoin  = 'round';
   mctx2.miterLimit = 2;
   mctx2.strokeStyle = 'rgba(0, 0, 0, 1)';
+  // Reuse the same 4-string font table from the shadow pass — same
+  // base/obj × normal/bold cube.
   const x0 = ax - bbox.x;
   for (let i = 0; i < lineGlyphs.length; i++) {
     const y = firstBaseline - bbox.y + i * lh;
     for (const g of lineGlyphs[i]) {
-      mctx2.strokeText(g.ch, x0 + g.x, y);
+      mctx2.font = debatePickFont(g.obj, g.bold);
+      mctx2.strokeText(g.ch, x0 + g.x, y + g.voff);
     }
     for (const g of lineGlyphs[i]) {
+      mctx2.font = debatePickFont(g.obj, g.bold);
       mctx2.fillStyle = fillStyle(g.color);
-      mctx2.fillText(g.ch, x0 + g.x, y);
+      mctx2.fillText(g.ch, x0 + g.x, y + g.voff);
+    }
+  }
+  // Ruby (furigana) reading pass — small text centered above each body
+  // span. Stroke + fill, mirroring the body pass. Outline width and font
+  // weight scale with size so the visual ratio matches the body.
+  mctx2.lineWidth = rubyOutlinePx * 2;
+  for (let i = 0; i < lineRuby.length; i++) {
+    const runs = lineRuby[i];
+    if (!runs.length) continue;
+    const y = firstBaseline - bbox.y + i * lh - rubyVOffsetPx;
+    for (const r of runs) {
+      mctx2.font = r.bold ? rubyFStrBold : rubyFStrNormal;
+      const rw = mctx2.measureText(r.reading).width;
+      const rx0 = x0 + (r.bodyStartX + r.bodyEndX) / 2 - rw / 2;
+      mctx2.strokeText(r.reading, rx0, y);
+      mctx2.fillStyle = fillStyle(r.color);
+      mctx2.fillText(r.reading, rx0, y);
     }
   }
 
@@ -3174,23 +3435,34 @@ async function exportPng() {
 
 // --- Modals ---
 
-// Resolves to the user-entered string (trimmed by caller), or `null` on
-// Cancel / Esc / click-outside. Pre-fills the input with `currentName` and
-// auto-selects so user can immediately type a replacement. Enter commits.
-function showRenameModal(currentName) {
+// Generic text-input modal. Resolves to the user-entered string (untrimmed —
+// caller decides), or `null` on Cancel / Esc / click-outside. `title` swaps
+// the heading; `initial` pre-fills the input (auto-selected on open so the
+// user can overtype immediately); `sublabel` (optional) shows a single line
+// between the title and the input — used by the rename flow to display the
+// current snapshot name. Enter commits; Esc / overlay click cancels.
+function showPromptModal(title, initial = '', sublabel = '') {
   return new Promise((resolve) => {
     const overlay     = document.getElementById('renameOverlay');
     const input       = document.getElementById('renameInput');
     const confirmBtn  = document.getElementById('renameConfirm');
     const cancelBtn   = document.getElementById('renameCancel');
-    document.getElementById('renameCurrent').textContent = `Current: ${currentName}`;
-    input.value = currentName;
+    const titleEl     = document.getElementById('renameTitle');
+    const subEl       = document.getElementById('renameCurrent');
+    const titlePrev   = titleEl.textContent;
+    titleEl.textContent = title;
+    subEl.textContent   = sublabel;
+    subEl.hidden        = !sublabel;
+    input.value         = initial;
     overlay.classList.add('active');
     // Defer focus to next frame so the modal's display:flex transition
     // doesn't suppress the autofocus + select.
     requestAnimationFrame(() => { input.focus(); input.select(); });
     function close(result) {
       overlay.classList.remove('active');
+      // Restore defaults so the next caller sees clean state.
+      titleEl.textContent = titlePrev;
+      subEl.hidden = false;
       confirmBtn.onclick = cancelBtn.onclick = overlay.onclick = null;
       input.onkeydown = null;
       document.removeEventListener('keydown', onKey);
@@ -3207,6 +3479,13 @@ function showRenameModal(currentName) {
     };
     document.addEventListener('keydown', onKey);
   });
+}
+
+// Snapshot-rename specialization: pre-fills with the current name and
+// surfaces it on the sublabel line so the user can compare against the
+// in-flight value. Returns the new (untrimmed) name or `null` on cancel.
+function showRenameModal(currentName) {
+  return showPromptModal('Rename snapshot', currentName, `Current: ${currentName}`);
 }
 
 function showModal(message) {
@@ -3507,26 +3786,67 @@ function showModal(message) {
   function bindColorSwatches(textarea, applyValue) {
     const row = textarea.parentElement.querySelector('.color-wrap-row');
     if (!row) return;
+    // Shared wrap helper: surrounds [selStart, selEnd) with open/close,
+    // updates the state setter, and restores selection to cover the
+    // wrapped substring so chained clicks (e.g. <color> then <b>) keep
+    // operating on the same span. With no selection, an empty tag pair
+    // is inserted at the caret and the cursor sits between them.
+    function wrapWith(open, close, selStart, selEnd) {
+      const v = textarea.value;
+      const s = selStart ?? textarea.selectionStart ?? v.length;
+      const e = selEnd   ?? textarea.selectionEnd   ?? v.length;
+      const before = v.slice(0, s);
+      const inside = v.slice(s, e);
+      const after  = v.slice(e);
+      const next   = before + open + inside + close + after;
+      textarea.value = next;
+      applyValue(next);
+      const innerStart = before.length + open.length;
+      const innerEnd   = innerStart + inside.length;
+      textarea.focus();
+      textarea.setSelectionRange(innerStart, innerEnd);
+      scheduleRender();
+      scheduleSceneConfigSave();
+    }
     for (const sw of row.querySelectorAll('.color-swatch')) {
       sw.onclick = () => {
-        const hex   = (sw.dataset.hex || '#ffffff').toLowerCase();
-        const open  = `<color=${hex}>`;
-        const close = `</color>`;
-        const v = textarea.value;
-        const s = textarea.selectionStart ?? v.length;
-        const e = textarea.selectionEnd   ?? v.length;
-        const before = v.slice(0, s);
-        const inside = v.slice(s, e);
-        const after  = v.slice(e);
-        const next   = before + open + inside + close + after;
-        textarea.value = next;
-        applyValue(next);
-        const innerStart = before.length + open.length;
-        const innerEnd   = innerStart + inside.length;
-        textarea.focus();
-        textarea.setSelectionRange(innerStart, innerEnd);
-        scheduleRender();
-        scheduleSceneConfigSave();
+        const hex = (sw.dataset.hex || '#ffffff').toLowerCase();
+        wrapWith(`<color=${hex}>`, `</color>`);
+      };
+    }
+    const boldBtn = row.querySelector('[data-tag="b"]');
+    if (boldBtn) {
+      boldBtn.onclick = () => wrapWith('<b>', '</b>');
+    }
+    const objBtn = row.querySelector('[data-tag="obj"]');
+    if (objBtn) {
+      // `<obj>` is our editor's shorthand for the in-game Objection style
+      // (color + 1.25× size + downward voff). The source-script form is
+      // `<link="Objection_XX">…</link>` — different tag, identical effect.
+      objBtn.onclick = () => wrapWith('<obj>', '</obj>');
+    }
+    const rubyBtn = row.querySelector('[data-tag="ruby"]');
+    if (rubyBtn) {
+      rubyBtn.onclick = async () => {
+        // Capture the selection before opening the modal, because the
+        // modal's input will steal focus and clear textarea.selection*.
+        const s = textarea.selectionStart ?? 0;
+        const e = textarea.selectionEnd   ?? 0;
+        if (e === s) {
+          // No body selected — ruby needs a kanji span to attach to.
+          // Surface a hint via the existing modal infra rather than
+          // silently doing nothing.
+          await showModal('Select the kanji body first, then click Ruby.');
+          return;
+        }
+        const reading = await showPromptModal('Ruby reading (furigana)');
+        if (reading === null) return;
+        const trimmed = reading.trim();
+        if (!trimmed) return;
+        // Quotes in the reading would terminate the attribute early —
+        // strip them so a paste like `"こけ"` still produces a valid tag.
+        const clean = trimmed.replace(/"/g, '');
+        wrapWith(`<ruby="${clean}">`, '</ruby>', s, e);
       };
     }
   }

@@ -653,6 +653,24 @@ body {
 }
 .color-swatch:hover { transform: scale(1.1); }
 
+/* Tag-wrap pills (Bold, Ruby) live in the same row as the color swatches
+   and wrap the textarea selection with their respective tag. Sized to
+   approximate the swatch footprint so the row stays balanced. */
+.tag-wrap-btn {
+  height: 26px;
+  padding: 0 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.tag-wrap-btn:hover { background: #333338; }
+.tag-wrap-btn b { font-weight: 800; }
+
 /* Pre-render placeholder shown inside the preview before the first composite
    completes. Plain text — replaced by the canvas via replaceChildren. */
 .loading-msg {
