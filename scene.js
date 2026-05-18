@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260519a';
+const BUILD_VERSION = '20260519d';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -306,6 +306,88 @@ function placementBySlug(slug) {
 function intrinsicScaleFor(snap) {
   if (!snap) return 1;
   return intrinsicScales.get(snap.character) ?? 1;
+}
+
+// --- ScenePosition (Naninovel) ↔ placement (canvas pixels) ---
+//
+// Placements store top-left pixel coords; the inspector exposes them as
+// Naninovel ScenePosition %, anchored at the actor's transform.position
+// (== Naninovel ScenePos semantics). The preview canvas is CANVAS_W ×
+// CANVAS_H = the game's ReferenceResolution (2560×1440), so % maps 1:1 to
+// pixels — but actor.position is OFFSET from the rig/sprite centre that
+// snap.pivotY represents:
+//
+//   actor.position lands at CharacterMetadata.Pivot OF THE BOUNDS, where
+//   "bounds" is the 15×30 m RenderCanvas for layered actors (much bigger
+//   than the visible rig) or the sprite m_Rect for diced actors.
+//
+// For Ema (layered, pivot.y=0.695), actor.position sits 5.85 m above the
+// rig centre — so ScenePosY=50 (= actor at canvas centre) means the rig
+// centre is 585 px BELOW canvas centre, NOT at it. Without the offset,
+// the editor would render Ema with her head off the canvas top.
+//
+// Diced actors use snap.width/height × intrinsic × scale as the bounds
+// approximation. The cropped snap is slightly smaller than the atlas
+// m_Rect Naninovel uses (~85% for Yuki), so the offset is mildly under-
+// estimated; in practice this is a few % of canvas height — well below
+// what a user notices.
+//
+// Old snapshots without pivotX/pivotY default to the snap centre. Snaps
+// from a character not in characterPivots (missing authors.json entry)
+// default pivot to (0.5, 0.5) → zero offset.
+const LAYERED_RENDER_CANVAS_W_PX = 1500;   // 15 m × PPU 100
+const LAYERED_RENDER_CANVAS_H_PX = 3000;   // 30 m × PPU 100
+
+function snapPivotPx(snap) {
+  if (!snap) return [0, 0];
+  const px = Number.isFinite(snap.pivotX) ? snap.pivotX : snap.width  / 2;
+  const py = Number.isFinite(snap.pivotY) ? snap.pivotY : snap.height / 2;
+  return [px, py];
+}
+function actorBoundsPx(snap, placementScale) {
+  if (!snap) return [0, 0];
+  if (snap.charType === 'diced') {
+    const s = intrinsicScaleFor(snap) * placementScale;
+    return [snap.width * s, snap.height * s];
+  }
+  return [LAYERED_RENDER_CANVAS_W_PX * placementScale,
+          LAYERED_RENDER_CANVAS_H_PX * placementScale];
+}
+function pivotOffsetCanvasPx(snap, placementScale) {
+  if (!snap) return [0, 0];
+  const pivot = characterPivots.get(snap.character) || [0.5, 0.5];
+  const [bw, bh] = actorBoundsPx(snap, placementScale);
+  // pivot.y > 0.5 ⇒ actor above rig centre in world Y-up ⇒ SMALLER canvas y
+  // (Y-down). Same logic for x: pivot.x > 0.5 ⇒ actor right of rig centre.
+  return [-(pivot[0] - 0.5) * bw, -(pivot[1] - 0.5) * bh];
+}
+function placementToSceneX(placement, snap) {
+  if (!snap) return 50;
+  const s = intrinsicScaleFor(snap) * placement.scale;
+  const [px] = snapPivotPx(snap);
+  const [ox] = pivotOffsetCanvasPx(snap, placement.scale);
+  return ((placement.x + px * s + ox) / CANVAS_W) * 100;
+}
+function placementToSceneY(placement, snap) {
+  if (!snap) return 50;
+  const s = intrinsicScaleFor(snap) * placement.scale;
+  const [, py] = snapPivotPx(snap);
+  const [, oy] = pivotOffsetCanvasPx(snap, placement.scale);
+  return ((CANVAS_H - (placement.y + py * s + oy)) / CANVAS_H) * 100;
+}
+function sceneXToPlacementX(sceneX, placement, snap) {
+  if (!snap) return placement.x;
+  const s = intrinsicScaleFor(snap) * placement.scale;
+  const [px] = snapPivotPx(snap);
+  const [ox] = pivotOffsetCanvasPx(snap, placement.scale);
+  return Math.round((sceneX / 100) * CANVAS_W - px * s - ox);
+}
+function sceneYToPlacementY(sceneY, placement, snap) {
+  if (!snap) return placement.y;
+  const s = intrinsicScaleFor(snap) * placement.scale;
+  const [, py] = snapPivotPx(snap);
+  const [, oy] = pivotOffsetCanvasPx(snap, placement.scale);
+  return Math.round(CANVAS_H * (1 - sceneY / 100) - py * s - oy);
 }
 
 // --- Placement persistence ---
@@ -2817,18 +2899,19 @@ function relativeTime(iso) {
 }
 
 // Default position/scale for a freshly-placed snapshot. Always lands at
-// placement.scale=1.0 (i.e. "as the game would render at script_scale=1.0",
-// since intrinsic_scale composes in at render time), horizontally centered
-// at on-stage width, with the sprite's top edge at 20% of the canvas height
-// — matches the game's typical VN framing where the head sits in the upper
-// quarter and the body fills the rest.
+// placement.scale=1.0 and Naninovel ScenePosition (X=50, Y=50) — i.e. the
+// actor's transform.position is anchored at the canvas centre, matching
+// the game's default actor state (Vector3.zero world position → centre of
+// the scene rect). The actual snap pixels are offset from canvas centre by
+// the per-character pivot delta from rig centre (5.85 m × PPU for layered
+// Ema, etc.), so the visible character lands where the game would render
+// it on first appearance.
 function defaultPlacementFor(snap) {
-  const intrinsic = intrinsicScaleFor(snap);
-  const rw = snap.width * intrinsic;
+  const stub = { slug: snap.slug, x: 0, y: 0, scale: 1.0 };
   return {
     slug:  snap.slug,
-    x:     Math.round((CANVAS_W - rw) / 2),
-    y:     Math.round(CANVAS_H * 0.2),
+    x:     sceneXToPlacementX(50, stub, snap),
+    y:     sceneYToPlacementY(50, stub, snap),
     scale: 1.0,
   };
 }
@@ -3140,7 +3223,9 @@ function clampScale(v) {
 function refreshInspector() {
   const placement = selectedSlug ? placementBySlug(selectedSlug) : null;
   const xEl       = document.getElementById('inspectorX');
+  const xNumEl    = document.getElementById('inspectorXValue');
   const yEl       = document.getElementById('inspectorY');
+  const yNumEl    = document.getElementById('inspectorYValue');
   const scaleEl   = document.getElementById('inspectorScale');
   const scaleNumEl= document.getElementById('inspectorScaleValue');
   const nameEl    = document.getElementById('inspectorName');
@@ -3148,25 +3233,29 @@ function refreshInspector() {
   const toBackEl  = document.getElementById('placementToBack');
   const removeEl  = document.getElementById('placementRemove');
 
+  const inputs = [xEl, xNumEl, yEl, yNumEl, scaleEl, scaleNumEl];
+
   if (!placement) {
-    nameEl.textContent     = '(no selection)';
-    xEl.value              = 0;
-    yEl.value              = 0;
-    scaleEl.value          = 1;
-    scaleNumEl.value       = '1.00';
-    xEl.disabled = yEl.disabled = scaleEl.disabled = scaleNumEl.disabled = true;
+    nameEl.textContent = '(no selection)';
+    xEl.value = xNumEl.value = 50;
+    yEl.value = yNumEl.value = 50;
+    scaleEl.value    = 1;
+    scaleNumEl.value = '1.00';
+    for (const el of inputs) el.disabled = true;
     toFrontEl.disabled = toBackEl.disabled = removeEl.disabled = true;
     return;
   }
 
-  xEl.disabled = yEl.disabled = scaleEl.disabled = scaleNumEl.disabled = false;
+  for (const el of inputs) el.disabled = false;
   removeEl.disabled = false;
   const snap = snapshots.get(placement.slug);
-  nameEl.textContent  = snap ? snap.name : placement.slug;
-  xEl.value           = placement.x;
-  yEl.value           = placement.y;
-  scaleEl.value       = placement.scale;
-  scaleNumEl.value    = placement.scale.toFixed(2);
+  nameEl.textContent = snap ? snap.name : placement.slug;
+  const sx = Math.round(placementToSceneX(placement, snap));
+  const sy = Math.round(placementToSceneY(placement, snap));
+  xEl.value = xNumEl.value = sx;
+  yEl.value = yNumEl.value = sy;
+  scaleEl.value    = placement.scale;
+  scaleNumEl.value = placement.scale.toFixed(2);
   const z = placementZPosition(placement.slug);
   toFrontEl.disabled = !z.canFront;
   toBackEl.disabled  = !z.canBack;
@@ -4069,13 +4158,62 @@ function showModal(message) {
     if (render) scheduleRender();
     schedulePlacementsSave();
   }
-  const inspectorX = document.getElementById('inspectorX');
-  const inspectorY = document.getElementById('inspectorY');
+  const inspectorX     = document.getElementById('inspectorX');
+  const inspectorXNum  = document.getElementById('inspectorXValue');
+  const inspectorY     = document.getElementById('inspectorY');
+  const inspectorYNum  = document.getElementById('inspectorYValue');
   const inspectorScale = document.getElementById('inspectorScale');
-  inspectorX.oninput  = (e) => withSelected(p => { p.x = Number(e.target.value) || 0; }, { render: false });
-  inspectorY.oninput  = (e) => withSelected(p => { p.y = Number(e.target.value) || 0; }, { render: false });
+  // X/Y inputs are ScenePosition % (Naninovel-anchored at snapshot pivot);
+  // sceneXToPlacementX / sceneYToPlacementY reproject to pixel placement.x/y.
+  // The slider + number stay mirrored so dragging one repaints the other.
+  function applyScenePosX(v) {
+    withSelected(p => {
+      const snap = snapshots.get(p.slug);
+      p.x = sceneXToPlacementX(v, p, snap);
+    }, { render: false });
+  }
+  function applyScenePosY(v) {
+    withSelected(p => {
+      const snap = snapshots.get(p.slug);
+      p.y = sceneYToPlacementY(v, p, snap);
+    }, { render: false });
+  }
+  inspectorX.oninput = (e) => {
+    const v = Number(e.target.value) || 0;
+    inspectorXNum.value = v;
+    applyScenePosX(v);
+  };
   inspectorX.onchange = () => scheduleRender();
+  inspectorXNum.oninput = (e) => {
+    const v = Number(e.target.value) || 0;
+    inspectorX.value = v;
+    applyScenePosX(v);
+  };
+  inspectorXNum.onchange = (e) => {
+    const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+    e.target.value = v;
+    inspectorX.value = v;
+    applyScenePosX(v);
+    scheduleRender();
+  };
+  inspectorY.oninput = (e) => {
+    const v = Number(e.target.value) || 0;
+    inspectorYNum.value = v;
+    applyScenePosY(v);
+  };
   inspectorY.onchange = () => scheduleRender();
+  inspectorYNum.oninput = (e) => {
+    const v = Number(e.target.value) || 0;
+    inspectorY.value = v;
+    applyScenePosY(v);
+  };
+  inspectorYNum.onchange = (e) => {
+    const v = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+    e.target.value = v;
+    inspectorY.value = v;
+    applyScenePosY(v);
+    scheduleRender();
+  };
   const inspectorScaleNum = document.getElementById('inspectorScaleValue');
   // Slider drag → number input mirrors. Render is deferred until pointer-up
   // (onchange) so the scale slider stays fluid during continuous drags.

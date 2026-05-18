@@ -943,6 +943,17 @@ body {
 .tick-label[data-v="1.75"] { left: 50%;  }
 .tick-label[data-v="2"]    { left: 60%;  }
 .tick-label[data-v="3"]    { left: 100%; }
+/* Position-slider tick rail: data-v is the ScenePosition % (0..100), so the
+   tick's `left` equals its value. Scoped via .pos-tickrail to avoid clashing
+   with the scale rail above (which shares data-v="1" at a different left). */
+.pos-tickrail .tick-label[data-v="0"]   { left: 0%;   }
+.pos-tickrail .tick-label[data-v="20"]  { left: 20%;  }
+.pos-tickrail .tick-label[data-v="30"]  { left: 30%;  }
+.pos-tickrail .tick-label[data-v="32"]  { left: 32%;  }
+.pos-tickrail .tick-label[data-v="50"]  { left: 50%;  }
+.pos-tickrail .tick-label[data-v="70"]  { left: 70%;  }
+.pos-tickrail .tick-label[data-v="80"]  { left: 80%;  }
+.pos-tickrail .tick-label[data-v="100"] { left: 100%; }
 .inspector-zorder {
   display: flex;
   gap: 6px;

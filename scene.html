@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260519a">
+<link rel="stylesheet" href="styles.css?v=20260519d">
 </head>
 <body class="scene-editor">
 
@@ -342,12 +342,54 @@
   <div class="field placement-inspector" id="placementInspector" data-scene-type="adv">
     <div class="section-label">Placement</div>
     <div class="inspector-name" id="inspectorName"></div>
-    <div class="inspector-row">
+    <div class="inspector-row inspector-row-pos">
       <label class="inspector-label">X</label>
-      <input class="inspector-num" type="number" id="inspectorX" step="1">
-      <label class="inspector-label">Y</label>
-      <input class="inspector-num" type="number" id="inspectorY" step="1">
+      <div class="scale-control">
+        <input class="inspector-range" type="range" id="inspectorX"
+               min="0" max="100" step="1" list="inspectorXTicks">
+        <div class="inspector-tickrail pos-tickrail">
+          <span class="tick-label" data-v="0">0</span>
+          <span class="tick-label" data-v="20">20</span>
+          <span class="tick-label" data-v="30">30</span>
+          <span class="tick-label" data-v="50">50</span>
+          <span class="tick-label" data-v="70">70</span>
+          <span class="tick-label" data-v="80">80</span>
+          <span class="tick-label" data-v="100">100</span>
+        </div>
+      </div>
+      <input class="inspector-num inspector-scale-num" type="number"
+             id="inspectorXValue" min="0" max="100" step="1">
     </div>
+    <div class="inspector-row inspector-row-pos">
+      <label class="inspector-label">Y</label>
+      <div class="scale-control">
+        <input class="inspector-range" type="range" id="inspectorY"
+               min="0" max="100" step="1" list="inspectorYTicks">
+        <div class="inspector-tickrail pos-tickrail">
+          <span class="tick-label" data-v="0">0</span>
+          <span class="tick-label" data-v="32">32</span>
+          <span class="tick-label" data-v="50">50</span>
+          <span class="tick-label" data-v="100">100</span>
+        </div>
+      </div>
+      <input class="inspector-num inspector-scale-num" type="number"
+             id="inspectorYValue" min="0" max="100" step="1">
+    </div>
+    <datalist id="inspectorXTicks">
+      <option value="0"></option>
+      <option value="20"></option>
+      <option value="30"></option>
+      <option value="50"></option>
+      <option value="70"></option>
+      <option value="80"></option>
+      <option value="100"></option>
+    </datalist>
+    <datalist id="inspectorYTicks">
+      <option value="0"></option>
+      <option value="32"></option>
+      <option value="50"></option>
+      <option value="100"></option>
+    </datalist>
     <div class="inspector-row inspector-row-scale">
       <label class="inspector-label">Scale</label>
       <div class="scale-control">
@@ -436,6 +478,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260519a"></script>
+<script type="module" src="scene.js?v=20260519d"></script>
 </body>
 </html>
