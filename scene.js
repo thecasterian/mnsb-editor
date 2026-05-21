@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260519d';
+const BUILD_VERSION = '20260519f';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -3252,10 +3252,15 @@ function refreshInspector() {
   nameEl.textContent = snap ? snap.name : placement.slug;
   const sx = Math.round(placementToSceneX(placement, snap));
   const sy = Math.round(placementToSceneY(placement, snap));
-  xEl.value = xNumEl.value = sx;
-  yEl.value = yNumEl.value = sy;
-  scaleEl.value    = placement.scale;
-  scaleNumEl.value = placement.scale.toFixed(2);
+  // Skip the input the user is actively editing: reassigning .value (and,
+  // for scale, reformatting via toFixed) resets the caret and swallows
+  // mid-entry keystrokes. The focused element keeps its own live value;
+  // its onchange clamps/reconciles on commit (Enter / blur).
+  const setVal = (el, v) => { if (el !== document.activeElement) el.value = v; };
+  setVal(xEl, sx);  setVal(xNumEl, sx);
+  setVal(yEl, sy);  setVal(yNumEl, sy);
+  setVal(scaleEl,    placement.scale);
+  setVal(scaleNumEl, placement.scale.toFixed(2));
   const z = placementZPosition(placement.slug);
   toFrontEl.disabled = !z.canFront;
   toBackEl.disabled  = !z.canBack;
@@ -4215,12 +4220,29 @@ function showModal(message) {
     scheduleRender();
   };
   const inspectorScaleNum = document.getElementById('inspectorScaleValue');
+  // Naninovel scales an actor around its pivot: the rendered mesh is built
+  // with the pivot at the transform's local origin (TransitionalSpriteBuilder
+  // .ApplyPivot), and `@char scale` sets transform.localScale, which Unity
+  // applies around that origin. Placements store the sprite's top-left, so a
+  // naive `p.scale = v` would instead grow the sprite from its corner and
+  // drift the pivot. Capture the ScenePosition % before the change and
+  // reproject p.x/p.y after, keeping the pivot (= ScenePos) pinned.
+  function applyScale(v) {
+    withSelected(p => {
+      const snap = snapshots.get(p.slug);
+      const sx = placementToSceneX(p, snap);
+      const sy = placementToSceneY(p, snap);
+      p.scale = v;
+      p.x = sceneXToPlacementX(sx, p, snap);
+      p.y = sceneYToPlacementY(sy, p, snap);
+    }, { render: false });
+  }
   // Slider drag → number input mirrors. Render is deferred until pointer-up
   // (onchange) so the scale slider stays fluid during continuous drags.
   inspectorScale.oninput = (e) => {
     const v = clampScale(Number(e.target.value));
     inspectorScaleNum.value = v.toFixed(2);
-    withSelected(p => { p.scale = v; }, { render: false });
+    applyScale(v);
   };
   inspectorScale.onchange = () => scheduleRender();
   // Number input direct entry. `oninput` updates the slider live as the user
@@ -4230,13 +4252,13 @@ function showModal(message) {
   inspectorScaleNum.oninput = (e) => {
     const v = clampScale(Number(e.target.value));
     inspectorScale.value = v;
-    withSelected(p => { p.scale = v; }, { render: false });
+    applyScale(v);
   };
   inspectorScaleNum.onchange = (e) => {
     const v = clampScale(Number(e.target.value));
     e.target.value = v.toFixed(2);
     inspectorScale.value = v;
-    withSelected(p => { p.scale = v; }, { render: false });
+    applyScale(v);
     scheduleRender();
   };
   document.getElementById('placementRemove').onclick = () => {
