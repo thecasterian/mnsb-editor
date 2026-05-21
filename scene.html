@@ -164,6 +164,21 @@
     </label>
   </div>
 
+  <div class="field" data-scene-type="trial" data-trial-subtype="debate">
+    <div class="section-label">Trial Choice UI</div>
+    <label class="switch">
+      <span>Show trial choice UI</span>
+      <input type="checkbox" id="toggleTrialChoiceUI">
+      <span class="switch-track"><span class="switch-knob"></span></span>
+    </label>
+    <div class="layer-row" id="trialChoicePortraitPresets">
+      <button class="layer-btn active" type="button" data-portrait="Hiro">Hiro</button>
+      <button class="layer-btn"        type="button" data-portrait="Ema">Ema</button>
+    </div>
+    <div class="trial-choice-list" id="trialChoiceButtonList"></div>
+    <button class="trial-choice-add" id="trialChoiceAddBtn" type="button">+ Add choice</button>
+  </div>
+
 
   <div class="field" data-scene-type="trial" data-trial-subtype="debate">
     <div class="section-label">Testimony</div>

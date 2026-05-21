@@ -224,6 +224,22 @@ let trialDebateText = '';
 let trialDebatePosX = 70;
 let trialDebatePosY = 50;
 
+// Trial choice UI overlay (debate subtype). In-game the cross-examination's
+// objection press-points open the Trial choice screen — a witness portrait
+// panel plus N runtime-instantiated ChoiceButton_Trial widgets. In the editor
+// this is driven by a toggle instead of a click.
+//   trialDebateShowChoiceUI — master on/off for the overlay.
+//   trialChoicePortrait     — which TrialChoicePanel@<x> chrome ('Hiro'|'Ema').
+//   trialChoiceButtons      — ordered list of { variant, label }; `variant` is
+//     the suffix of a ChoiceButton_Trial@<variant> prefab ('' = plain, no tag).
+//     Cancel is NOT in this list — it's appended implicitly as the column tail.
+//   trialChoiceCancelLabel  — label text for the always-present Cancel button.
+// See docs/trial_ui_compositing.md for the panel + layout-group geometry.
+let trialDebateShowChoiceUI = false;
+let trialChoicePortrait     = 'Hiro';
+let trialChoiceButtons      = defaultTrialChoiceButtons();   // see definition
+let trialChoiceCancelLabel  = 'Cancel';
+
 // Resolve the "active" author / message based on sceneType, so the shared
 // text-rendering path in renderTextLeaf doesn't need to know about subtypes.
 // (Adv scenes always read the adv-side state; trial scenes always read the
@@ -474,6 +490,11 @@ function saveSceneConfig() {
       trialDebateText,
       trialDebatePosX,
       trialDebatePosY,
+      // Trial choice screen overlay (debate subtype).
+      trialDebateShowChoiceUI,
+      trialChoicePortrait,
+      trialChoiceButtons,
+      trialChoiceCancelLabel,
       // trialLookStandIdx replaces the older trialLookChar (character-id-keyed)
       // — see the state declaration for why. Saved as an integer or null.
       trialLookStandIdx,
@@ -744,6 +765,33 @@ function loadSceneConfig({ render = true } = {}) {
     trialDebatePosY = data.trialDebatePosY;
     syncDebatePosUI('y');
   }
+  // Trial choice screen overlay. The button list is sanitized — unknown
+  // variants fall back to plain, non-string labels to empty — so a stale or
+  // hand-edited record can't break the renderer.
+  if (typeof data.trialDebateShowChoiceUI === 'boolean') {
+    trialDebateShowChoiceUI = data.trialDebateShowChoiceUI;
+    const el = document.getElementById('toggleTrialChoiceUI');
+    if (el) el.checked = trialDebateShowChoiceUI;
+  }
+  if (TRIAL_CHOICE_PORTRAITS.includes(data.trialChoicePortrait)) {
+    trialChoicePortrait = data.trialChoicePortrait;
+    refreshTrialChoicePortraitActive();
+  }
+  if (typeof data.trialChoiceCancelLabel === 'string') {
+    trialChoiceCancelLabel = data.trialChoiceCancelLabel;
+  }
+  if (Array.isArray(data.trialChoiceButtons)) {
+    // Drop any persisted Cancel rows — Cancel is now implicit, not a list
+    // entry — then sanitize unknown variants to plain and clamp to the budget.
+    trialChoiceButtons = data.trialChoiceButtons
+      .filter(b => b && typeof b === 'object' && b.variant !== 'Cancel')
+      .slice(0, TRIAL_CHOICE_MAX_USER)
+      .map(b => ({
+        variant: TRIAL_CHOICE_VARIANTS.some(v => v.key === b.variant) ? b.variant : '',
+        label:   typeof b.label === 'string' ? b.label : '',
+      }));
+  }
+  renderTrialChoiceList();
 
   if (render) scheduleRender();
 }
@@ -2002,9 +2050,9 @@ async function renderTrialScene() {
   // getter, so the prefab loop transparently reads from the trialShow* state
   // when sceneType === 'trial' without any prefab-data changes.
   //
-  // 'debate' subtype: just the testimony text on top of bare 3D. No
-  // DebateUI/ChoiceButton overlays in v1 — those live in a separate
-  // not-yet-implemented prefab pass. See renderDebateText for the
+  // 'debate' subtype: the tilted testimony text on top of bare 3D, the
+  // WitchBookButtonUI + DebateUI HUD overlays, and — when enabled — the
+  // trial choice screen (renderTrialChoiceUI). See renderDebateText for the
   // ScenePosition → canvas mapping.
   if (trialSubtype !== 'adv' && trialSubtype !== 'debate') return mirror;
 
@@ -2076,6 +2124,10 @@ async function renderTrialScene() {
         }
       }
     }
+    // Trial choice screen — drawn last so its full-canvas TrialChoiceBase
+    // backdrop covers the testimony + HUD beneath, matching the in-game
+    // behaviour where an objection press-point swaps to the choice screen.
+    if (trialDebateShowChoiceUI) await renderTrialChoiceUI(dst);
   }
 
   const out = document.createElement('canvas');
@@ -2316,6 +2368,279 @@ async function renderDebateText(dst) {
                     bbox.x + DEBATE_SHADOW_OFFSET, bbox.y + DEBATE_SHADOW_OFFSET,
                     cx, cy, angleRad);
   blitRotatedCanvas(dst, mainCanvas, bbox.x, bbox.y, cx, cy, angleRad);
+}
+
+// --- Trial choice screen overlay (debate subtype) ---------------------------
+//
+// The Trial choice screen is panel chrome (TrialChoicePanel@<portrait>: a
+// full-canvas backdrop + a right-anchored witness portrait) plus a vertical
+// column of ChoiceButton_Trial widgets. See docs/trial_ui_compositing.md.
+
+// Choice-button variants: dropdown key → human label. The key is the suffix of
+// the `ChoiceButton_Trial@<key>` prefab in scene/trial/meta.json; '' is the
+// plain prefab `ChoiceButton_Trial` (balloon only, no tag badge). `Cancel` is
+// intentionally absent — every trial choice column ends with a Cancel button,
+// so it's appended implicitly by the renderer rather than picked by the user.
+const TRIAL_CHOICE_VARIANTS = [
+  { key: '',            label: 'Plain'          },
+  { key: 'Objection',   label: 'Objection'      },
+  { key: 'Perjury',     label: 'Perjury'        },
+  { key: 'Question',    label: 'Question'       },
+  { key: 'Approval',    label: 'Approval'       },
+  { key: 'MagicEma',    label: 'Magic — Ema'    },
+  { key: 'MagicCoco',   label: 'Magic — Coco'   },
+  { key: 'MagicAnAn',   label: 'Magic — AnAn'   },
+  { key: 'MagicLeia',   label: 'Magic — Leia'   },
+  { key: 'MagicMargo',  label: 'Magic — Margo'  },
+  { key: 'MagicNanoka', label: 'Magic — Nanoka' },
+];
+const TRIAL_CHOICE_PORTRAITS = ['Hiro', 'Ema'];
+// Doc's choice budget is N≤4 total (4 tight); the implicit Cancel takes one
+// slot, so the user can add at most 3 of their own.
+const TRIAL_CHOICE_MAX_USER = 3;
+
+function trialChoicePrefabName(variant) {
+  return variant ? `ChoiceButton_Trial@${variant}` : 'ChoiceButton_Trial';
+}
+
+// Tag-badge sprites ship one PNG per locale (`Objection_Ja.png` /
+// `Objection_Ko.png` / `Objection_ZhHans.png`). The meta records the `_Ja`
+// variant; swap the suffix to the active locale. Balloon sprites have no
+// `_Ja` suffix, so they pass through untouched.
+const TRIAL_CHOICE_LOCALE_SUFFIX = { ko: 'Ko', ja: 'Ja', 'zh-Hans': 'ZhHans' };
+function localizedTrialChoiceFile(file) {
+  const suf = TRIAL_CHOICE_LOCALE_SUFFIX[locale] || 'Ja';
+  return file.replace(/_Ja\.png$/, `_${suf}.png`);
+}
+
+// VerticalLayoutGroup constants for TrialChoicePanel/Wrapper/Content, lifted
+// from the `placement` block in docs/trial_ui_compositing.md.
+const TRIAL_CHOICE_SPACING      = 80;     // gap between buttons (px)
+const TRIAL_CHOICE_X_ANCHOR_PIL = 2005;   // shared right edge (x_anchor_basis)
+const TRIAL_CHOICE_Y_PIVOT_PIL  = 787;    // column-centre pivot, PIL Y-down
+const TRIAL_CHOICE_Y_PIVOT_POS  = 0.5;    // 0 = pivot at column top, 1 = bottom
+
+// Compute per-button top-left canvas positions for a vertical column of trial
+// choice buttons, following TrialChoicePanel/Wrapper/Content's
+// VerticalLayoutGroup (MiddleRight alignment, spacing 80, centred on a pivot).
+//
+// The layout is MIXED-HEIGHT and MIXED-WIDTH aware — Cancel is 767×229 while
+// the other buttons are 1099×318. Because alignment is MiddleRight, every
+// button's RIGHT edge sits at TRIAL_CHOICE_X_ANCHOR_PIL, so a narrower button
+// lands further right. A naive N*h / fixed-x formula mis-stacks any column
+// containing a Cancel button.
+//
+// Formula from docs/trial_ui_compositing.md ("Choice button placement");
+// padding_top / padding_bottom are both 0. The N=3 worked example
+// ([318,318,229] tall, [1099,1099,767] wide) yields tops [275, 673, 1071]
+// and lefts [906, 906, 1238].
+//
+// @param sizes  Array of [w, h] per button, in column order (top → bottom).
+// @returns      Array of [leftX, topY] — PIL top-left on the 2560×1440 canvas.
+function computeTrialChoiceLayout(sizes) {
+  const n = sizes.length;
+  if (!n) return [];
+  const totalH = sizes.reduce((sum, [, h]) => sum + h, 0)
+               + (n - 1) * TRIAL_CHOICE_SPACING;
+  const columnTopY = TRIAL_CHOICE_Y_PIVOT_PIL - totalH * TRIAL_CHOICE_Y_PIVOT_POS;
+  const places = [];
+  let y = columnTopY;
+  for (const [w, h] of sizes) {
+    places.push([
+      Math.round(TRIAL_CHOICE_X_ANCHOR_PIL - w),   // MiddleRight: right edge fixed
+      Math.round(y),
+    ]);
+    y += h + TRIAL_CHOICE_SPACING;
+  }
+  return places;
+}
+
+// Render the trial choice screen onto the linear-space canvas buffer `dst`.
+async function renderTrialChoiceUI(dst) {
+  // 1. Panel chrome — backdrop + the chosen witness portrait.
+  const panel = trialMeta?.prefabs?.find(
+    p => p.name === `TrialChoicePanel@${trialChoicePortrait}`);
+  if (panel) {
+    for (const layer of panel.layers || []) {
+      await renderLayer(layer, dst, SCENE_TRIAL_ROOT);
+    }
+  }
+  // 2. Choice buttons — resolve each configured row to its prefab; silently
+  //    drop rows whose variant has no matching prefab. The Cancel button is
+  //    appended unconditionally as the column tail: every trial choice column
+  //    ends with one in-game, and its short 229-px sprite is what lets a
+  //    4-button column fit, so the user never adds it manually.
+  const resolved = [];
+  for (const cfg of trialChoiceButtons) {
+    const prefab = trialMeta?.prefabs?.find(
+      p => p.name === trialChoicePrefabName(cfg.variant));
+    if (prefab) resolved.push({ cfg, prefab });
+  }
+  const cancelPrefab = trialMeta?.prefabs?.find(
+    p => p.name === 'ChoiceButton_Trial@Cancel');
+  if (cancelPrefab) {
+    resolved.push({ cfg: { variant: 'Cancel', label: trialChoiceCancelLabel },
+                    prefab: cancelPrefab });
+  }
+  if (!resolved.length) return;
+  const sizes  = resolved.map(({ prefab }) =>
+    prefab.root_intrinsic_size || prefab.canvas_size);
+  const places = computeTrialChoiceLayout(sizes);
+  if (!places) return;   // placement formula not implemented yet
+  for (let i = 0; i < resolved.length; i++) {
+    const { cfg, prefab } = resolved[i];
+    const [ox, oy] = places[i];
+    // Button layers (balloon, then optional tag badge), offset into the panel.
+    for (const layer of prefab.layers || []) {
+      await renderLayer(
+        { ...layer,
+          file: localizedTrialChoiceFile(layer.file),
+          pos:  [layer.pos[0] + ox, layer.pos[1] + oy] },
+        dst, SCENE_TRIAL_ROOT);
+    }
+    // Label text — the user's per-button string via the plain-text path.
+    for (const txt of prefab.texts || []) {
+      if (txt.go !== 'Label') continue;
+      renderPlainText(
+        { ...txt, pos: [txt.pos[0] + ox, txt.pos[1] + oy] },
+        dst, cfg.label || '');
+    }
+  }
+}
+
+// A representative starting choice set: a magic accusation + a question. The
+// Cancel tail is implicit (see renderTrialChoiceUI), so it isn't seeded here.
+// Returns a fresh array each call so callers can mutate it freely.
+function defaultTrialChoiceButtons() {
+  return [
+    { variant: 'MagicMargo', label: 'Magic accusation' },
+    { variant: 'Question',   label: 'Question'         },
+  ];
+}
+
+// Mark the active portrait button in the Hiro/Ema picker.
+function refreshTrialChoicePortraitActive() {
+  for (const b of document.querySelectorAll('#trialChoicePortraitPresets .layer-btn')) {
+    b.classList.toggle('active', b.dataset.portrait === trialChoicePortrait);
+  }
+}
+
+// (Re)build the editable choice-button list DOM from trialChoiceButtons. Called
+// on init, after add/remove, and after loadSceneConfig swaps the array.
+function renderTrialChoiceList() {
+  const list = document.getElementById('trialChoiceButtonList');
+  if (!list) return;
+  list.replaceChildren();
+  trialChoiceButtons.forEach((cfg, idx) => {
+    const row = document.createElement('div');
+    row.className = 'trial-choice-row';
+
+    const sel = document.createElement('select');
+    sel.className = 'trial-choice-variant';
+    for (const v of TRIAL_CHOICE_VARIANTS) {
+      const opt = document.createElement('option');
+      opt.value       = v.key;
+      opt.textContent = v.label;
+      if (v.key === cfg.variant) opt.selected = true;
+      sel.appendChild(opt);
+    }
+    sel.onchange = () => {
+      trialChoiceButtons[idx].variant = sel.value;
+      scheduleRender();
+      scheduleSceneConfigSave();
+    };
+
+    const input = document.createElement('input');
+    input.type        = 'text';
+    input.className   = 'trial-choice-label';
+    input.placeholder = 'Label';
+    input.value       = cfg.label || '';
+    input.oninput = () => {
+      trialChoiceButtons[idx].label = input.value;
+      scheduleRender();
+      scheduleSceneConfigSave();
+    };
+
+    const rm = document.createElement('button');
+    rm.type        = 'button';
+    rm.className   = 'trial-choice-remove';
+    rm.textContent = '×';
+    rm.title       = 'Remove choice';
+    rm.onclick = () => {
+      trialChoiceButtons.splice(idx, 1);
+      renderTrialChoiceList();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    };
+
+    row.append(sel, input, rm);
+    list.appendChild(row);
+  });
+
+  // Implicit Cancel tail — a locked row the user can't reorder or remove,
+  // shown so the always-present Cancel button is visible in the editor. Only
+  // its label is editable; the variant is fixed and there is no remove button.
+  const cancelRow = document.createElement('div');
+  cancelRow.className = 'trial-choice-row';
+
+  const cancelTag = document.createElement('div');
+  cancelTag.className   = 'trial-choice-variant trial-choice-fixed';
+  cancelTag.textContent = 'Cancel';
+
+  const cancelInput = document.createElement('input');
+  cancelInput.type        = 'text';
+  cancelInput.className   = 'trial-choice-label';
+  cancelInput.placeholder = 'Cancel label';
+  cancelInput.value       = trialChoiceCancelLabel;
+  cancelInput.oninput = () => {
+    trialChoiceCancelLabel = cancelInput.value;
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+
+  // Empty spacer keeps the 3-column grid aligned with the rows above.
+  const spacer = document.createElement('span');
+
+  cancelRow.append(cancelTag, cancelInput, spacer);
+  list.appendChild(cancelRow);
+
+  const addBtn = document.getElementById('trialChoiceAddBtn');
+  if (addBtn) addBtn.disabled = trialChoiceButtons.length >= TRIAL_CHOICE_MAX_USER;
+}
+
+// Wire the trial choice UI controls: the show toggle, the Hiro/Ema portrait
+// picker, and the add-choice button, then build the initial list.
+function initTrialChoiceUI() {
+  const toggle = document.getElementById('toggleTrialChoiceUI');
+  toggle.checked  = trialDebateShowChoiceUI;
+  toggle.onchange = (e) => {
+    trialDebateShowChoiceUI = e.target.checked;
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+
+  for (const b of document.querySelectorAll('#trialChoicePortraitPresets .layer-btn')) {
+    b.addEventListener('click', () => {
+      const p = b.dataset.portrait;
+      if (!TRIAL_CHOICE_PORTRAITS.includes(p) || trialChoicePortrait === p) return;
+      trialChoicePortrait = p;
+      refreshTrialChoicePortraitActive();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    });
+  }
+
+  const addBtn = document.getElementById('trialChoiceAddBtn');
+  addBtn.onclick = () => {
+    if (trialChoiceButtons.length >= TRIAL_CHOICE_MAX_USER) return;
+    trialChoiceButtons.push({ variant: '', label: '' });
+    renderTrialChoiceList();
+    scheduleRender();
+    scheduleSceneConfigSave();
+  };
+
+  refreshTrialChoicePortraitActive();
+  renderTrialChoiceList();
 }
 
 // Composite `srcCanvas` onto `dst` (linear-space full-canvas buffer) after
@@ -3747,6 +4072,9 @@ function showModal(message) {
     };
   }
 
+  // Trial choice screen overlay: show toggle + portrait picker + button list.
+  initTrialChoiceUI();
+
   // Direct sliders + number inputs. Each pair shares the same underlying
   // state var (trialYawMult / trialDistance / trialHeight); updating one
   // input mirrors to the other so the displayed values never diverge.
@@ -4024,6 +4352,15 @@ function showModal(message) {
       document.getElementById('trialDebateInput').value = '';
       syncDebatePosUI('x');
       syncDebatePosUI('y');
+      // Trial choice screen back to defaults: overlay off, Hiro portrait,
+      // the seeded sample set, and the default Cancel label.
+      trialDebateShowChoiceUI = false;
+      trialChoicePortrait     = 'Hiro';
+      trialChoiceButtons      = defaultTrialChoiceButtons();
+      trialChoiceCancelLabel  = 'Cancel';
+      document.getElementById('toggleTrialChoiceUI').checked = false;
+      refreshTrialChoicePortraitActive();
+      renderTrialChoiceList();
       // All trial groups default expanded — clear any user-toggled .collapsed.
       for (const g of document.querySelectorAll('#groups .group')) {
         g.classList.remove('collapsed');

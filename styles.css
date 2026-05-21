@@ -671,6 +671,63 @@ body {
 .tag-wrap-btn:hover { background: #333338; }
 .tag-wrap-btn b { font-weight: 800; }
 
+/* Editable trial-choice button list. Each row pairs a variant <select> with a
+   label <input> and a remove button; the add button stacks below. */
+.trial-choice-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.trial-choice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) 28px;
+  align-items: center;
+  gap: 6px;
+}
+.trial-choice-variant,
+.trial-choice-label {
+  height: 32px;
+  padding: 0 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.trial-choice-label::placeholder { color: var(--text-muted); }
+.trial-choice-variant:focus,
+.trial-choice-label:focus { outline: none; border-color: var(--active); }
+/* Locked variant cell for the always-present Cancel row — looks like the
+   select but is a static, non-interactive label. */
+.trial-choice-fixed {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: default;
+}
+.trial-choice-remove {
+  height: 32px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.trial-choice-remove:hover { color: var(--accent); border-color: var(--accent); }
+.trial-choice-add {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.trial-choice-add:hover { border-color: var(--active); color: var(--active); }
+.trial-choice-add:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* Pre-render placeholder shown inside the preview before the first composite
    completes. Plain text — replaced by the canvas via replaceChildren. */
 .loading-msg {
