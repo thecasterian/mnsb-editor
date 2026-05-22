@@ -233,12 +233,13 @@ let trialDebatePosY = 50;
 //   trialChoiceButtons      — ordered list of { variant, label }; `variant` is
 //     the suffix of a ChoiceButton_Trial@<variant> prefab ('' = plain, no tag).
 //     Cancel is NOT in this list — it's appended implicitly as the column tail.
-//   trialChoiceCancelLabel  — label text for the always-present Cancel button.
+// The Cancel button's label is a fixed per-locale string, not user state: the
+// trial scripts always add it via `@addChoice Common_Return` (a shared key),
+// so it never varies per scene — see TRIAL_CHOICE_CANCEL_LABEL.
 // See docs/trial_ui_compositing.md for the panel + layout-group geometry.
 let trialDebateShowChoiceUI = false;
-let trialChoicePortrait     = 'Hiro';
+let trialChoicePortrait     = 'Ema';
 let trialChoiceButtons      = defaultTrialChoiceButtons();   // see definition
-let trialChoiceCancelLabel  = 'Cancel';
 
 // Resolve the "active" author / message based on sceneType, so the shared
 // text-rendering path in renderTextLeaf doesn't need to know about subtypes.
@@ -490,11 +491,11 @@ function saveSceneConfig() {
       trialDebateText,
       trialDebatePosX,
       trialDebatePosY,
-      // Trial choice screen overlay (debate subtype).
+      // Trial choice screen overlay (debate subtype). The Cancel label is a
+      // fixed per-locale constant, not state, so it isn't persisted.
       trialDebateShowChoiceUI,
       trialChoicePortrait,
       trialChoiceButtons,
-      trialChoiceCancelLabel,
       // trialLookStandIdx replaces the older trialLookChar (character-id-keyed)
       // — see the state declaration for why. Saved as an integer or null.
       trialLookStandIdx,
@@ -777,9 +778,6 @@ function loadSceneConfig({ render = true } = {}) {
     trialChoicePortrait = data.trialChoicePortrait;
     refreshTrialChoicePortraitActive();
   }
-  if (typeof data.trialChoiceCancelLabel === 'string') {
-    trialChoiceCancelLabel = data.trialChoiceCancelLabel;
-  }
   if (Array.isArray(data.trialChoiceButtons)) {
     // Drop any persisted Cancel rows — Cancel is now implicit, not a list
     // entry — then sanitize unknown variants to plain and clamp to the budget.
@@ -899,6 +897,33 @@ for (let i = 0; i < 256; i++) A_LUT[i] = i / 255;
 function linearToSrgb(c) {
   if (c <= 0.0031308) return c * 12.92;
   return 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+}
+
+function srgbToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+// Float LUTs for the linear↔sRGB round-trip. compositeLinear works in linear
+// space, but the trial-choice scrim must blend in sRGB (see
+// renderTrialChoiceScrim) — and that runs per pixel over the whole canvas, so
+// the pow()-based scalars above are too slow. 1024 steps: the quantisation
+// error stays well under one 8-bit level.
+const SRGB_LUT_N = 1024;
+const LIN_TO_SRGB_LUT = new Float32Array(SRGB_LUT_N + 1);
+const SRGB_TO_LIN_LUT = new Float32Array(SRGB_LUT_N + 1);
+for (let i = 0; i <= SRGB_LUT_N; i++) {
+  LIN_TO_SRGB_LUT[i] = linearToSrgb(i / SRGB_LUT_N);
+  SRGB_TO_LIN_LUT[i] = srgbToLinear(i / SRGB_LUT_N);
+}
+function linToSrgbFast(c) {
+  if (c <= 0) return 0;
+  if (c >= 1) return 1;
+  return LIN_TO_SRGB_LUT[(c * SRGB_LUT_N) | 0];
+}
+function srgbToLinFast(c) {
+  if (c <= 0) return 0;
+  if (c >= 1) return 1;
+  return SRGB_TO_LIN_LUT[(c * SRGB_LUT_N) | 0];
 }
 
 function imageDataToLinear(id) {
@@ -2050,10 +2075,10 @@ async function renderTrialScene() {
   // getter, so the prefab loop transparently reads from the trialShow* state
   // when sceneType === 'trial' without any prefab-data changes.
   //
-  // 'debate' subtype: the tilted testimony text on top of bare 3D, the
-  // WitchBookButtonUI + DebateUI HUD overlays, and — when enabled — the
-  // trial choice screen (renderTrialChoiceUI). See renderDebateText for the
-  // ScenePosition → canvas mapping.
+  // 'debate' subtype: the tilted testimony text on bare 3D plus the
+  // WitchBookButtonUI + DebateUI HUD overlays — and, when enabled, the trial
+  // choice screen layered in between (testimony dimmed beneath it, HUD on
+  // top). See renderDebateText for the ScenePosition → canvas mapping.
   if (trialSubtype !== 'adv' && trialSubtype !== 'debate') return mirror;
 
   await ensureFontsLoaded();
@@ -2078,6 +2103,11 @@ async function renderTrialScene() {
     // ClockBase and FastButtonBase share the "Wrapper" group, so a
     // prefix-based gate can't separate them.
     await renderDebateText(dst);
+    // Trial choice screen: overlays the debate view (testimony stays visible,
+    // dimmed by the choice panel's Underlay scrim) rather than replacing it.
+    // Drawn before the WitchBook + DebateUI HUD below so those stay on top —
+    // in-game the witch-book button and the clock are not dimmed.
+    if (trialDebateShowChoiceUI) await renderTrialChoiceUI(dst);
     for (const prefab of sceneMeta.prefabs) {
       if (prefab.name !== 'WitchBookButtonUI') continue;
       if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
@@ -2100,12 +2130,17 @@ async function renderTrialScene() {
       layers.forEach((l, i) => items.push([l.order ?? i,                'layer', l]));
       texts .forEach((t, i) => items.push([t.order ?? layers.length + i, 'text',  t]));
       items.sort((a, b) => a[0] - b[0]);
+      // The fast-skip button is hidden while the trial choice screen is up
+      // (the clock and witch-book button stay) — matching the in-game choice
+      // state. ClockBase / FastButton* share a group, so this is gated here
+      // per-layer rather than via items_toggle.
+      const showFast = trialDebateShowFastButton && !trialDebateShowChoiceUI;
       for (const [, kind, item] of items) {
         if (kind === 'layer') {
-          if (item.name === 'ClockBase'      && !trialDebateShowClock)      continue;
-          if (item.name === 'FastButtonBase' && !trialDebateShowFastButton) continue;
+          if (item.name === 'ClockBase'      && !trialDebateShowClock) continue;
+          if (item.name === 'FastButtonBase' && !showFast)             continue;
           if (item.name === 'FastIcon') {
-            if (!trialDebateShowFastButton) continue;
+            if (!showFast) continue;
             if (!trialDebateFastIconActive) {
               // Spread to a shallow copy so the meta record's `color` field
               // stays the activated yellow on the next render.
@@ -2124,10 +2159,6 @@ async function renderTrialScene() {
         }
       }
     }
-    // Trial choice screen — drawn last so its full-canvas TrialChoiceBase
-    // backdrop covers the testimony + HUD beneath, matching the in-game
-    // behaviour where an objection press-point swaps to the choice screen.
-    if (trialDebateShowChoiceUI) await renderTrialChoiceUI(dst);
   }
 
   const out = document.createElement('canvas');
@@ -2413,6 +2444,72 @@ function localizedTrialChoiceFile(file) {
   return file.replace(/_Ja\.png$/, `_${suf}.png`);
 }
 
+// Fixed Cancel-button label per locale. Every trial Cancel is added via
+// `@addChoice Common_Return` (a shared localizable-text key — confirmed across
+// all trial scripts), so the label is a constant, not per-scene content. The
+// `Common_Return` glyphs aren't in the local bundles; these are the standard
+// "go back" strings for each shipped locale.
+const TRIAL_CHOICE_CANCEL_LABEL = { ko: '돌아가기', ja: '戻る', 'zh-Hans': '返回' };
+function trialChoiceCancelLabel() {
+  return TRIAL_CHOICE_CANCEL_LABEL[locale] || TRIAL_CHOICE_CANCEL_LABEL.ja;
+}
+
+// Choice-button label weight. The prefab's Label leaf declares font_weight 400,
+// but the in-game render is visibly heavier; bump it so the editor matches.
+// fontString() adds a further +100, so this rasterizes at 700 (Bold).
+const TRIAL_CHOICE_LABEL_WEIGHT = 600;
+
+// TrialChoicePanel/Underlay — a plain black Image (no sprite) at ~50% alpha,
+// stretched full-canvas below the TrialChoiceBase grunge sprite. It dims the
+// debate view the choice screen overlays. Value is the Image m_Color alpha.
+const TRIAL_CHOICE_UNDERLAY_ALPHA = 0.502;
+
+// Merged trial-choice scrim, cached per sprite path. The flat black Underlay
+// and the TrialChoiceBase grunge/vignette sprite are flattened into one
+// straight-alpha RGBA layer — RGB stored in sRGB (gamma) space — so a render
+// only needs one source-over pass. See renderTrialChoiceScrim.
+const _trialScrimCache = new Map();
+async function getTrialChoiceScrim(file) {
+  let scrim = _trialScrimCache.get(file);
+  if (scrim) return scrim;
+  const sprite = await spriteAtSize(`${SCENE_TRIAL_ROOT}/${file}`, CANVAS_W, CANVAS_H);
+  const ua = TRIAL_CHOICE_UNDERLAY_ALPHA;
+  scrim = new Float32Array(sprite.length);   // RGB in sRGB, A = merged alpha
+  for (let i = 0; i < sprite.length; i += 4) {
+    const ba = sprite[i + 3];                // TrialChoiceBase coverage
+    const a  = ba + ua * (1 - ba);           // Base composited over Underlay
+    scrim[i + 3] = a;
+    // Underlay is pure black, so the merged straight RGB is base_rgb*ba / a.
+    const k = a > 0 ? ba / a : 0;
+    scrim[i]     = linearToSrgb(sprite[i])     * k;
+    scrim[i + 1] = linearToSrgb(sprite[i + 1]) * k;
+    scrim[i + 2] = linearToSrgb(sprite[i + 2]) * k;
+  }
+  _trialScrimCache.set(file, scrim);
+  return scrim;
+}
+
+// Composite the trial-choice scrim onto the linear buffer `dst`.
+//
+// Unlike everything else the editor draws, the scrim blends in sRGB (gamma)
+// space, not linear: it's a large *dark, semi-transparent* layer, and a
+// linear-space blend lets the bright background bleed through — the vignette
+// flattens and the canvas edges come out too light. Unity composites this UI
+// in gamma space; matching it restores the deep edge darkening. Opaque sprites
+// (portrait, balloons) are unaffected by the choice of space, so they keep the
+// normal linear renderLayer path.
+async function renderTrialChoiceScrim(dst, baseLayer) {
+  const scrim = await getTrialChoiceScrim(baseLayer.file);
+  for (let i = 0; i < dst.length; i += 4) {
+    const sa = scrim[i + 3];
+    const inv = 1 - sa;
+    // source-over in sRGB: out = scrim_rgb*sa + bg_srgb*(1-sa)
+    dst[i]     = srgbToLinFast(scrim[i]     * sa + linToSrgbFast(dst[i])     * inv);
+    dst[i + 1] = srgbToLinFast(scrim[i + 1] * sa + linToSrgbFast(dst[i + 1]) * inv);
+    dst[i + 2] = srgbToLinFast(scrim[i + 2] * sa + linToSrgbFast(dst[i + 2]) * inv);
+  }
+}
+
 // VerticalLayoutGroup constants for TrialChoicePanel/Wrapper/Content, lifted
 // from the `placement` block in docs/trial_ui_compositing.md.
 const TRIAL_CHOICE_SPACING      = 80;     // gap between buttons (px)
@@ -2457,15 +2554,17 @@ function computeTrialChoiceLayout(sizes) {
 
 // Render the trial choice screen onto the linear-space canvas buffer `dst`.
 async function renderTrialChoiceUI(dst) {
-  // 1. Panel chrome — backdrop + the chosen witness portrait.
   const panel = trialMeta?.prefabs?.find(
     p => p.name === `TrialChoicePanel@${trialChoicePortrait}`);
-  if (panel) {
-    for (const layer of panel.layers || []) {
-      await renderLayer(layer, dst, SCENE_TRIAL_ROOT);
-    }
-  }
-  // 2. Choice buttons — resolve each configured row to its prefab; silently
+  // 1. Scrim — the flat black Underlay + the TrialChoiceBase grunge/vignette
+  //    sprite, merged and composited in gamma space (see renderTrialChoiceScrim).
+  const baseLayer = panel?.layers?.find(l => l.name === 'TrialChoiceBase');
+  if (baseLayer) await renderTrialChoiceScrim(dst, baseLayer);
+  // 2. Witness portrait — an opaque sprite, so the normal linear renderLayer
+  //    path is fine; drawn on top of the scrim.
+  const portrait = panel?.layers?.find(l => l.name.startsWith('ChoicePortrait'));
+  if (portrait) await renderLayer(portrait, dst, SCENE_TRIAL_ROOT);
+  // 3. Choice buttons — resolve each configured row to its prefab; silently
   //    drop rows whose variant has no matching prefab. The Cancel button is
   //    appended unconditionally as the column tail: every trial choice column
   //    ends with one in-game, and its short 229-px sprite is what lets a
@@ -2479,7 +2578,7 @@ async function renderTrialChoiceUI(dst) {
   const cancelPrefab = trialMeta?.prefabs?.find(
     p => p.name === 'ChoiceButton_Trial@Cancel');
   if (cancelPrefab) {
-    resolved.push({ cfg: { variant: 'Cancel', label: trialChoiceCancelLabel },
+    resolved.push({ cfg: { variant: 'Cancel', label: trialChoiceCancelLabel() },
                     prefab: cancelPrefab });
   }
   if (!resolved.length) return;
@@ -2498,11 +2597,14 @@ async function renderTrialChoiceUI(dst) {
           pos:  [layer.pos[0] + ox, layer.pos[1] + oy] },
         dst, SCENE_TRIAL_ROOT);
     }
-    // Label text — the user's per-button string via the plain-text path.
+    // Label text — the user's per-button string via the plain-text path, at
+    // the heavier weight (TRIAL_CHOICE_LABEL_WEIGHT) the in-game render uses.
     for (const txt of prefab.texts || []) {
       if (txt.go !== 'Label') continue;
       renderPlainText(
-        { ...txt, pos: [txt.pos[0] + ox, txt.pos[1] + oy] },
+        { ...txt,
+          font_weight: TRIAL_CHOICE_LABEL_WEIGHT,
+          pos: [txt.pos[0] + ox, txt.pos[1] + oy] },
         dst, cfg.label || '');
     }
   }
@@ -2566,6 +2668,8 @@ function renderTrialChoiceList() {
     rm.className   = 'trial-choice-remove';
     rm.textContent = '×';
     rm.title       = 'Remove choice';
+    // Keep at least one user choice — the column can't be Cancel-only.
+    rm.disabled    = trialChoiceButtons.length <= 1;
     rm.onclick = () => {
       trialChoiceButtons.splice(idx, 1);
       renderTrialChoiceList();
@@ -2577,33 +2681,9 @@ function renderTrialChoiceList() {
     list.appendChild(row);
   });
 
-  // Implicit Cancel tail — a locked row the user can't reorder or remove,
-  // shown so the always-present Cancel button is visible in the editor. Only
-  // its label is editable; the variant is fixed and there is no remove button.
-  const cancelRow = document.createElement('div');
-  cancelRow.className = 'trial-choice-row';
-
-  const cancelTag = document.createElement('div');
-  cancelTag.className   = 'trial-choice-variant trial-choice-fixed';
-  cancelTag.textContent = 'Cancel';
-
-  const cancelInput = document.createElement('input');
-  cancelInput.type        = 'text';
-  cancelInput.className   = 'trial-choice-label';
-  cancelInput.placeholder = 'Cancel label';
-  cancelInput.value       = trialChoiceCancelLabel;
-  cancelInput.oninput = () => {
-    trialChoiceCancelLabel = cancelInput.value;
-    scheduleRender();
-    scheduleSceneConfigSave();
-  };
-
-  // Empty spacer keeps the 3-column grid aligned with the rows above.
-  const spacer = document.createElement('span');
-
-  cancelRow.append(cancelTag, cancelInput, spacer);
-  list.appendChild(cancelRow);
-
+  // The Cancel button is always appended as the column tail by
+  // renderTrialChoiceUI, with a fixed per-locale label — it isn't user-
+  // tweakable, so it gets no row here.
   const addBtn = document.getElementById('trialChoiceAddBtn');
   if (addBtn) addBtn.disabled = trialChoiceButtons.length >= TRIAL_CHOICE_MAX_USER;
 }
@@ -4353,11 +4433,11 @@ function showModal(message) {
       syncDebatePosUI('x');
       syncDebatePosUI('y');
       // Trial choice screen back to defaults: overlay off, Hiro portrait,
-      // the seeded sample set, and the default Cancel label.
+      // the seeded sample set. (The Cancel label is a fixed per-locale
+      // constant — nothing to reset.)
       trialDebateShowChoiceUI = false;
-      trialChoicePortrait     = 'Hiro';
+      trialChoicePortrait     = 'Ema';
       trialChoiceButtons      = defaultTrialChoiceButtons();
-      trialChoiceCancelLabel  = 'Cancel';
       document.getElementById('toggleTrialChoiceUI').checked = false;
       refreshTrialChoicePortraitActive();
       renderTrialChoiceList();

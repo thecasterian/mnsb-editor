@@ -671,6 +671,9 @@ body {
 .tag-wrap-btn:hover { background: #333338; }
 .tag-wrap-btn b { font-weight: 800; }
 
+/* Hiro/Ema portrait picker — spaced off the toggle switch above it. */
+#trialChoicePortraitPresets { margin-top: 8px; }
+
 /* Editable trial-choice button list. Each row pairs a variant <select> with a
    label <input> and a remove button; the add button stacks below. */
 .trial-choice-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
@@ -694,14 +697,6 @@ body {
 .trial-choice-label::placeholder { color: var(--text-muted); }
 .trial-choice-variant:focus,
 .trial-choice-label:focus { outline: none; border-color: var(--active); }
-/* Locked variant cell for the always-present Cancel row — looks like the
-   select but is a static, non-interactive label. */
-.trial-choice-fixed {
-  display: flex;
-  align-items: center;
-  color: var(--text-muted);
-  cursor: default;
-}
 .trial-choice-remove {
   height: 32px;
   background: var(--bg-card);
@@ -712,7 +707,8 @@ body {
   line-height: 1;
   cursor: pointer;
 }
-.trial-choice-remove:hover { color: var(--accent); border-color: var(--accent); }
+.trial-choice-remove:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.trial-choice-remove:disabled { opacity: 0.35; cursor: not-allowed; }
 .trial-choice-add {
   margin-top: 8px;
   width: 100%;
