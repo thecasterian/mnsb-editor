@@ -4352,9 +4352,45 @@ function showModal(message) {
       };
     }
   }
+  // Character-insert row above the wrap row. These differ from the wrap
+  // buttons in kind: nothing surrounds the selection, the button's payload
+  // just lands at the caret and replaces any selection — exactly what
+  // typing the character would do.
+  //
+  // Two payloads are doubled because the shipped Japanese scripts
+  // effectively never use them singly: U+2026 appears 37,360 times (as
+  // `……`) and U+2015 3,238 times (as `――`) across the 21 story bundles.
+  // U+3010/U+3011 stay single — they're the evidence-highlight brackets
+  // (`【…】`, 2,075 pairs) and the two halves land at different offsets.
+  // Each button's label is its literal payload, so the doubling is visible
+  // rather than surprising.
+  function bindCharInserts(textarea, applyValue) {
+    const row = textarea.parentElement.querySelector('.char-insert-row');
+    if (!row) return;
+    for (const btn of row.querySelectorAll('.char-insert-btn')) {
+      const payload = btn.dataset.insert || '';
+      btn.onclick = () => {
+        const v = textarea.value;
+        const s = textarea.selectionStart ?? v.length;
+        const e = textarea.selectionEnd   ?? v.length;
+        const next = v.slice(0, s) + payload + v.slice(e);
+        textarea.value = next;
+        applyValue(next);
+        const caret = s + payload.length;
+        textarea.focus();
+        textarea.setSelectionRange(caret, caret);
+        scheduleRender();
+        scheduleSceneConfigSave();
+      };
+    }
+  }
+
   bindColorSwatches(messageInput,      (v) => { messageText      = v; });
   bindColorSwatches(trialMessageInput, (v) => { trialMessageText = v; });
   bindColorSwatches(trialDebateInput,  (v) => { trialDebateText  = v; });
+  bindCharInserts(messageInput,      (v) => { messageText      = v; });
+  bindCharInserts(trialMessageInput, (v) => { trialMessageText = v; });
+  bindCharInserts(trialDebateInput,  (v) => { trialDebateText  = v; });
 
   for (const b of document.querySelectorAll('#localeSelector .preset-btn')) {
     b.addEventListener('click', () => {
