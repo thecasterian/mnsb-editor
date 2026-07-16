@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and app.js in index.html.
-const BUILD_VERSION = '20260514a';
+const BUILD_VERSION = '20260717a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the scene editor. Dynamic
@@ -58,6 +58,146 @@ let dicedMeta = null;      // diced: { type, name, canvas_size, poses }
 let activePose = null;     // diced: currently selected pose name
 let spoilerMode = false;   // false hides SPOILER_CHARACTERS from the dropdown
 
+// --- State persistence ---
+//
+// Everything the editor remembers across reloads lives under one localStorage
+// key: the global toggles plus one record per character. Per-character (rather
+// than last-character-only) means switching away to check another portrait and
+// coming back leaves your composition intact.
+//
+// One key, unlike scene.js's placements/config split — that split exists to
+// stop a drag's ~200ms write cadence from echoing into another tab and
+// clobbering in-progress text entry. Here the only high-frequency mutation is
+// the advanced-offset sliders, and they belong to the same per-character
+// record as everything else, so there's nothing to separate.
+
+const EDITOR_STATE_KEY     = 'manosaba.editor.state';
+const EDITOR_STATE_VERSION = 1;
+
+// charName → { head, enabled, offsets } | { pose }. Read from localStorage once
+// at init, then kept in sync as the live state changes.
+let savedChars = {};
+
+// Snapshot the live state of the current character.
+function captureCharState() {
+  if (charType === 'diced') return { pose: activePose };
+  return {
+    head: activeHead,
+    // Enabled names, not the full {name: bool} map: compact, and stale entries
+    // cost nothing on load because activeState is rebuilt from the live
+    // layersInfo anyway (see applySavedEnabled).
+    enabled: Object.keys(activeState).filter(n => activeState[n]),
+    offsets: groupOffsets,
+  };
+}
+
+function saveEditorState() {
+  try {
+    let onDisk = {};
+    try {
+      const raw = localStorage.getItem(EDITOR_STATE_KEY);
+      const prev = raw ? JSON.parse(raw) : null;
+      if (prev && prev.version === EDITOR_STATE_VERSION && prev.chars) onDisk = prev.chars;
+    } catch { /* corrupt payload — start the map fresh rather than refuse to save */ }
+
+    // Read-modify-write the chars map: disk wins for every character except the
+    // one this tab is editing. Two tabs each hold a stale view of the other's
+    // records, so a blind whole-blob write would erase the other tab's work.
+    savedChars = { ...savedChars, ...onDisk };
+    if (currentChar) savedChars[currentChar] = captureCharState();
+
+    localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
+      version:  EDITOR_STATE_VERSION,
+      lastChar: currentChar,
+      spoilerMode,
+      advancedMode,
+      chars:    savedChars,
+    }));
+  } catch (e) {
+    console.error('Failed to save editor state:', e);
+  }
+}
+
+// Coalesces high-frequency mutations (slider drags fire on every `input`) into
+// one write per ~200ms idle, matching scene.js's debounce. Tab close between
+// writes loses at most the last 200ms of slider motion — acceptable.
+let _stateSaveTimer = null;
+function scheduleEditorStateSave() {
+  if (_stateSaveTimer) clearTimeout(_stateSaveTimer);
+  _stateSaveTimer = setTimeout(() => { _stateSaveTimer = null; saveEditorState(); }, 200);
+}
+
+// Restores the global toggles + the saved-character map. Returns the character
+// to open, or null to fall back to DEFAULT_CHARACTER. Doesn't touch the DOM —
+// init applies the toggles itself so the spoiler confirm modal stays silent.
+function loadEditorState() {
+  let data;
+  try {
+    const raw = localStorage.getItem(EDITOR_STATE_KEY);
+    if (!raw) return null;
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse saved editor state:', e);
+    return null;
+  }
+  if (!data || data.version !== EDITOR_STATE_VERSION) return null;
+
+  if (typeof data.spoilerMode  === 'boolean') spoilerMode  = data.spoilerMode;
+  if (typeof data.advancedMode === 'boolean') advancedMode = data.advancedMode;
+  if (data.chars && typeof data.chars === 'object') savedChars = data.chars;
+
+  // A spoiler character is only restorable with spoilers on — otherwise it
+  // isn't in the dropdown and the <select> would show a value it can't offer.
+  const c = data.lastChar;
+  if (!CHARACTERS.includes(c)) return null;
+  if (!spoilerMode && SPOILER_CHARACTERS.has(c)) return null;
+  return c;
+}
+
+// Rebuild activeState from a saved `enabled` list. layers.json is regenerated
+// by extract_bundle.py, so a saved list can name layers a re-extraction renamed
+// away; iterating the live layersInfo rather than the saved array drops those
+// unknown names for free. enforceDeps() runs after this and self-heals the
+// `requires` chains, so this only has to decide the starting truth.
+//
+// Always-on bases are forced back on when the saved list lost one — they're
+// hidden from the panel and nothing declares `requires: "Body"`, so
+// enforceDeps() couldn't rescue a composite missing its body. But the force-on
+// is intersected with defaultEnabled rather than applied to every
+// isAlwaysOnBase() match: that predicate matches any `HeadBase*`, and a bundle
+// can ship a HeadBase the character never uses (Hanna has HeadBase02 with no
+// Head02-side facials). Forcing every match on renders two heads at once.
+// Every default.json enables exactly the bases its character needs, so
+// defaultEnabled is the right authority — and for multi-head characters it's
+// already resolved to the restored head's block.
+function applySavedEnabled(saved) {
+  const wanted = new Set(saved);
+  for (const l of layersInfo) {
+    activeState[l.name] =
+      wanted.has(l.name) || (isAlwaysOnBase(l) && defaultEnabled.includes(l.name));
+  }
+}
+
+// Clamp a saved offsets map to the live axis config. Unknown group paths are
+// harmless (getLayerOffset simply never looks them up), but a non-numeric or
+// out-of-range value would reach the renderer's transform math, so every axis
+// is validated against AXIS_CONFIG rather than trusted.
+function sanitizeOffsets(saved) {
+  const out = {};
+  if (!saved || typeof saved !== 'object') return out;
+  for (const [groupPath, off] of Object.entries(saved)) {
+    if (!off || typeof off !== 'object') continue;
+    const clean = {};
+    for (const [axis, cfg] of Object.entries(AXIS_CONFIG)) {
+      const v = off[axis];
+      if (typeof v !== 'number' || Number.isNaN(v)) continue;
+      clean[axis] = Math.max(cfg.min, Math.min(cfg.max, v));
+    }
+    if (Object.keys(clean).length) out[groupPath] = clean;
+  }
+  return out;
+}
+
 function isFacialGroup(groupPath) {
   if (groupPath.startsWith('__')) return false; // synthetic mask buckets
   const leaf = groupPath.split('/').pop();
@@ -110,6 +250,10 @@ async function loadCharacter(name) {
   buildHeadSelector();
   buildUI();
   renderPreview();
+  // Records lastChar. On the init restore this rewrites the state we just
+  // read back, which is harmless — and self-healing, since it persists the
+  // cleaned-up version after stale layers were dropped.
+  scheduleEditorStateSave();
 }
 
 async function loadLayeredCharacter(name) {
@@ -143,6 +287,7 @@ async function loadLayeredCharacter(name) {
     l.group.includes(head) &&
     facialKeywords.some(k => l.group.includes(k) || l.name.includes(k)));
   headBases = [...headSet].filter(hasFacialFeatures).sort();
+  const saved = savedChars[name];
   if (headBases.length > 1) {
     // Per-head shape: pick first head that has a block; else legacy fallback via HeadBase entry
     const perHead = headBases.find(h => defaultJsonRaw[h]);
@@ -152,12 +297,19 @@ async function loadLayeredCharacter(name) {
       const legacy = (defaultJsonRaw.enabled || []).find(n => n.startsWith('HeadBase'));
       activeHead = legacy ? 'Head' + legacy.replace('HeadBase', '') : headBases[0];
     }
+    // A saved head overrides the default, but only if the bundle still has it.
+    // This must land before computeDefaultEnabled() — that reads
+    // defaultJsonRaw[activeHead], so restoring later would resolve defaults
+    // against the wrong head.
+    if (saved && headBases.includes(saved.head)) activeHead = saved.head;
   } else {
     activeHead = null;
   }
   defaultEnabled = computeDefaultEnabled();
 
   resetToDefault();
+  if (saved && Array.isArray(saved.enabled)) applySavedEnabled(saved.enabled);
+  groupOffsets = sanitizeOffsets(saved?.offsets);
   enforceDeps();
 }
 
@@ -173,7 +325,12 @@ async function loadDicedCharacter(name) {
   activeState = {};
 
   dicedMeta = await fetch(assetUrl(`characters/${name}/meta.json`)).then(r => r.json());
-  activePose = dicedMeta.poses[0];
+  // A saved pose only survives if the atlas still lists it — poses are named
+  // from the bundle's sprite names, which a re-extraction can change.
+  const saved = savedChars[name];
+  activePose = (saved && dicedMeta.poses.includes(saved.pose))
+    ? saved.pose
+    : dicedMeta.poses[0];
 }
 
 // --- Render descriptor helpers ---
@@ -406,6 +563,7 @@ function buildHeadSelector() {
       }
       buildUI();
       renderPreview();
+      scheduleEditorStateSave();
     };
     container.appendChild(btn);
   }
@@ -488,6 +646,7 @@ function buildUIDiced() {
       }
       statusSpan.textContent = ` — ${pose}`;
       renderPreview();
+      scheduleEditorStateSave();
     };
     opts.appendChild(btn);
   }
@@ -536,6 +695,7 @@ function buildPresets() {
       enforceDeps();
       updateUI();
       renderPreview();
+      scheduleEditorStateSave();
     };
     container.appendChild(btn);
   }
@@ -651,6 +811,7 @@ function buildGroups() {
       enforceDeps();
       updateUI();
       renderPreview();
+      scheduleEditorStateSave();
     };
     opts.appendChild(noneBtn);
 
@@ -728,6 +889,7 @@ function buildGroups() {
         enforceDeps();
         updateUI();
         renderPreview();
+        scheduleEditorStateSave();
       };
       opts.appendChild(btn);
     }
@@ -768,6 +930,9 @@ function buildAdvancedSliders(groupPath) {
     inputs[axis].value = v;
     values[axis].value = v.toFixed(cfg.decimals);
     renderPreview();
+    // The no-op early-return above means a drag only saves on real change;
+    // the debounce collapses the rest of the drag into one write.
+    scheduleEditorStateSave();
   }
 
   for (const axis of Object.keys(AXIS_CONFIG)) {
@@ -1372,6 +1537,9 @@ document.getElementById('resetBtn').onclick = async () => {
   buildGroups();
   updateUI();
   renderPreview();
+  // Persists the reset itself — next load restores defaults, not the state
+  // that was just discarded.
+  scheduleEditorStateSave();
 };
 
 document.getElementById('advancedToggle').onclick = (e) => {
@@ -1379,6 +1547,7 @@ document.getElementById('advancedToggle').onclick = (e) => {
   e.currentTarget.classList.toggle('active', advancedMode);
   buildGroups();
   updateUI();
+  scheduleEditorStateSave();
 };
 
 // --- Init ---
@@ -1463,11 +1632,22 @@ document.getElementById('spoilerToggle').onchange = async (e) => {
   }
   spoilerMode = target.checked;
   rebuildCharSelect();
+  scheduleEditorStateSave();
 };
 
+// Restore before the first rebuildCharSelect() — it reads spoilerMode to
+// decide which characters the dropdown offers.
+const restoredChar = loadEditorState();
+// Applied straight to the DOM rather than by firing the handlers: a
+// programmatic `checked` write doesn't refire `change`, so restoring spoilers
+// doesn't re-prompt the confirm modal on every load.
+document.getElementById('spoilerToggle').checked = spoilerMode;
+document.getElementById('advancedToggle').classList.toggle('active', advancedMode);
+
+const startChar = restoredChar || DEFAULT_CHARACTER;
 rebuildCharSelect();
-charSelect.value = DEFAULT_CHARACTER;
-loadCharacter(DEFAULT_CHARACTER);
+charSelect.value = startChar;
+loadCharacter(startChar);
 
 // --- Zoom & Pan ---
 
