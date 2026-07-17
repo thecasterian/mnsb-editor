@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Background Picker — Standalone Test</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { margin: 0; background: #121214; color: #e8e6e3;
+         font-family: -apple-system, "Segoe UI", sans-serif; }
+  .wrap { width: 460px; padding: 24px; }
+  .section-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+                   color: #8a8a8e; margin-bottom: 8px; }
+  #log { margin-top: 20px; font: 12px ui-monospace, monospace; color: #8a8a8e;
+         white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="section-label">Background</div>
+  <div id="bgPicker"></div>
+  <div id="log">onChange log:</div>
+</div>
+
+<script type="module">
+import { createBgPicker } from './bg_picker.js';
+
+// Mirrors scene.js's real derivation so this page exercises the same URLs.
+const thumbUrl = (v) => {
+  if (!v) return null;
+  const m = v.match(/^(.*)\/(main|stills)\/(.+)\.png$/);
+  return m ? `${m[1]}/thumbs/${m[2]}/${m[3]}.webp` : null;
+};
+
+const groups = [
+  { label: null, items: [{ value: '', label: '(none — black)', pinned: true }] },
+  { label: 'Main', items: [] },
+  { label: 'Stills', items: [] },
+];
+
+// Fall back to invented rows so the page also works on a clone with no art —
+// that's the missing-thumbnail path, which is worth being able to see.
+try {
+  const meta = await (await fetch('scene/backgrounds/meta.json')).json();
+  groups[1].items = meta.main.map(e => (
+    { value: `scene/backgrounds/main/${e.file}`, label: e.name }));
+  groups[2].items = meta.stills.map(e => (
+    { value: `scene/backgrounds/stills/${e.file}`, label: e.name }));
+} catch {
+  groups[1].items = Array.from({ length: 8 }, (_, i) => ({
+    value: `scene/backgrounds/main/Background_0${23 + i}_001.png`,
+    label: `Background_0${23 + i}_001`,
+  }));
+  groups[2].items = [{ value: 'scene/backgrounds/stills/Still_001_001.png',
+                       label: 'Still_001_001' }];
+  document.getElementById('log').textContent =
+    'no meta.json — using invented rows; every popover should show the missing-thumb message';
+}
+
+const log = document.getElementById('log');
+const picker = createBgPicker({
+  mount: document.getElementById('bgPicker'),
+  thumbUrl,
+  onChange: (v) => { log.textContent += `\nonChange(${JSON.stringify(v)})`; },
+});
+picker.setGroups(groups);
+picker.setValue(groups[1].items[0]?.value ?? '');
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260519f';
+const BUILD_VERSION = '20260717a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -10,6 +10,11 @@ const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 // and on delete.
 const { snapshotGetAll, snapshotDelete, snapshotChannel } =
   await import(`./snapshot_store.js?v=${BUILD_VERSION}`);
+
+// Background picker widget. Dynamic import so the BUILD_VERSION query string
+// busts module-script caches the same way the static asset URLs do.
+const { createBgPicker } =
+  await import(`./bg_picker.js?v=${BUILD_VERSION}`);
 
 const CANVAS_W = 2560;
 const CANVAS_H = 1440;
@@ -715,7 +720,7 @@ function loadSceneConfig({ render = true } = {}) {
 
   if (typeof data.bgPath === 'string' || data.bgPath === null) {
     bgPath = data.bgPath || null;
-    document.getElementById('bgSelect').value = bgPath || '';
+    bgPicker.setValue(bgPath || '');
   }
 
   if (typeof data.authorId === 'string') {
@@ -3195,35 +3200,49 @@ async function renderScene() {
 
 // --- UI ---
 
-function populateBgSelect() {
-  const sel = document.getElementById('bgSelect');
-  sel.innerHTML = '';
+// Thumbnail URL for a background path, derived rather than recorded in
+// meta.json — that keeps build_bg_thumbs.py independent of
+// build_backgrounds_meta.py, and a recorded flag would lie the moment a thumb
+// was deleted. A missing thumb 404s and the picker shows its own placeholder.
+// Returns null for "(none — black)", which has nothing to preview.
+function bgThumbUrl(bgFilePath) {
+  if (!bgFilePath) return null;
+  const m = bgFilePath.match(/^(.*)\/(main|stills)\/(.+)\.png$/);
+  if (!m) return null;
+  return assetUrl(`${m[1]}/thumbs/${m[2]}/${m[3]}.webp`);
+}
 
-  const noneOpt = document.createElement('option');
-  noneOpt.value = '';
-  noneOpt.textContent = '(none — black)';
-  sel.appendChild(noneOpt);
+const bgPicker = createBgPicker({
+  mount: document.getElementById('bgPicker'),
+  thumbUrl: bgThumbUrl,
+  onChange: (v) => {
+    bgPath = v || null;
+    scheduleRender();
+    scheduleSceneConfigSave();
+  },
+});
+
+function populateBgPicker() {
+  const groups = [
+    { label: null, items: [{ value: '', label: '(none — black)', pinned: true }] },
+  ];
 
   function addGroup(label, list, dir) {
     if (!list || list.length === 0) return;
-    const og = document.createElement('optgroup');
-    og.label = label;
-    for (const e of list) {
-      const o = document.createElement('option');
-      o.value = `${SCENE_BG_ROOT}/${dir}/${e.file}`;
-      o.textContent = e.name;
-      og.appendChild(o);
-    }
-    sel.appendChild(og);
+    groups.push({
+      label,
+      items: list.map(e => ({ value: `${SCENE_BG_ROOT}/${dir}/${e.file}`, label: e.name })),
+    });
   }
   addGroup('Main',   bgMeta.main,   'main');
   addGroup('Stills', bgMeta.stills, 'stills');
   // bgMeta.utility (Grid_001, Grid_002, SolidColor, Transparent) is omitted —
   // those are author/debug helpers, not narrative backgrounds.
+  bgPicker.setGroups(groups);
 
   const first = bgMeta.main && bgMeta.main[0];
   bgPath = first ? `${SCENE_BG_ROOT}/main/${first.file}` : null;
-  sel.value = bgPath || '';
+  bgPicker.setValue(bgPath || '');
 }
 
 // Mirror the character editor's dropdown labels (app.js:displayName) so the
@@ -4024,7 +4043,7 @@ function showModal(message) {
     return;
   }
 
-  populateBgSelect();
+  populateBgPicker();
   populateAuthorSelect();
   document.getElementById('messageInput').value = messageText;
   // Seed debate inputs from defaults (loadSceneConfig will overwrite if a
@@ -4219,11 +4238,6 @@ function showModal(message) {
       scheduleSceneConfigSave();
     });
   }
-  document.getElementById('bgSelect').onchange = (e) => {
-    bgPath = e.target.value || null;
-    scheduleRender();
-    scheduleSceneConfigSave();
-  };
   document.getElementById('authorSelect').onchange = (e) => {
     authorId = e.target.value;
     scheduleRender();
@@ -4507,7 +4521,7 @@ function showModal(message) {
     populateAuthorSelect();
     showAuthorPlate = showAutoToggle = showMenuButton = showBookButton = true;
     for (const [id] of overlayBindings) document.getElementById(id).checked = true;
-    document.getElementById('bgSelect').value = bgPath || '';
+    bgPicker.setValue(bgPath || '');
     document.getElementById('messageInput').value = messageText;
     // Reset clears placements but never deletes snapshots — those persist
     // across sessions and may be expensive to recreate. Clearing the snapshot

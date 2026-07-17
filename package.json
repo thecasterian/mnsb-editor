@@ -1,0 +1,7 @@
+{
+  "name": "manosaba-editor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Static character/scene editor. No build step, no dependencies. `type: module` exists so Node's built-in test runner can import the browser modules as ESM.",
+  "type": "module"
+}
