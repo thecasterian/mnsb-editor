@@ -548,6 +548,36 @@ body {
 .export-btn { background: var(--accent); color: #fff; transition: all 0.2s; }
 .export-btn:hover { background: #ff8266; }
 
+.hide-ui-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+.hide-ui-btn:hover { background: #333338; color: var(--text); }
+.hide-ui-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* While "Hide UI" is engaged, the individual overlay switches have no effect —
+   dim them and block interaction so that's obvious. Scoped to `.switch` (not
+   the whole field) so the Hide UI button that now lives inside the section
+   stays fully lit and clickable — otherwise you couldn't turn Hide UI back off. */
+.panel.ui-hidden [data-overlay-toggles] .switch {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* The Hide UI button sits at the top of each Overlays section, above the
+   show-switches. Sized down to match the "Advanced" toggle (smaller than a
+   default .action-btn): full width, switch-height padding, 14px/500 text, with
+   breathing room below so it doesn't crowd the first switch. */
+[data-overlay-toggles] .hide-ui-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
 .disclaimer {
   margin-top: 12px;
   padding-top: 10px;

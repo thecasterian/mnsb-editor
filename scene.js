@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260717a';
+const BUILD_VERSION = '20260718a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -174,6 +174,13 @@ let showBookButton = true;          // gates the WitchBookButtonUI prefab (adv)
 // because rendering the plate without text — or text without a plate — would
 // look broken; the user thinks of the plate as a single unit.
 let showAuthorPlate = true;
+// "Hide UI" master view mode: when true, every render skips all in-scene UI
+// overlays (dialog frame, plates, buttons, timer, testimony, trial-choice
+// screen), leaving just the background + character placements/billboards.
+// Non-destructive — the individual overlay flags above are untouched, so
+// turning it back off restores exactly what was showing before. Persisted in
+// the scene config; scene-type-independent (one flag covers adv + trial).
+let uiHidden = false;
 // Mirror set for trial-with-adv-overlays.
 let trialShowAutoToggle = true;
 let trialShowMenuButton = true;
@@ -478,6 +485,8 @@ function saveSceneConfig() {
       bgPath,
       authorId,
       messageText,
+      // "Hide UI" master view mode (scene-type-independent).
+      uiHidden,
       // Trial state — saved unconditionally so a user can flip back from Adv
       // to Trial and find their previous camera setup intact. Templates
       // (lookChar, composition, zoom) and direct values (yawMult, distance,
@@ -533,6 +542,18 @@ let _configSaveTimer = null;
 function scheduleSceneConfigSave() {
   if (_configSaveTimer) clearTimeout(_configSaveTimer);
   _configSaveTimer = setTimeout(() => { _configSaveTimer = null; saveSceneConfig(); }, 200);
+}
+
+// Sync the "Hide UI" button's active state and the panel's `ui-hidden` class
+// (which greys the overlay switches) to the current `uiHidden` flag. Called
+// from the button handler, from loadSceneConfig on restore, and from reset.
+// Declared at module scope (not inside init) so loadSceneConfig can call it.
+function applyUiHiddenState() {
+  // One button per Overlays section (adv / trial-adv / trial-debate); only one
+  // is visible at a time, but keep all their active states in sync with the flag.
+  document.querySelectorAll('.hide-ui-btn').forEach(btn =>
+    btn.classList.toggle('active', uiHidden));
+  document.querySelector('.panel').classList.toggle('ui-hidden', uiHidden);
 }
 
 // Apply a saved-config record to the in-memory state and corresponding DOM
@@ -795,6 +816,12 @@ function loadSceneConfig({ render = true } = {}) {
       }));
   }
   renderTrialChoiceList();
+
+  // "Hide UI" master view mode. Absent in pre-feature configs → stays false.
+  if (typeof data.uiHidden === 'boolean') {
+    uiHidden = data.uiHidden;
+  }
+  applyUiHiddenState();
 
   if (render) scheduleRender();
 }
@@ -2085,6 +2112,10 @@ async function renderTrialScene() {
   // choice screen layered in between (testimony dimmed beneath it, HUD on
   // top). See renderDebateText for the ScenePosition → canvas mapping.
   if (trialSubtype !== 'adv' && trialSubtype !== 'debate') return mirror;
+  // "Hide UI": skip every overlay pass (adv dialog frame, or the debate
+  // testimony / trial-choice screen / HUD) and return the bare 3D courtroom
+  // + character billboards.
+  if (uiHidden) return mirror;
 
   await ensureFontsLoaded();
   const dst = imageDataToLinear(mctx.getImageData(0, 0, CANVAS_W, CANVAS_H));
@@ -3184,11 +3215,15 @@ async function renderScene() {
   // Placements sit behind the dialog frame, in array order (later = on top).
   for (const p of placements) await renderPlacement(p, dst);
 
-  for (const prefab of sceneMeta.prefabs) {
-    if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
-    for (const [, kind, item] of selectPrefabItems(prefab)) {
-      if (kind === 'layer') await renderLayer(item, dst);
-      else                  await renderTextLeaf(item, dst);
+  // "Hide UI": skip all in-scene overlays, leaving the background +
+  // placements already composited above.
+  if (!uiHidden) {
+    for (const prefab of sceneMeta.prefabs) {
+      if (prefab.toggle && !isFlagOn(prefab.toggle)) continue;
+      for (const [, kind, item] of selectPrefabItems(prefab)) {
+        if (kind === 'layer') await renderLayer(item, dst);
+        else                  await renderTextLeaf(item, dst);
+      }
     }
   }
 
@@ -4428,8 +4463,23 @@ function showModal(message) {
     };
   }
 
+  // "Hide UI" toggle: master view mode that hides all in-scene overlays,
+  // leaving background + characters. Non-destructive and persisted. One button
+  // lives in each Overlays section (scene-type-specific), all driving the flag.
+  document.querySelectorAll('.hide-ui-btn').forEach(btn => {
+    btn.onclick = () => {
+      uiHidden = !uiHidden;
+      applyUiHiddenState();
+      scheduleRender();
+      scheduleSceneConfigSave();
+    };
+  });
+
   document.getElementById('resetBtn').onclick = async () => {
     if (!await showModal('Reset all customizations to default?')) return;
+    // "Hide UI" is a view mode, not scene content — reset it for both types.
+    uiHidden = false;
+    applyUiHiddenState();
     if (sceneType === 'trial') {
       // Trial reset: locale + dropdowns (templates) + direct camera values
       // + roll + pitch. Locale doesn't affect the current trial preview,

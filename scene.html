@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260717a">
+<link rel="stylesheet" href="styles.css?v=20260718a">
 </head>
 <body class="scene-editor">
 
@@ -71,8 +71,9 @@
     </div>
   </div>
 
-  <div class="field" data-scene-type="adv">
+  <div class="field" data-scene-type="adv" data-overlay-toggles>
     <div class="section-label">Overlays</div>
+    <button type="button" class="action-btn hide-ui-btn" data-hide-ui>Hide UI</button>
     <label class="switch">
       <span>Author</span>
       <input type="checkbox" id="toggleAuthorPlate" checked>
@@ -137,8 +138,9 @@
     </div>
   </div>
 
-  <div class="field" data-scene-type="trial" data-trial-subtype="adv">
+  <div class="field" data-scene-type="trial" data-trial-subtype="adv" data-overlay-toggles>
     <div class="section-label">Overlays</div>
+    <button type="button" class="action-btn hide-ui-btn" data-hide-ui>Hide UI</button>
     <label class="switch">
       <span>Author</span>
       <input type="checkbox" id="toggleTrialAuthorPlate" checked>
@@ -161,8 +163,9 @@
     </label>
   </div>
 
-  <div class="field" data-scene-type="trial" data-trial-subtype="debate">
+  <div class="field" data-scene-type="trial" data-trial-subtype="debate" data-overlay-toggles>
     <div class="section-label">Overlays</div>
+    <button type="button" class="action-btn hide-ui-btn" data-hide-ui>Hide UI</button>
     <label class="switch">
       <span>Clock</span>
       <input type="checkbox" id="toggleTrialDebateClock" checked>
@@ -515,6 +518,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260717a"></script>
+<script type="module" src="scene.js?v=20260718a"></script>
 </body>
 </html>
