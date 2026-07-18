@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260718b';
+const BUILD_VERSION = '20260719a';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -535,22 +535,23 @@ function updateHistoryButtons() {
   if (r) r.disabled = !adv || !history.canRedo();
 }
 
-// Move the selected placement by (dx, dy) canvas pixels. Coalesces a burst of
-// nudges (held arrow key -> OS key-repeat) into one undo step via a 600 ms idle
-// timer, mirroring how a drag is one step. Canvas is 2560x1440, so step 1 is a
-// fine nudge and Shift's step 10 is coarse.
-function nudgeSelected(dx, dy) {
+// Shared nudge machinery for the arrow-key shortcuts. Resolves the selected
+// placement, coalesces a burst of nudges (held arrow key -> OS key-repeat)
+// into one undo step via a 600 ms idle timer (mirroring how a drag is one
+// step), applies `mutate(p, snap)`, then refreshes + saves.
+function nudgePlacement(mutate) {
   if (sceneType !== 'adv') return;
   const p = selectedSlug ? placementBySlug(selectedSlug) : null;
   if (!p) return;
+  const snap = snapshots.get(p.slug);
+  if (!snap) return;
   if (_nudgeTimer) {
     clearTimeout(_nudgeTimer);
   } else {
     flushHistory();
     history.begin(currentPlacementState());
   }
-  p.x = Math.round(p.x + dx);
-  p.y = Math.round(p.y + dy);
+  mutate(p, snap);
   refreshPlacementOverlays();
   refreshInspector();
   scheduleRender();
@@ -560,6 +561,25 @@ function nudgeSelected(dx, dy) {
     history.commit(currentPlacementState());
     updateHistoryButtons();
   }, 600);
+}
+
+// Plain arrow keys move by scene-position percent, matching the inspector
+// sliders' units. Reproject through ScenePosition so the step is exactly 1 %
+// (as the slider would): current percent + delta -> back to placement pixels.
+function nudgeSelectedPercent(dxPct, dyPct) {
+  nudgePlacement((p, snap) => {
+    p.x = sceneXToPlacementX(placementToSceneX(p, snap) + dxPct, p, snap);
+    p.y = sceneYToPlacementY(placementToSceneY(p, snap) + dyPct, p, snap);
+  });
+}
+
+// Ctrl/Cmd + arrow keys move by one canvas pixel — fine adjustment. Placements
+// store top-left pixel coords (PIL Y-down), so Up is -1 on y.
+function nudgeSelectedPixels(dx, dy) {
+  nudgePlacement((p) => {
+    p.x = Math.round(p.x + dx);
+    p.y = Math.round(p.y + dy);
+  });
 }
 
 // Drag lock: while the user is dragging in *this* tab, ignore incoming
@@ -4827,15 +4847,36 @@ function showModal(message) {
       return;
     }
     if (mod && key === 'y') { e.preventDefault(); redoPlacement(); return; }
-    if (mod) return;   // leave other Ctrl/Cmd combos to the browser
 
     if (sceneType !== 'adv') return;
-    const step = e.shiftKey ? 10 : 1;
+
+    // Arrow-key nudge. Plain arrows move by 1 % scene-position (matching the
+    // inspector sliders' units); Ctrl/Cmd + arrow moves by 1 pixel for fine
+    // adjustment. Scene Y is measured bottom-up, so Up raises the percent but
+    // lowers the placement y. Handled before the generic `if (mod) return`
+    // below so Ctrl/Cmd + arrow reaches the pixel path.
     switch (e.key) {
-      case 'ArrowLeft':  e.preventDefault(); nudgeSelected(-step, 0); break;
-      case 'ArrowRight': e.preventDefault(); nudgeSelected(step, 0);  break;
-      case 'ArrowUp':    e.preventDefault(); nudgeSelected(0, -step); break;
-      case 'ArrowDown':  e.preventDefault(); nudgeSelected(0, step);  break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (mod) nudgeSelectedPixels(-1, 0); else nudgeSelectedPercent(-1, 0);
+        return;
+      case 'ArrowRight':
+        e.preventDefault();
+        if (mod) nudgeSelectedPixels(1, 0); else nudgeSelectedPercent(1, 0);
+        return;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (mod) nudgeSelectedPixels(0, -1); else nudgeSelectedPercent(0, 1);
+        return;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (mod) nudgeSelectedPixels(0, 1); else nudgeSelectedPercent(0, -1);
+        return;
+    }
+
+    if (mod) return;   // leave other Ctrl/Cmd combos to the browser
+
+    switch (e.key) {
       case 'Delete':
       case 'Backspace':
         if (selectedSlug) { e.preventDefault(); removePlacement(selectedSlug); }
