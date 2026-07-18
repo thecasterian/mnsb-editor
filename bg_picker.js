@@ -9,7 +9,7 @@
 // with `node --test tests/bg_picker.test.mjs`. Keep it that way.
 
 /** Groups whose rows match `query`, dropping groups left with no rows.
- *  Rows marked `pinned` (the "(none — black)" entry) always survive. */
+ *  Rows marked `pinned` (the "(black)" / "(white)" entries) always survive. */
 export function filterGroups(groups, query) {
   const q = query.trim().toLowerCase();
   if (!q) return groups;

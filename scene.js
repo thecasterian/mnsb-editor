@@ -61,7 +61,10 @@ let sceneType = 'adv';              // one of SCENE_TYPES — drives field visib
 let locale = 'ko';                  // one of LOCALES
 let messageText = '';
 let authorId = '';                  // resolved to the first available entry on init
-let bgPath = null;                  // null = solid black
+let bgPath = null;                  // null = solid black; BG_WHITE = solid white
+// Sentinel bgPath for a flat white fill. Like null→black, it's the absence of a
+// real asset, so it never hits renderBackground / bgThumbUrl / meta.json.
+const BG_WHITE = '__white__';
 
 // Trial scene state. The renderer (scene_court.js) is loaded lazily on first
 // trial render — Adv-only sessions never pay the Three.js download cost.
@@ -3205,7 +3208,10 @@ async function renderScene() {
   await ensureFontsLoaded();
   const dst = new Float32Array(CANVAS_W * CANVAS_H * 4);
 
-  if (bgPath) {
+  if (bgPath === BG_WHITE) {
+    // Solid opaque white: linear RGB = 1 (sRGB white), alpha = 1.
+    dst.fill(1);
+  } else if (bgPath) {
     await renderBackground(bgPath, dst);
   } else {
     // Solid opaque black: rgb already 0, set alpha to 1.
@@ -3239,7 +3245,7 @@ async function renderScene() {
 // meta.json — that keeps build_bg_thumbs.py independent of
 // build_backgrounds_meta.py, and a recorded flag would lie the moment a thumb
 // was deleted. A missing thumb 404s and the picker shows its own placeholder.
-// Returns null for "(none — black)", which has nothing to preview.
+// Returns null for "(black)", which has nothing to preview.
 function bgThumbUrl(bgFilePath) {
   if (!bgFilePath) return null;
   const m = bgFilePath.match(/^(.*)\/(main|stills)\/(.+)\.png$/);
@@ -3259,7 +3265,10 @@ const bgPicker = createBgPicker({
 
 function populateBgPicker() {
   const groups = [
-    { label: null, items: [{ value: '', label: '(none — black)', pinned: true }] },
+    { label: null, items: [
+      { value: '',       label: '(black)',        pinned: true },
+      { value: BG_WHITE, label: '(white)',        pinned: true },
+    ] },
   ];
 
   function addGroup(label, list, dir) {
