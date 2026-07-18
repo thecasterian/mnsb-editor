@@ -520,12 +520,26 @@ body {
 .slider-reset:hover { color: var(--text); border-color: #555; }
 
 /* Action buttons */
+.history-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+}
 .actions {
   display: flex;
   gap: 8px;
   margin-top: auto;
   padding-top: 12px;
 }
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* Scene editor: history row grabs the flex slack so the two bottom button
+   rows sit together (Undo/Redo directly above Reset/Export). The character
+   editor has no .history-actions and keeps .actions as its bottom anchor. */
+body.scene-editor .history-actions { margin-top: auto; }
+body.scene-editor .actions { margin-top: 0; padding-top: 8px; }
 
 .action-btn {
   flex: 1;

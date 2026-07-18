@@ -1,6 +1,6 @@
 // Bump on every deploy to invalidate stale browser caches of JSON/PNG assets.
 // Also bump the matching ?v= on styles.css and scene.js in scene.html.
-const BUILD_VERSION = '20260718a';
+const BUILD_VERSION = '20260718b';
 const assetUrl = (path) => `${path}?v=${BUILD_VERSION}`;
 
 // IndexedDB-backed snapshot store shared with the character editor. Records:
@@ -15,6 +15,12 @@ const { snapshotGetAll, snapshotDelete, snapshotChannel } =
 // busts module-script caches the same way the static asset URLs do.
 const { createBgPicker } =
   await import(`./bg_picker.js?v=${BUILD_VERSION}`);
+
+// Placement undo/redo history. Dynamic import mirrors bg_picker.js so the
+// BUILD_VERSION query string busts the module cache the same way.
+const { createHistory } =
+  await import(`./placement_history.js?v=${BUILD_VERSION}`);
+const history = createHistory();
 
 const CANVAS_W = 2560;
 const CANVAS_H = 1440;
@@ -456,6 +462,106 @@ function schedulePlacementsSave() {
   _saveTimer = setTimeout(() => { _saveTimer = null; savePlacements(); }, 200);
 }
 
+// --- Placement history plumbing ---
+//
+// The history module stores snapshots of this object. begin/commit clone
+// internally, so passing the live reference is safe.
+function currentPlacementState() {
+  return { placements, selectedSlug };
+}
+
+// Idle timer for coalescing arrow-key nudge bursts into one undo step.
+let _nudgeTimer = null;
+
+// Open-gesture flag for inspector (slider/number) edits — reset by
+// flushHistory()/historyClearAll() so those close every gesture kind.
+let _inspectorGesture = false;
+
+// Close any open gesture as its own step. Called before starting a new logical
+// operation (drag start, undo/redo, remove, reset, cross-tab reload) so a
+// pending nudge burst can't merge into the next action. Also cancels the
+// nudge idle timer so it doesn't fire a late no-op commit.
+function flushHistory() {
+  _inspectorGesture = false;
+  if (_nudgeTimer) { clearTimeout(_nudgeTimer); _nudgeTimer = null; }
+  history.commit(currentPlacementState());
+}
+
+// The single restore path for undo and redo. Deep-clones the snapshot into the
+// live state so later in-place mutations (drag) can't corrupt a stored entry,
+// then runs the same refreshers every mutation site uses.
+function applyState(snapshot) {
+  placements   = structuredClone(snapshot.placements);
+  selectedSlug = snapshot.selectedSlug;
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  updateHistoryButtons();
+}
+
+function undoPlacement() {
+  if (sceneType !== 'adv') return;
+  flushHistory();
+  const snap = history.undo(currentPlacementState());
+  if (snap) applyState(snap);
+}
+
+function redoPlacement() {
+  if (sceneType !== 'adv') return;
+  flushHistory();
+  const snap = history.redo(currentPlacementState());
+  if (snap) applyState(snap);
+}
+
+// Reset both stacks (and the nudge timer). Used when the base state changes
+// underneath us via a cross-tab reload, invalidating the in-memory history.
+function historyClearAll() {
+  _inspectorGesture = false;
+  if (_nudgeTimer) { clearTimeout(_nudgeTimer); _nudgeTimer = null; }
+  history.clear();
+  updateHistoryButtons();
+}
+
+// Reflect stack availability on the on-screen buttons. Guarded so it is safe
+// to call before the buttons exist (they are added in scene.html in Task 3).
+function updateHistoryButtons() {
+  const u = document.getElementById('undoBtn');
+  const r = document.getElementById('redoBtn');
+  // Undo/redo act on adv placements only; keep the buttons inert in trial.
+  const adv = sceneType === 'adv';
+  if (u) u.disabled = !adv || !history.canUndo();
+  if (r) r.disabled = !adv || !history.canRedo();
+}
+
+// Move the selected placement by (dx, dy) canvas pixels. Coalesces a burst of
+// nudges (held arrow key -> OS key-repeat) into one undo step via a 600 ms idle
+// timer, mirroring how a drag is one step. Canvas is 2560x1440, so step 1 is a
+// fine nudge and Shift's step 10 is coarse.
+function nudgeSelected(dx, dy) {
+  if (sceneType !== 'adv') return;
+  const p = selectedSlug ? placementBySlug(selectedSlug) : null;
+  if (!p) return;
+  if (_nudgeTimer) {
+    clearTimeout(_nudgeTimer);
+  } else {
+    flushHistory();
+    history.begin(currentPlacementState());
+  }
+  p.x = Math.round(p.x + dx);
+  p.y = Math.round(p.y + dy);
+  refreshPlacementOverlays();
+  refreshInspector();
+  scheduleRender();
+  schedulePlacementsSave();
+  _nudgeTimer = setTimeout(() => {
+    _nudgeTimer = null;
+    history.commit(currentPlacementState());
+    updateHistoryButtons();
+  }, 600);
+}
+
 // Drag lock: while the user is dragging in *this* tab, ignore incoming
 // `storage` events. Reloading mid-drag would clobber the in-progress geometry
 // with whatever the other tab last saved. Pending reloads coalesce into a
@@ -628,6 +734,7 @@ function loadSceneConfig({ render = true } = {}) {
     }
   }
   applySidebarVisibility();
+  updateHistoryButtons();   // keep Undo/Redo buttons in sync with adv/trial
 
   // Trial state — apply individually to dropdowns/inputs, but skip the
   // look-character dropdown if it's not populated yet (the value is held in
@@ -3393,9 +3500,15 @@ function addOrSelectPlacement(slug) {
   let placement = placementBySlug(slug);
   let added = false;
   if (!placement) {
+    flushHistory();
+    history.begin(currentPlacementState());
     placement = defaultPlacementFor(snap);
     placements.push(placement);
     added = true;
+  } else if (selectedSlug !== slug) {
+    // Selecting a different already-placed character ends any open gesture
+    // (e.g. a nudge burst) as its own undo step before the selection changes.
+    flushHistory();
   }
   selectedSlug = slug;
   refreshSnapshotList();
@@ -3403,20 +3516,23 @@ function addOrSelectPlacement(slug) {
   refreshPlacementOverlays();
   scheduleRender();
   schedulePlacementsSave();
+  if (added) { history.commit(currentPlacementState()); updateHistoryButtons(); }
   return added;
 }
 
 function removePlacement(slug) {
-  const before = placements.length;
+  if (!placements.some(p => p.slug === slug)) return;
+  flushHistory();
+  history.begin(currentPlacementState());
   placements = placements.filter(p => p.slug !== slug);
   if (selectedSlug === slug) selectedSlug = null;
-  if (placements.length !== before) {
-    refreshSnapshotList();
-    refreshInspector();
-    refreshPlacementOverlays();
-    scheduleRender();
-    schedulePlacementsSave();
-  }
+  refreshSnapshotList();
+  refreshInspector();
+  refreshPlacementOverlays();
+  scheduleRender();
+  schedulePlacementsSave();
+  history.commit(currentPlacementState());
+  updateHistoryButtons();
 }
 
 // Z-order. Render iterates `placements` in array order — last is topmost.
@@ -3425,22 +3541,30 @@ function removePlacement(slug) {
 function bringPlacementToFront(slug) {
   const i = placements.findIndex(p => p.slug === slug);
   if (i < 0 || i === placements.length - 1) return false;
+  flushHistory();
+  history.begin(currentPlacementState());
   const [target] = placements.splice(i, 1);
   placements.push(target);
   refreshPlacementOverlays();
   scheduleRender();
   schedulePlacementsSave();
+  history.commit(currentPlacementState());
+  updateHistoryButtons();
   return true;
 }
 
 function sendPlacementToBack(slug) {
   const i = placements.findIndex(p => p.slug === slug);
   if (i <= 0) return false;
+  flushHistory();
+  history.begin(currentPlacementState());
   const [target] = placements.splice(i, 1);
   placements.unshift(target);
   refreshPlacementOverlays();
   scheduleRender();
   schedulePlacementsSave();
+  history.commit(currentPlacementState());
+  updateHistoryButtons();
   return true;
 }
 
@@ -3463,7 +3587,13 @@ async function deleteSnapshot(slug) {
   if (snap.blobUrl) URL.revokeObjectURL(snap.blobUrl);
   snapshots.delete(slug);
   dropSnapshotCache(slug);
+  const wasPlaced = placements.some(p => p.slug === slug);
   removePlacement(slug);  // also drops any placement using it
+  // The snapshot is permanently gone, so any undo entry referencing it would
+  // resurrect an orphaned placement. Drop history when a placed snapshot is
+  // deleted. (Deleting an unplaced snapshot leaves live placements untouched,
+  // so history stays.)
+  if (wasPlaced) historyClearAll();
   refreshSnapshotList();
   snapshotChannel.postMessage({ type: 'deleted', slug });
 }
@@ -3558,6 +3688,10 @@ async function deleteAllSnapshots() {
   snapshots.clear();
   placements = [];
   selectedSlug = null;
+  // All snapshots are permanently gone; undo can't meaningfully restore
+  // placements that reference them, so drop history rather than make this
+  // undoable (unlike Reset, which keeps snapshots and stays undoable).
+  historyClearAll();
   refreshSnapshotList();
   refreshInspector();
   refreshPlacementOverlays();
@@ -3771,6 +3905,11 @@ async function reloadSnapshots() {
   if (placements.length !== before) scheduleRender();
   else if (snapshots.size > 0)      scheduleRender();  // freshly-loaded blob URLs need a re-decode
   if (placements.length !== before || selectedSlug !== beforeSelected) {
+    // A snapshot was deleted in another tab/editor and pruned live placements
+    // (or the selection). The base state changed underneath us, so in-memory
+    // undo history no longer describes reachable states — drop it, matching
+    // the cross-tab PLACEMENTS_KEY reload path.
+    historyClearAll();
     schedulePlacementsSave();
   }
 }
@@ -3877,6 +4016,8 @@ function attachPlacementOverlayHandlers(el) {
       offsetX,
       offsetY,
     };
+    flushHistory();
+    history.begin(currentPlacementState());
     _dragInProgress = true;
   }
 
@@ -3910,6 +4051,10 @@ function attachPlacementOverlayHandlers(el) {
       // Our own last save will broadcast outward via storage events too, so
       // both tabs converge a moment later.
       loadPlacements({ preserveSelection: true });
+      historyClearAll();               // base changed cross-tab; drop history
+    } else if (wasDragging) {
+      history.commit(currentPlacementState());
+      updateHistoryButtons();
     }
     if (wasDragging) scheduleRender();  // commit the moved character to pixels
   }
@@ -4105,6 +4250,7 @@ function showModal(message) {
     if (!SCENE_TYPES.has(e.target.value)) return;
     sceneType = e.target.value;
     applySidebarVisibility();
+    updateHistoryButtons();   // reflect adv/trial on the Undo/Redo buttons
     if (sceneType === 'trial') await ensureTrialUIInit();
     // Snapshot library is shared across modes — repaint so trial vs adv
     // annotations ("On stand X" vs the relative-time line) and click
@@ -4585,6 +4731,8 @@ function showModal(message) {
     // Reset clears placements but never deletes snapshots — those persist
     // across sessions and may be expensive to recreate. Clearing the snapshot
     // library belongs in each row's delete button.
+    flushHistory();
+    history.begin(currentPlacementState());
     placements = [];
     selectedSlug = null;
     refreshSnapshotList();
@@ -4593,8 +4741,13 @@ function showModal(message) {
     scheduleRender();
     schedulePlacementsSave();
     scheduleSceneConfigSave();
+    history.commit(currentPlacementState());
+    updateHistoryButtons();
   };
   document.getElementById('exportBtn').onclick = exportPng;
+  document.getElementById('undoBtn').onclick = undoPlacement;
+  document.getElementById('redoBtn').onclick = redoPlacement;
+  updateHistoryButtons();
 
   // Snapshot library controls: search filter + bulk delete buttons.
   const snapshotSearch = document.getElementById('snapshotSearch');
@@ -4637,6 +4790,7 @@ function showModal(message) {
     if (e.key === PLACEMENTS_KEY) {
       if (_dragInProgress) { _pendingReload = true; return; }
       loadPlacements({ preserveSelection: true });
+      historyClearAll();   // another tab changed the base state; drop history
     } else if (e.key === SCENE_CONFIG_KEY) {
       loadSceneConfig();
     }
@@ -4648,6 +4802,52 @@ function showModal(message) {
   // viewport resizes. Refresh overlays so they keep tracking the canvas.
   // No-op for trial — refreshPlacementOverlays early-returns there.
   window.addEventListener('resize', refreshPlacementOverlays);
+
+  // Placement keyboard shortcuts. Suppressed while a text/select control is
+  // focused (so Ctrl+Z does native text undo in the message box, arrows move
+  // the caret, etc.). Nudge/delete/z-order act on the selected placement and
+  // only in adv mode; undo/redo are placement-scoped so they no-op elsewhere.
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' ||
+        (t && t.isContentEditable)) return;
+
+    // Don't let shortcuts interleave with an in-progress mouse drag — that
+    // would prematurely commit the drag's gesture (or, for Delete, remove the
+    // captured overlay and strand _dragInProgress).
+    if (_dragInProgress) return;
+
+    const mod = e.ctrlKey || e.metaKey;
+    const key = e.key.toLowerCase();
+
+    if (mod && key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) redoPlacement(); else undoPlacement();
+      return;
+    }
+    if (mod && key === 'y') { e.preventDefault(); redoPlacement(); return; }
+    if (mod) return;   // leave other Ctrl/Cmd combos to the browser
+
+    if (sceneType !== 'adv') return;
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+      case 'ArrowLeft':  e.preventDefault(); nudgeSelected(-step, 0); break;
+      case 'ArrowRight': e.preventDefault(); nudgeSelected(step, 0);  break;
+      case 'ArrowUp':    e.preventDefault(); nudgeSelected(0, -step); break;
+      case 'ArrowDown':  e.preventDefault(); nudgeSelected(0, step);  break;
+      case 'Delete':
+      case 'Backspace':
+        if (selectedSlug) { e.preventDefault(); removePlacement(selectedSlug); }
+        break;
+      case '[':
+        if (selectedSlug) { e.preventDefault(); if (sendPlacementToBack(selectedSlug)) refreshInspector(); }
+        break;
+      case ']':
+        if (selectedSlug) { e.preventDefault(); if (bringPlacementToFront(selectedSlug)) refreshInspector(); }
+        break;
+    }
+  });
 
   // Debate FastButton click → toggle FastIcon active ↔ inactive. Hit-tests
   // the FastButtonBase rect in canvas coords. Sidebar's "Fast button"
@@ -4689,6 +4889,21 @@ function showModal(message) {
     if (render) scheduleRender();
     schedulePlacementsSave();
   }
+  // One undo step per inspector edit. `begin` runs on the first live change
+  // (before the value is applied, so it captures the pre-edit state); `end`
+  // runs on the control's `change` event (slider release / number commit).
+  function beginInspectorGesture() {
+    if (_inspectorGesture) return;
+    flushHistory();
+    history.begin(currentPlacementState());
+    _inspectorGesture = true;
+  }
+  function endInspectorGesture() {
+    if (!_inspectorGesture) return;
+    _inspectorGesture = false;
+    history.commit(currentPlacementState());
+    updateHistoryButtons();
+  }
   const inspectorX     = document.getElementById('inspectorX');
   const inspectorXNum  = document.getElementById('inspectorXValue');
   const inspectorY     = document.getElementById('inspectorY');
@@ -4710,12 +4925,14 @@ function showModal(message) {
     }, { render: false });
   }
   inspectorX.oninput = (e) => {
+    beginInspectorGesture();
     const v = Number(e.target.value) || 0;
     inspectorXNum.value = v;
     applyScenePosX(v);
   };
-  inspectorX.onchange = () => scheduleRender();
+  inspectorX.onchange = () => { scheduleRender(); endInspectorGesture(); };
   inspectorXNum.oninput = (e) => {
+    beginInspectorGesture();
     const v = Number(e.target.value) || 0;
     inspectorX.value = v;
     applyScenePosX(v);
@@ -4726,14 +4943,17 @@ function showModal(message) {
     inspectorX.value = v;
     applyScenePosX(v);
     scheduleRender();
+    endInspectorGesture();
   };
   inspectorY.oninput = (e) => {
+    beginInspectorGesture();
     const v = Number(e.target.value) || 0;
     inspectorYNum.value = v;
     applyScenePosY(v);
   };
-  inspectorY.onchange = () => scheduleRender();
+  inspectorY.onchange = () => { scheduleRender(); endInspectorGesture(); };
   inspectorYNum.oninput = (e) => {
+    beginInspectorGesture();
     const v = Number(e.target.value) || 0;
     inspectorY.value = v;
     applyScenePosY(v);
@@ -4744,6 +4964,7 @@ function showModal(message) {
     inspectorY.value = v;
     applyScenePosY(v);
     scheduleRender();
+    endInspectorGesture();
   };
   const inspectorScaleNum = document.getElementById('inspectorScaleValue');
   // Naninovel scales an actor around its pivot: the rendered mesh is built
@@ -4766,16 +4987,18 @@ function showModal(message) {
   // Slider drag → number input mirrors. Render is deferred until pointer-up
   // (onchange) so the scale slider stays fluid during continuous drags.
   inspectorScale.oninput = (e) => {
+    beginInspectorGesture();
     const v = clampScale(Number(e.target.value));
     inspectorScaleNum.value = v.toFixed(2);
     applyScale(v);
   };
-  inspectorScale.onchange = () => scheduleRender();
+  inspectorScale.onchange = () => { scheduleRender(); endInspectorGesture(); };
   // Number input direct entry. `oninput` updates the slider live as the user
   // types (so dragging-from-the-spinner feels parallel to the slider drag);
   // `onchange` clamps and snaps the displayed string on commit (Enter / blur)
   // and triggers the actual scene render.
   inspectorScaleNum.oninput = (e) => {
+    beginInspectorGesture();
     const v = clampScale(Number(e.target.value));
     inspectorScale.value = v;
     applyScale(v);
@@ -4786,6 +5009,7 @@ function showModal(message) {
     inspectorScale.value = v;
     applyScale(v);
     scheduleRender();
+    endInspectorGesture();
   };
   document.getElementById('placementRemove').onclick = () => {
     if (selectedSlug) removePlacement(selectedSlug);

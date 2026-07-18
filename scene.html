@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;800&family=Noto+Serif+KR:wght@400;500;700;800&family=Noto+Serif+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260718a">
+<link rel="stylesheet" href="styles.css?v=20260718b">
 </head>
 <body class="scene-editor">
 
@@ -466,6 +466,11 @@
     <button class="action-btn placement-remove" id="placementRemove">Remove</button>
   </div>
 
+  <div class="history-actions">
+    <button class="action-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>Undo</button>
+    <button class="action-btn" id="redoBtn" title="Redo (Ctrl+Shift+Z)" disabled>Redo</button>
+  </div>
+
   <div class="actions">
     <button class="action-btn reset-btn" id="resetBtn">Reset</button>
     <button class="action-btn export-btn" id="exportBtn">Export PNG</button>
@@ -518,6 +523,6 @@
 </div>
 
 <!-- styles.css?v= and scene.js?v= must be bumped together with BUILD_VERSION in scene.js -->
-<script type="module" src="scene.js?v=20260718a"></script>
+<script type="module" src="scene.js?v=20260718b"></script>
 </body>
 </html>
